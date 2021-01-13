@@ -26,7 +26,9 @@
 -->
 
 <div id="mainTable" class="whiteblock">   
-	<h3>{THE_HERD}</h3>		
+	<h3>{THE_HERD}</h3>	
+    <div id="theherd">
+    </div>	
 </div>
 
 <div id="myhand_wrap" class="whiteblock">

@@ -227,6 +227,53 @@ class mow extends Table
     */
 
     
+    
+    // Play a card from player hand
+    function playCard($card_id) {
+        self::checkAction("playCard");
+        
+        $player_id = self::getActivePlayerId();
+        
+        // Get all cards in player hand
+        // (note: we must get ALL cards in player's hand in order to check if the card played is correct)
+        
+        $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
+
+        // Check that the card is in this hand and gets its caracteristics
+        $bIsInHand = false;
+        foreach($player_hand as $current_card) {
+            if($current_card['id'] == $card_id) {
+                $bIsInHand = true;
+            }
+        }
+        
+        if(!$bIsInHand) {
+            throw new BgaUserException(self::_("This card is not in your hand"));
+        }
+
+        /*$herd = $this->cards->getCardsInLocation('herd', $player_id);
+
+        $minHerd = null;
+        $maxHerd = null;        
+        foreach($herd as $current_card) {
+            if($current_card['id'] == $card_id) {
+                $bIsInHand = true;
+            }
+        }        
+        
+        // If this is the first card of the trick (or the Fool has been played by the first player)
+        if ($five_players && $this->cards->countCardInLocation('cardswon') == 0 && $card['type'] == $called_color && $card['type_arg'] != $called_value)  {
+            throw new BgaUserException(sprintf(self::_("You can't lead with a %s on the first turn (it's the called color), unless you play the %s"), $this->colors[$called_color]['nametr'], $this->figures[$called_value]['nametr']), true);
+        }*/
+        
+        // Checks are done! now we can play our card
+        self::_playCard($card);
+        
+        // Next player
+        $this->gamestate->nextState('playCard');
+    }
+
+    
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
 ////////////

@@ -398,35 +398,21 @@ function (dojo, declare) {
         ////////////////////////////////
         ////////////////////////////////
         onPlayerHandSelectionChanged: function(control_name, item_id)
-        {
-            console.log('onPlayerHandSelectionChanged',control_name, item_id);
-        if(typeof item_id == "undefined") return;
-        var state = this.gamedatas.gamestate.name;
-        var items = this.playerHand.getSelectedItems();
-
-        /*if(state == "giveCards"){
-            this.removeActionButtons();
-            if(!this.playerHand.isSelected(item_id))
-            return;
-
-            if(items.length > this.gamedatas.nbr_cards_to_give)
-            this.playerHand.unselectItem(item_id);
-
-            items = this.playerHand.getSelectedItems()
-            if(items.length == this.gamedatas.nbr_cards_to_give)
-            this.addActionButton( 'giveCards_button', _('Give selected cards'), 'onGiveCards' );
-        }
-
-        else */if(state == "playerTurn"){
-            this.playerHand.unselectAll();
-            if(!this.checkAction('playCard', true))
-            return;
-            if(dojo.hasClass('myhand_item_' + item_id, 'disabled'))
-            return;
-
-            this.takeAction("playCard", { id: item_id })
-        //            dojo.query('.stockitem').removeClass('receivedCard');
-        }
+        {            
+            var items = this.playerHand.getSelectedItems();
+            if (items.length == 1) {
+                if (this.checkAction('playCard', true)) {
+                    // Can play a card
+                    var card_id = items[0].id;
+                    
+                    this.ajaxcall("/mow/mow/playCard.html", { 
+                        'card_id': card_id,
+                        'lock': true 
+                    }, this, function(result) {}, function(is_error) {});
+                    
+                    this.player_hand.unselectAll();
+                }
+            }
         },
    });             
 });
