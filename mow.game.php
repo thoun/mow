@@ -273,6 +273,9 @@ class mow extends Table
         $this->gamestate->nextState('playCard');
     }
 
+    function chooseDirection($change) {
+    }
+
     function collectHerd() {
         
     }

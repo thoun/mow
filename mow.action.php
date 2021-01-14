@@ -48,6 +48,14 @@
         $this->game->playCard( $card_id );
         self::ajaxResponse( );
     }
+	
+    public function chooseDirection()
+    {
+        self::setAjaxMode();     
+        $change = self::getArg( "change", AT_bool, true );
+        $this->game->chooseDirection( $change );
+        self::ajaxResponse( );
+    }
     
     public function collectHerd()
     {
