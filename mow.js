@@ -30,8 +30,8 @@ function (dojo, declare) {
             // Example:
             // this.myGlobalValue = 0;
 			this.playerHand = null;
-			this.cardwidth = 402;
-            this.cardheight = 594;
+			this.cardwidth = 121;
+            this.cardheight = 178;
 
         },
         
@@ -66,31 +66,31 @@ function (dojo, declare) {
             dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 			
 			// Create cards types:
-			for( $value=1; $value<=15; $value++ )   // 1-15 green
+			for( value=1; value<=15; value++ )   // 1-15 green
 			{
 				var card_type_id = this.getCardUniqueId( 0, value );
-				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards0.png', $value-1 );		
+				this.playerHand.addItemType( card_type_id, value, g_gamethemeurl+'img/cards0.jpg', value-1 );		
 			}
 			
-			for( $value=2; $value<=14; $value++ )   // 2-14 yellow
+			for( value=2; value<=14; value++ )   // 2-14 yellow
 			{
 				var card_type_id = this.getCardUniqueId( 1, value );
-				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards1.png', $value-2 );		
+				this.playerHand.addItemType( card_type_id, value, g_gamethemeurl+'img/cards1.jpg', value-2 );		
 			}
 			
-			for( $value=3; $value<=13; $value++ )   // 3-13 orange
+			for( value=3; value<=13; value++ )   // 3-13 orange
 			{
 				var card_type_id = this.getCardUniqueId( 2, value );
-				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards2.png', $value-3 );		
+				this.playerHand.addItemType( card_type_id, value, g_gamethemeurl+'img/cards2.jpg', value-3 );		
 			}
 			
-			for( $value=7; $value<=9; $value++ )   // 7,8,9 red
+			for( value=7; value<=9; value++ )   // 7,8,9 red
 			{
 				var card_type_id = this.getCardUniqueId( 3, value );
-				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards3.png', $value-7 );		
+				this.playerHand.addItemType( card_type_id, value, g_gamethemeurl+'img/cards3.jpg', value-7 );		
 			}		
             
-            var cards5url = g_gamethemeurl+'img/cards5.png';
+            var cards5url = g_gamethemeurl+'img/cards5.jpg';
 			
 			var card_type_id = this.getCardUniqueId(5, 0);
 			this.playerHand.addItemType( card_type_id, 1, cards5url, 0 );		
@@ -108,12 +108,14 @@ function (dojo, declare) {
 			this.playerHand.addItemType( card_type_id, 5, cards5url, 4 );
 			
 			card_type_id = this.getCardUniqueId(5, 90);
-			this.playerHand.addItemType( card_type_id, 6, cards5url, 5 );
+            this.playerHand.addItemType( card_type_id, 6, cards5url, 5 );
+            
+            console.log('this.gamedatas', this.gamedatas);
 			
 			// The six special cows
-			// for( var i in this.gamedatas.hand)$this->special_labels as $key => $value)
+			// for( var i in this.gamedatas.hand)$this->special_labels as $key => value)
 			// {
-				// var card_type_id = this.getCardUniqueId( 5, $value );
+				// var card_type_id = this.getCardUniqueId( 5, value );
 				// this.playerHand.addItemType( card_type_id, card_type_id, 'img/cards.jpg', card_type_id );		
 			// }
 			
@@ -123,6 +125,7 @@ function (dojo, declare) {
                 var card = this.gamedatas.hand[i];
                 var color = card.type;
                 var value = card.type_arg;
+                console.log('hand', card, this.getCardUniqueId( color, value ));
 				
                 this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }
@@ -134,9 +137,11 @@ function (dojo, declare) {
                 var color = card.type;
                 var value = card.type_arg;
                 var player_id = card.location_arg;
+                console.log('cardsontable', card, card.id);
                 this.playCardOnTable( player_id, color, value, card.id );
             }
             // Setup game notifications to handle (see "setupNotifications" method below)
+            console.log('setupNotifications');
             this.setupNotifications();
 
             console.log( "Ending game setup" );
@@ -246,7 +251,7 @@ function (dojo, declare) {
         getCardUniqueId: function( color, value )
         {
 			//return color;
-            return color*100+value;
+            return Number(color)*100+Number(value);
         },
 		
 		showCardInHand: function()		

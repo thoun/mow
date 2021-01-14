@@ -121,7 +121,7 @@ class mow extends Table
 		foreach($this->special_labels as $key => $value)
 		{
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
-		}
+        }
 			   
         $this->cards->createCards( $cards, 'deck' );   
 	   
