@@ -51,19 +51,22 @@
     
     public function collectHerd()
     {
-        // self::setAjaxMode();     
-        // $cards_raw = self::getArg( "cards", AT_numberlist, true );
+        self::setAjaxMode();     
+        /*$cards_raw = self::getArg( "cards", AT_numberlist, true );
         
-        // // Removing last ';' if exists
-        // if( substr( $cards_raw, -1 ) == ';' )
-            // $cards_raw = substr( $cards_raw, 0, -1 );
-        // if( $cards_raw == '' )
-            // $cards = array();
-        // else
-            // $cards = explode( ';', $cards_raw );
+        // Removing last ';' if exists
+        if( substr( $cards_raw, -1 ) == ';' ) {
+            $cards_raw = substr( $cards_raw, 0, -1 );
+        }
+        if( $cards_raw == '' ) {
+            $cards = array();
+        } else {
+            $cards = explode( ';', $cards_raw );
+        }
 
-        // $this->game->giveCards( $cards );
-        // self::ajaxResponse( );    
+        $this->game->collectHerd( $cards );*/
+        $this->game->collectHerd();
+        self::ajaxResponse( );    
     }
 
 	

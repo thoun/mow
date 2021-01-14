@@ -222,6 +222,14 @@ function (dojo, declare) {
                     break;
 */
                 }
+
+
+
+                this.removeActionButtons();
+                var items = this.playerHand.getSelectedItems()
+                if(items.length == this.gamedatas.nbr_cards_to_give) {
+                    this.addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd' );
+                }
             }
         },        
 
@@ -237,8 +245,8 @@ function (dojo, declare) {
 		
         getCardUniqueId: function( color, value )
         {
-			return color;
-            //return color*100+value;
+			//return color;
+            return color*100+value;
         },
 		
 		showCardInHand: function()		
@@ -349,7 +357,7 @@ function (dojo, declare) {
             // TODO: here, associate your game notifications with local methods
             
             // Example 1: standard notification handling
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
+            dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
             
             // Example 2: standard notification handling + tell the user interface to wait
             //            during 3 seconds after calling the method in order to let the players
@@ -375,9 +383,6 @@ function (dojo, declare) {
             }            
         },
 		
-        /*
-        Example:
-        
         notif_cardPlayed: function( notif )
         {
             console.log( 'notif_cardPlayed' );
@@ -385,10 +390,8 @@ function (dojo, declare) {
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             
-            // TODO: play the card in the user interface.
-        },    
-        
-        */
+            this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
+        },
 
         
 
@@ -404,15 +407,45 @@ function (dojo, declare) {
                 if (this.checkAction('playCard', true)) {
                     // Can play a card
                     var card_id = items[0].id;
-                    
-                    this.ajaxcall("/mow/mow/playCard.html", { 
+
+                    this.takeAction("playCard", { 
                         'card_id': card_id,
                         'lock': true 
-                    }, this, function(result) {}, function(is_error) {});
+                    });
                     
                     this.player_hand.unselectAll();
                 }
             }
+        },
+
+        onCollectHerd: function(){
+            if(!this.checkAction('playCard'))
+            return;
+        
+            var items = this.playerHand.getSelectedItems();
+            // Should be useless now
+            /*if(items.length != this.nbr_cards_to_give){
+            this.showMessage(dojo.string.substitute(_("You must select exactly ${n} cards"), {n: this.nbr_cards_to_give}), 'error');
+            return;
+            }*/
+        
+            this.takeAction("collectHerd"/*, {
+            cards: items.map(item => item.id).join(';')
+            }*/);
+        },
+
+
+        ////////////////////////////////
+        ////////////////////////////////
+        /////////    Utils    //////////
+        ////////////////////////////////
+        ////////////////////////////////
+        
+        takeAction: function (action, data, callback) {
+          data = data || {};
+          data.lock = true;
+          callback = callback || function (res) { };
+          this.ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
         },
    });             
 });

@@ -99,28 +99,28 @@ class mow extends Table
 		
 		for( $value=1; $value<=15; $value++ )   // 1-15 green
         {
-			$cards[] = array( 'type' => 0, 'type_arg' => $value, 'nbr' => 1);
+			$cards[] = array( 'type' => 0, 'type_arg' => $value, 'nbr' => 1, 'id' => $value);
 		}
 		
 		for( $value=2; $value<=14; $value++ )   // 2-14 yellow
         {
-			$cards[] = array( 'type' => 1, 'type_arg' => $value, 'nbr' => 1);
+			$cards[] = array( 'type' => 1, 'type_arg' => $value, 'nbr' => 1, 'id' => 100 + $value);
 		}
 		
 		for( $value=3; $value<=13; $value++ )   // 3-13 orange
         {
-			$cards[] = array( 'type' => 2, 'type_arg' => $value, 'nbr' => 1);
+			$cards[] = array( 'type' => 2, 'type_arg' => $value, 'nbr' => 1, 'id' => 200 + $value);
 		}
 		
 		for( $value=7; $value<=9; $value++ )   // 7,8,9 red
         {
-			$cards[] = array( 'type' => 3, 'type_arg' => $value, 'nbr' => 1);
+			$cards[] = array( 'type' => 3, 'type_arg' => $value, 'nbr' => 1, 'id' => 300 + $value);
 		}
 		
 		// The six special cows
 		foreach($this->special_labels as $key => $value)
 		{
-			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1);
+			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
 		}
 			   
         $this->cards->createCards( $cards, 'deck' );   
@@ -246,19 +246,19 @@ class mow extends Table
                 $bIsInHand = true;
             }
         }
+        self::dump('player_hand', $player_hand);
         
         if(!$bIsInHand) {
             throw new BgaUserException(self::_("This card is not in your hand"));
         }
 
-        /*$herd = $this->cards->getCardsInLocation('herd', $player_id);
+        $herd = $this->cards->getCardsInLocation('herd', null);
+        self::dump('herd', $herd);
 
-        $minHerd = null;
+        /*$minHerd = null;
         $maxHerd = null;        
         foreach($herd as $current_card) {
-            if($current_card['id'] == $card_id) {
-                $bIsInHand = true;
-            }
+            
         }        
         
         // If this is the first card of the trick (or the Fool has been played by the first player)
@@ -267,10 +267,14 @@ class mow extends Table
         }*/
         
         // Checks are done! now we can play our card
-        self::_playCard($card);
+        //self::_playCard($card);
         
         // Next player
         $this->gamestate->nextState('playCard');
+    }
+
+    function collectHerd() {
+        
     }
 
     
@@ -319,6 +323,8 @@ class mow extends Table
         $this->cards->moveAllCardsInLocation( null, "deck" );
         $this->cards->shuffle( 'deck' );
     
+        //self::notifyAllPlayers('cleanUp');
+
         // Deal 5 cards to each players
         // Create deck, shuffle it and give 5 initial cards
         $players = self::loadPlayersBasicInfos();
