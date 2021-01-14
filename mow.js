@@ -30,8 +30,8 @@ function (dojo, declare) {
             // Example:
             // this.myGlobalValue = 0;
 			this.playerHand = null;
-			this.cardwidth = 72;
-            this.cardheight = 112;
+			this.cardwidth = 402;
+            this.cardheight = 594;
 
         },
         
@@ -63,52 +63,52 @@ function (dojo, declare) {
             // TODO: Set up your game interface here, according to "gamedatas"
             this.playerHand = new ebg.stock();
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
-			this.playerHand.image_items_per_row = 5;
             dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 			
 			// Create cards types:
 			for( $value=1; $value<=15; $value++ )   // 1-15 green
 			{
 				var card_type_id = this.getCardUniqueId( 0, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );		
+				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards0.png', $value-1 );		
 			}
 			
 			for( $value=2; $value<=14; $value++ )   // 2-14 yellow
 			{
 				var card_type_id = this.getCardUniqueId( 1, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );		
+				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards1.png', $value-2 );		
 			}
 			
 			for( $value=3; $value<=13; $value++ )   // 3-13 orange
 			{
 				var card_type_id = this.getCardUniqueId( 2, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );		
+				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards2.png', $value-3 );		
 			}
 			
 			for( $value=7; $value<=9; $value++ )   // 7,8,9 red
 			{
 				var card_type_id = this.getCardUniqueId( 3, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );		
+				this.playerHand.addItemType( card_type_id, $value, g_gamethemeurl+'img/cards3.png', $value-7 );		
 			}		
-			
+            
+            var cards5url = g_gamethemeurl+'img/cards5.png';
 			
 			var card_type_id = this.getCardUniqueId(5, 0);
-			this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );		
+			this.playerHand.addItemType( card_type_id, 1, cards5url, 0 );		
 			
 			card_type_id = this.getCardUniqueId(5, 16);
-			this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );			
+			this.playerHand.addItemType( card_type_id, 2, cards5url, 1 );			
 			
 			card_type_id = this.getCardUniqueId(5, 21);
-			this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );
+			this.playerHand.addItemType( card_type_id, 3, cards5url, 2 );
 			
 			card_type_id = this.getCardUniqueId(5, 22);
-			this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );
+			this.playerHand.addItemType( card_type_id, 4, cards5url, 3 );
 			
 			card_type_id = this.getCardUniqueId(5, 70);
-			this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );
+			this.playerHand.addItemType( card_type_id, 5, cards5url, 4 );
 			
 			card_type_id = this.getCardUniqueId(5, 90);
-			this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/sprites.png', card_type_id );
+			this.playerHand.addItemType( card_type_id, 6, cards5url, 5 );
 			
 			// The six special cows
 			// for( var i in this.gamedatas.hand)$this->special_labels as $key => $value)
