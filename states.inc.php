@@ -76,8 +76,14 @@ $machinestates = array(
     	"description" => clienttranslate('${actplayer} must play a card or pick up the herd'),
     	"descriptionmyturn" => clienttranslate('${you} must play a card or pick up the herd'),
     	"type" => "activeplayer",
-    	"possibleactions" => array( "playCard", "collectHerd", "chooseDirection" ),
-    	"transitions" => array( "playCard" => ST_NEXT_PLAYER, "collectHerd" => ST_NEXT_PLAYER, "chooseDirection" => ST_CHOOSE_DIRECTION )
+    	"possibleactions" => array( "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ),
+    	"transitions" => array( 
+            "playCard" => ST_NEXT_PLAYER, 
+            "chooseDirection" => ST_CHOOSE_DIRECTION, 
+            "collectHerd" => ST_PLAYER_TURN, 
+            "collectLastHerd" => ST_NEW_HAND, 
+            "endGame" => ST_END_GAME
+        )
     ),
 
     ST_CHOOSE_DIRECTION => array(
@@ -85,8 +91,8 @@ $machinestates = array(
     	"description" => clienttranslate('${actplayer} must choose the direction'),
     	"descriptionmyturn" => clienttranslate('${you} must choose the direction'),
     	"type" => "activeplayer",
-    	"possibleactions" => array( "chooseDirection" ),
-    	"transitions" => array( "chooseDirection" => ST_NEXT_PLAYER )
+    	"possibleactions" => array( "nextPlayer" ),
+    	"transitions" => array( "nextPlayer" => ST_NEXT_PLAYER )
     ),
 
     /*ST_COLLECT_HERD => array(

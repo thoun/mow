@@ -92,9 +92,10 @@ function (dojo, declare) {
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }
 
-            for(var pId in this.gamedatas.players){
+            /*for(var pId in this.gamedatas.players){
+                console.log(this.scoreCtrl, pId, this.gamedatas.players)
                 this.scoreCtrl[pId].toValue( this.gamedatas.players[pId].score);
-            }
+            }*/
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             console.log('setupNotifications');
@@ -382,6 +383,7 @@ function (dojo, declare) {
             dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
             dojo.subscribe( 'newCard', this, "notif_newCard" );
             dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
+            dojo.subscribe( 'handCollected', this, "notif_handCollected" );
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
@@ -405,7 +407,6 @@ function (dojo, declare) {
         notif_cardPlayed: function( notif )
         {
             console.log( 'notif_cardPlayed', notif );
-            console.log( notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             
@@ -425,12 +426,20 @@ function (dojo, declare) {
         notif_herdCollected: function( notif )
         {
             console.log( 'notif_herdCollected', notif );
-            console.log( notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             
-            this.scoreCtrl[notif.args.player_id].incValue(notif.args.points);
+            this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerd.removeAll();
+        },
+		
+        notif_handCollected: function( notif )
+        {
+            console.log( 'notif_handCollected', notif );
+            
+            // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
+            
+            this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         },
 
         ////////////////////////////////
@@ -441,7 +450,7 @@ function (dojo, declare) {
         onPlayerHandSelectionChanged: function(control_name, item_id)
         {            
             var items = this.playerHand.getSelectedItems();
-            if (items.length == 1) {
+            if (items.length == 1) {console.log(this);
                 if (this.checkAction('playCard', true)) {
                     // Can play a card
                     var card_id = items[0].id;//items[0].type
@@ -457,7 +466,7 @@ function (dojo, declare) {
         },
 
         onCollectHerd: function(){
-            if(!this.checkAction('playCard'))
+            if(!this.checkAction('collectHerd'))
             return;
         
             //var items = this.playerHand.getSelectedItems();
