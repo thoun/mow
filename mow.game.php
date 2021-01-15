@@ -158,7 +158,7 @@ class mow extends Table
         $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
         
         // Cards played on the table
-        $result['cardsontable'] = $this->cards->getCardsInLocation( 'cardsontable' );
+        $result['herd'] = $this->cards->getCardsInLocation( 'herd' );
   
         return $result;
     }
@@ -240,20 +240,22 @@ class mow extends Table
         $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
 
         // Check that the card is in this hand and gets its caracteristics
+        $card = null;
         $bIsInHand = false;
         foreach($player_hand as $current_card) {
             if($current_card['id'] == $card_id) {
+                $card = $current_card;
                 $bIsInHand = true;
             }
         }
-        self::dump('player_hand', $player_hand);
+        //self::dump('player_hand', $player_hand);die(json_encode($player_hand));
         
         if(!$bIsInHand) {
             throw new BgaUserException(self::_("This card is not in your hand"));
         }
 
-        $herd = $this->cards->getCardsInLocation('herd', null);
-        self::dump('herd', $herd);
+        $herd = $this->cards->getCardsInLocation('herd');
+        //self::dump('herd', json_encode($card));
 
         /*$minHerd = null;
         $maxHerd = null;        
@@ -267,17 +269,37 @@ class mow extends Table
         }*/
         
         // Checks are done! now we can play our card
-        //self::_playCard($card);
+        $this->cards->moveCard( $card_id, 'herd');
+            
+        // And notify
+        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${value_symbol}${color_symbol}'), array(
+            'card_id' => $card_id,
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'value' => $card['type_arg'],
+            'value_symbol' => $card['type_arg'], // The substitution will be done in JS format_string_recursive function
+            'color' => $card['type'],
+            'color_symbol' => $card['type'] // The substitution will be done in JS format_string_recursive function
+        ));
+
+        // get new card if possible
+        $newCard = $this->cards->pickCard('deck', $player_id );
+        self::notifyPlayer( $player_id, 'newCard', '', array( 
+            'card' => $newCard
+        ) );
         
         // Next player
-        $this->gamestate->nextState('playCard');
+        $this->gamestate->nextState($card['type'] === '5' ? 'chooseDirection' : 'playCard');
     }
 
     function chooseDirection($change) {
+        // TODO
+        $this->gamestate->nextState('playCard');
     }
 
     function collectHerd() {
-        
+        // TODO
+        $this->gamestate->nextState('playCard');
     }
 
     
@@ -345,7 +367,20 @@ class mow extends Table
 
         $this->gamestate->nextState( "" );
     }
-	
+    
+    
+function stNextPlayer()
+{
+	$players = self::loadPlayersBasicInfos();
+	$nbr_players = self::getPlayersNumber();
+
+	// Standard case (not the end of the trick) => just active the next player
+	$player_id = self::activeNextPlayer();
+	self::giveExtraTime($player_id);
+	$this->gamestate->nextState( 'nextPlayer' );
+}
+
+
     /*
     
     Example for game state "MyGameState":
