@@ -91,6 +91,11 @@ function (dojo, declare) {
 				
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }
+
+            for(var pId in this.gamedatas.players){
+                this.scoreCtrl[pId].toValue( this.gamedatas.players[pId].score);
+            }
+
             // Setup game notifications to handle (see "setupNotifications" method below)
             console.log('setupNotifications');
             this.setupNotifications();
@@ -373,20 +378,10 @@ function (dojo, declare) {
         {
             console.log( 'notifications subscriptions setup' );
             
-			 dojo.subscribe( 'newHand', this, "notif_newHand" );
-			
-            // TODO: here, associate your game notifications with local methods
-            
-            // Example 1: standard notification handling
-            dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-            
+			dojo.subscribe( 'newHand', this, "notif_newHand" );
+            dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
             dojo.subscribe( 'newCard', this, "notif_newCard" );
-            // Example 2: standard notification handling + tell the user interface to wait
-            //            during 3 seconds after calling the method in order to let the players
-            //            see what is happening in the game.
-            // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-            // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-            // 
+            dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
@@ -425,6 +420,17 @@ function (dojo, declare) {
             var color = card.type;
             var value = card.type_arg;
             this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+        },
+		
+        notif_herdCollected: function( notif )
+        {
+            console.log( 'notif_herdCollected', notif );
+            console.log( notif );
+            
+            // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
+            
+            this.scoreCtrl[notif.args.player_id].incValue(notif.args.points);
+            this.theHerd.removeAll();
         },
 
         ////////////////////////////////

@@ -47,58 +47,69 @@
                             method).
 */
 
+require_once("modules/constants.inc.php");
+
 //    !! It is not a good idea to modify this file when a game is running !!
 
 $machinestates = array(
 
     // The initial state. Please do not modify.
-    1 => array(
+    ST_BGA_GAME_SETUP => array(
         "name" => "gameSetup",
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 20 )
+        "transitions" => array( "" => ST_NEW_HAND )
     ),
     	
-	20 => array(
+	ST_NEW_HAND => array(
         "name" => "newHand",
         "description" => "",
         "type" => "game",
         "action" => "stNewHand",
         "updateGameProgression" => true,   
-        "transitions" => array( "" => 21 )
+        "transitions" => array( "" => ST_PLAYER_TURN )
     ),  
 
-    21 => array(
+    ST_PLAYER_TURN => array(
     	"name" => "playerTurn",
     	"description" => clienttranslate('${actplayer} must play a card or pick up the herd'),
     	"descriptionmyturn" => clienttranslate('${you} must play a card or pick up the herd'),
     	"type" => "activeplayer",
     	"possibleactions" => array( "playCard", "collectHerd", "chooseDirection" ),
-    	"transitions" => array( "playCard" => 32, "collectHerd" => 32, "chooseDirection" => 22 )
+    	"transitions" => array( "playCard" => ST_NEXT_PLAYER, "collectHerd" => ST_NEXT_PLAYER, "chooseDirection" => ST_CHOOSE_DIRECTION )
     ),
 
-    22 => array(
+    ST_CHOOSE_DIRECTION => array(
     	"name" => "chooseDirection",
     	"description" => clienttranslate('${actplayer} must choose the direction'),
     	"descriptionmyturn" => clienttranslate('${you} must choose the direction'),
     	"type" => "activeplayer",
     	"possibleactions" => array( "chooseDirection" ),
-    	"transitions" => array( "chooseDirection" => 32 )
+    	"transitions" => array( "chooseDirection" => ST_NEXT_PLAYER )
     ),
+
+    /*ST_COLLECT_HERD => array(
+        "name" => "newHand",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNewHand",
+        "updateGameProgression" => true,   
+        "transitions" => array( "" => ST_PLAYER_TURN )
+    ),  */
 	
-	32 => array(
+	ST_NEXT_PLAYER => array(
         "name" => "nextPlayer",
         "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "transitions" => array( "nextPlayer" => 21,  "endGame" => 99 )
+        "transitions" => array( "nextPlayer" => ST_PLAYER_TURN,  "endGame" => ST_END_GAME )
     ), 
 
    
     // Final state.
     // Please do not modify.
-    99 => array(
+    ST_END_GAME => array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",

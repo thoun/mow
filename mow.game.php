@@ -257,16 +257,41 @@ class mow extends Table
         $herd = $this->cards->getCardsInLocation('herd');
         //self::dump('herd', json_encode($card));
 
-        /*$minHerd = null;
-        $maxHerd = null;        
-        foreach($herd as $current_card) {
+        if (count($herd) > 0) {
+            $minHerd = -1;
+            $maxHerd = -1;
+            $bHas7 = false;    
+            $bHas9 = false;
+            foreach($herd as $current_card) {
+                if ($current_card['type'] != '5' || $current_card['type_arg'] == '0' || $current_card['type_arg'] == '16') {
+                    // standard numbered card
+                    $cardNumber = intval($current_card['type_arg']);
+                    if ($minHerd == -1 || $minHerd > $cardNumber) {
+                        $minHerd = $cardNumber;
+                    }
+                    if ($minHerd == -1 || $maxHerd < $cardNumber) {
+                        $maxHerd = $cardNumber;
+                    }
+                    if ($cardNumber == 7) {
+                        $bHas7 = true;
+                    }
+                    if ($cardNumber == 9) {
+                        $bHas9 = true;
+                    }
+                }
+            }
             
-        }        
-        
-        // If this is the first card of the trick (or the Fool has been played by the first player)
-        if ($five_players && $this->cards->countCardInLocation('cardswon') == 0 && $card['type'] == $called_color && $card['type_arg'] != $called_value)  {
-            throw new BgaUserException(sprintf(self::_("You can't lead with a %s on the first turn (it's the called color), unless you play the %s"), $this->colors[$called_color]['nametr'], $this->figures[$called_value]['nametr']), true);
-        }*/
+            // if it's not in the interval
+            $cardNumber = intval($card['type_arg']);
+            if (($current_card['type'] != '5' || $card['type_arg'] == '0' || $card['type_arg'] == '16') && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
+                throw new BgaUserException(sprintf(self::_("You must play less than %s or more than %s"), $minHerd, $maxHerd), true);
+            }
+            // if acrobatic can't be played
+            if ($current_card['type'] == '5' && (($card['type_arg'] == '70' && !$bHas7) || ($card['type_arg'] == '90' && !$bHas9))) {
+                $cardNumber = $cardNumber / 10;
+                throw new BgaUserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber), true);
+            }
+        }
         
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
@@ -298,6 +323,25 @@ class mow extends Table
     }
 
     function collectHerd() {
+        // collected cards go to the side
+        
+        $player_id = self::getActivePlayerId();
+
+        $herdCards = $this->cards->getCardsInLocation( "herd" );
+        $collectedPoints = array_sum(array_map(function($herdCard) { return intval($herdCard['type']); }, $herdCards));
+
+        $sql = "UPDATE player SET player_score=player_score+$collectedPoints  WHERE player_id='$player_id'";
+        self::DbQuery($sql);
+
+        $this->cards->moveAllCardsInLocation( "herd", "used" );
+            
+        // And notify
+        self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), array(
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'points' => $collectedPoints
+        ));
+
         // TODO
         $this->gamestate->nextState('playCard');
     }
