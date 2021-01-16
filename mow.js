@@ -55,9 +55,18 @@ function (dojo, declare) {
             // Setting up player boards
             for( var player_id in gamedatas.players )
             {
-                var player = gamedatas.players[player_id];
+                //var player = gamedatas.players[player_id];
                          
                 // TODO: Setting up players boards if needed
+
+                /*for(var pId in this.gamedatas.players){
+                    console.log(this.scoreCtrl, pId, this.gamedatas.players)
+                    this.scoreCtrl[pId].toValue( this.gamedatas.players[pId].score);
+                }*/
+            }
+            
+            if (gamedatas.playerorder.length == 2) {
+                dojo.style( 'direction_wrap', 'display', 'none' );
             }
             
             // TODO: Set up your game interface here, according to "gamedatas"
@@ -95,11 +104,6 @@ function (dojo, declare) {
             }
 
             $('remainingCards').innerHTML = this.gamedatas.remainingCards;
-
-            /*for(var pId in this.gamedatas.players){
-                console.log(this.scoreCtrl, pId, this.gamedatas.players)
-                this.scoreCtrl[pId].toValue( this.gamedatas.players[pId].score);
-            }*/
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             console.log('setupNotifications');
@@ -357,6 +361,7 @@ function (dojo, declare) {
 			dojo.subscribe( 'newHand', this, "notif_newHand" );
             dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
             dojo.subscribe( 'newCard', this, "notif_newCard" );
+            dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
             dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
             dojo.subscribe( 'handCollected', this, "notif_handCollected" );
         },  
@@ -398,6 +403,13 @@ function (dojo, declare) {
             var color = card.type;
             var value = card.type_arg;
             this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+        },
+		
+        notif_directionChanged: function( notif )
+        {
+            console.log( 'notif_directionChanged', notif );
+
+            dojo[notif.args.reverse_direction ? 'removeClass' : 'addClass']('direction', 'reverseDirection');
         },
 		
         notif_herdCollected: function( notif )

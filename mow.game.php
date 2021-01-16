@@ -85,7 +85,7 @@ class mow extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue( 'reverse_direction', false );
+        self::setGameStateInitialValue( 'reverse_direction', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -336,7 +336,13 @@ class mow extends Table
     function setDirection($change) {
 
         if ($change) {
-            self::setGameStateValue('reverse_direction', !self::getGameStateValue( 'reverse_direction' ) );
+            $reverse_direction = intval(self::getGameStateValue( 'reverse_direction' )) == 1 ? 0 : 1;
+            self::setGameStateValue('reverse_direction', $reverse_direction);
+
+            self::notifyAllPlayers('directionChanged', clienttranslate('${player_name} changes direction !'), array(
+                'player_name' => self::getActivePlayerName(),
+                'reverse_direction' => $reverse_direction == 1
+            ));
         }
 
         // TODO
@@ -470,7 +476,7 @@ function stNextPlayer()
 	$nbr_players = self::getPlayersNumber();
 
     // Standard case (not the end of the trick) => just active the next player
-    if (self::getGameStateValue( 'reverse_direction' )) {
+    if (intval(self::getGameStateValue( 'reverse_direction' )) == 1) {
         $player_id = self::activePrevPlayer();
     } else {
         $player_id = self::activeNextPlayer();

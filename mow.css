@@ -63,10 +63,26 @@
 
 #handdeck {
     display: flex;
+    flex-wrap: wrap;
 }
 
 #myhand_wrap {
     flex: 1;
+}
+
+#direction_wrap {
+    margin-left: 10px;
+    text-align: center;
+}
+#direction {
+    width: 188px;
+    height: 122px;
+    background-image: url('img/card-direction.jpg'); 
+    transition: transform 500ms ease-in-out;
+}
+
+.reverseDirection {
+    transform: rotate(180deg);
 }
 
 #deck_wrap {

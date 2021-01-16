@@ -42,7 +42,9 @@
 		
 		$this->tpl['THE_HERD'] = self::_("The Herd");
 		$this->tpl['MY_HAND'] = self::_("My hand");
+		$this->tpl['DIRECTION'] = self::_("Direction");
 		$this->tpl['DECK_REMAINING_CARDS'] = self::_("Remaining cards in deck");
+		$this->tpl['players_nbr'] = $players_nbr;
 		
         /*
         
