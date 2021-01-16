@@ -124,7 +124,7 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
 			   
-        $this->cards->createCards( array_slice($cards, 0, count($cards) - 6), 'deck' );   // TODO TEMP
+        $this->cards->createCards( array_slice($cards, 0, count($cards) - 4), 'deck' );   // TODO Add special cards
 	   
 
         // Activate first player (which is in general a good idea :) )

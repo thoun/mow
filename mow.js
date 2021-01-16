@@ -109,68 +109,40 @@ function (dojo, declare) {
             dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
             // addItemType( type, weight, image, image_position ):
+
+            var idsByType = [[], [], [], []];
 			
 			// Create cards types:
-			for( value=1; value<=15; value++ )   // 1-15 green
-			{
-				var card_type_id = this.getCardUniqueId( 0, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/cards0.jpg', value-1 );	
-				this.theHerd.addItemType( card_type_id, value, g_gamethemeurl+'img/cards0.jpg', value-1 );		
+			for( value=1; value<=15; value++ ) {  // 1-15 green
+                idsByType[0].push(value);
 			}
 			
-			for( value=2; value<=14; value++ )   // 2-14 yellow
-			{
-				var card_type_id = this.getCardUniqueId( 1, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/cards1.jpg', value-2 );	
-				this.theHerd.addItemType( card_type_id, value, g_gamethemeurl+'img/cards1.jpg', value-2 );		
+			for( value=2; value<=14; value++ ) {  // 2-14 yellow
+				idsByType[1].push(value);
 			}
 			
-			for( value=3; value<=13; value++ )   // 3-13 orange
-			{
-				var card_type_id = this.getCardUniqueId( 2, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/cards2.jpg', value-3 );	
-				this.theHerd.addItemType( card_type_id, value, g_gamethemeurl+'img/cards2.jpg', value-3 );		
+			for( value=3; value<=13; value++ ) {  // 3-13 orange
+				idsByType[2].push(value);
 			}
 			
-			for( value=7; value<=9; value++ )   // 7,8,9 red
-			{
-				var card_type_id = this.getCardUniqueId( 3, value );
-				this.playerHand.addItemType( card_type_id, card_type_id, g_gamethemeurl+'img/cards3.jpg', value-7 );	
-				this.theHerd.addItemType( card_type_id, value, g_gamethemeurl+'img/cards3.jpg', value-7 );		
+			for( value=7; value<=9; value++ ) {  // 7,8,9 red
+				idsByType[3].push(value);
 			}		
             
-            var cards5url = g_gamethemeurl+'img/cards5.jpg';
-			
-			var card_type_id = this.getCardUniqueId(5, 0);
-			this.playerHand.addItemType( card_type_id, card_type_id, cards5url, 0 );		
-			this.theHerd.addItemType( card_type_id, 0, cards5url, 0 );		
-			
-			card_type_id = this.getCardUniqueId(5, 16);
-			this.playerHand.addItemType( card_type_id, card_type_id, cards5url, 1 );			
-			this.theHerd.addItemType( card_type_id, 16, cards5url, 1 );			
-			
-			card_type_id = this.getCardUniqueId(5, 21);
-			this.playerHand.addItemType( card_type_id, card_type_id, cards5url, 2 );
-			this.theHerd.addItemType( card_type_id, 21, cards5url, 2 );
-			
-			card_type_id = this.getCardUniqueId(5, 22);
-			this.playerHand.addItemType( card_type_id, card_type_id, cards5url, 3 );
-			this.theHerd.addItemType( card_type_id, 22, cards5url, 3 );
-			
-			card_type_id = this.getCardUniqueId(5, 70);
-			this.playerHand.addItemType( card_type_id, card_type_id, cards5url, 4 );
-			this.theHerd.addItemType( card_type_id, 7, cards5url, 4 );
-			
-			card_type_id = this.getCardUniqueId(5, 90);
-            this.playerHand.addItemType( card_type_id, card_type_id, cards5url, 5 );            
-            this.theHerd.addItemType( card_type_id, 9, cards5url, 5 );      
-			
-			// The six special cows
-			// for( var i in this.gamedatas.hand)$this->special_labels as $key => value)
-			// {
-				// var card_type_id = this.getCardUniqueId( 5, value );
-				// this.playerHand.addItemType( card_type_id, card_type_id, 'img/cards.jpg', card_type_id );		
-			// }
+
+            idsByType[5] = [0, 16, 21, 22, 70, 90];
+
+            for (type in idsByType) {
+                var cardsurl = g_gamethemeurl+'img/cards'+type+'.jpg';
+
+                for (id=0; id<idsByType[type].length; id++) {
+                    var cardId = idsByType[type][id];
+                    var card_type_id = this.getCardUniqueId(type, cardId);
+                    var cardWeight = this.getCardWeight(type, cardId);
+                    this.playerHand.addItemType( card_type_id, cardWeight, cardsurl, id );		
+                    this.theHerd.addItemType( card_type_id, cardWeight, cardsurl, id );	
+                }
+            }
         },       
 
         ///////////////////////////////////////////////////
@@ -267,8 +239,18 @@ function (dojo, declare) {
 		
         getCardUniqueId: function( color, value )
         {
-			//return color;
             return Number(color)*100+Number(value);
+        },
+		
+        getCardWeight: function( color, value )
+        {
+            var displayedNumber = Number(value);
+            var iColor = Number(color);
+            if (iColor === 5 && (displayedNumber === 70 || displayedNumber === 90)) {
+                iColor /= 10;
+            }
+            //return color;
+            return displayedNumber*100+iColor;
         },
 		
 		showCardInHand: function()		
