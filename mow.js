@@ -416,6 +416,7 @@ function (dojo, declare) {
             console.log( 'notif_herdCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
+            this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, notif.args.points, 1000);
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerd.removeAll();
@@ -426,6 +427,7 @@ function (dojo, declare) {
             console.log( 'notif_handCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
+            this.displayScoring( 'myhand_wrap', this.gamedatas.players[notif.args.player_id].color, notif.args.points, 1000);
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         },

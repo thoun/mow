@@ -319,7 +319,7 @@ class mow extends Table
         }
         
         // changing direction is useless with 2 players
-        $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2
+        $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
         // Next player
         $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
     }
