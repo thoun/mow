@@ -91,8 +91,8 @@ $machinestates = array(
     	"description" => clienttranslate('${actplayer} must choose the direction'),
     	"descriptionmyturn" => clienttranslate('${you} must choose the direction'),
     	"type" => "activeplayer",
-    	"possibleactions" => array( "nextPlayer" ),
-    	"transitions" => array( "nextPlayer" => ST_NEXT_PLAYER )
+    	"possibleactions" => array( "setDirection" ),
+    	"transitions" => array( "setDirection" => ST_NEXT_PLAYER )
     ),
 
     /*ST_COLLECT_HERD => array(

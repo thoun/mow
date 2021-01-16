@@ -34,7 +34,7 @@ class mow extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
-            //    "my_first_global_variable" => 10,
+                "reverse_direction" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
@@ -85,7 +85,7 @@ class mow extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        self::setGameStateInitialValue( 'reverse_direction', false );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -124,7 +124,7 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
 			   
-        $this->cards->createCards( array_slice($cards, 0, count($cards) - 4), 'deck' );   // TODO Add special cards
+        $this->cards->createCards( array_slice($cards, count($cards) - 20, 20 - 4), 'deck' );   // TODO Add special cards
 	   
 
         // Activate first player (which is in general a good idea :) )
@@ -324,9 +324,14 @@ class mow extends Table
         $this->gamestate->nextState($card['type'] === '5' ? 'chooseDirection' : 'playCard');
     }
 
-    function chooseDirection($change) {
+    function setDirection($change) {
+
+        if ($change) {
+            self::setGameStateValue('reverse_direction', !self::getGameStateValue( 'reverse_direction' ) );
+        }
+
         // TODO
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->nextState('setDirection');
     }
 
     function getCardsValues($cards) {
@@ -455,8 +460,12 @@ function stNextPlayer()
 	$players = self::loadPlayersBasicInfos();
 	$nbr_players = self::getPlayersNumber();
 
-	// Standard case (not the end of the trick) => just active the next player
-	$player_id = self::activeNextPlayer();
+    // Standard case (not the end of the trick) => just active the next player
+    if (self::getGameStateValue( 'reverse_direction' )) {
+        $player_id = self::activePrevPlayer();
+    } else {
+        $player_id = self::activeNextPlayer();
+    }
 	self::giveExtraTime($player_id);
 	$this->gamestate->nextState( 'nextPlayer' );
 }

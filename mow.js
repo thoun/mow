@@ -220,9 +220,11 @@ function (dojo, declare) {
                     }
                     break;
 
-                 case 'chooseDirection':                    
+                 case 'chooseDirection': 
+                 console.log('start add button');                   
                     this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection' );
                     this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection' );
+                    console.log('end add button');
                     break;
                 }
 
@@ -465,6 +467,22 @@ function (dojo, declare) {
             this.takeAction("collectHerd"/*, {
             cards: items.map(item => item.id).join(';')
             }*/);
+        },
+
+        onKeepDirection: function(){
+            if(!this.checkAction('setDirection'))
+            return;
+            this.takeAction("setDirection", {
+                change: false
+            });
+        },
+
+        onChangeDirection: function(){
+            if(!this.checkAction('setDirection'))
+            return;
+            this.takeAction("setDirection", {
+                change: true
+            });
         },
 
 

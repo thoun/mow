@@ -49,11 +49,11 @@
         self::ajaxResponse( );
     }
 	
-    public function chooseDirection()
+    public function setDirection()
     {
         self::setAjaxMode();     
         $change = self::getArg( "change", AT_bool, true );
-        $this->game->chooseDirection( $change );
+        $this->game->setDirection( $change );
         self::ajaxResponse( );
     }
     
