@@ -284,6 +284,15 @@ class mow extends Table
             $cardNumber = $cardNumber / 10;
             throw new BgaUserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber), true);
         }
+
+        // if no place for slowpoke
+        if ($cardNumber == 21 || $cardNumber == 22) {
+            $places = $this->getPlacesForSlowpoke();
+
+            if (count($places) == 0) {
+                throw new BgaUserException(self::_("You can't play slowpoke cow, no place available"), true);
+            }
+        }
     }    
     
     // Play a card from player hand
@@ -331,6 +340,45 @@ class mow extends Table
         $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
         // Next player
         $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
+    }
+
+    function getPlacesForSlowpoke() {
+        $places = [];
+        $herd = $this->cards->getCardsInLocation('herd');
+
+        $lastDisplayedNumber = null;
+        $lastCard = null;
+        foreach($herd as $card) {
+            if ($lastDisplayedNumber != null) {
+                $currentDisplayedNumber = intval($card['type_arg']);
+                if ($currentDisplayedNumber == 70 || $currentDisplayedNumber == 90) {
+                    $currentDisplayedNumber = $currentDisplayedNumber / 10;
+                }
+
+                $diff = $currentDisplayedNumber - $lastDisplayedNumber;
+                if ($diff >= 2) {
+                    $canPlace = true;
+                    $lastId = intval($lastCard['id']);
+                    if ($diff == 2) {
+                        $canPlace = ($lastId != intval(self::getGameStateValue( 'card21afterid' )) && 
+                                     $lastId != intval(self::getGameStateValue( 'card22afterid' )));
+                    }
+                    if ($canPlace) {
+                        $places[] = [$lastCard, $card];
+                    }
+                }
+
+                $lastDisplayedNumber = $currentDisplayedNumber;
+                $lastCard = $card;
+            }            
+            $lastDisplayedNumber = intval($card['type_arg']);
+            $lastCard = $card;
+            if ($lastDisplayedNumber == 70 || $lastDisplayedNumber == 90) {
+                $lastDisplayedNumber = $lastDisplayedNumber / 10;
+            }
+        }
+
+        return $places;
     }
 
     function setDirection($change) {
