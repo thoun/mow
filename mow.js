@@ -63,8 +63,10 @@ function (dojo, declare) {
             // TODO: Set up your game interface here, according to "gamedatas"
             this.playerHand = new ebg.stock();
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
+            this.playerHand.setSelectionMode(0);
             this.theHerd = new ebg.stock();
             this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
+            this.theHerd.setSelectionMode(0);
 
             this.createCards();
             
@@ -157,22 +159,17 @@ function (dojo, declare) {
         {
             console.log( 'Entering state: '+stateName );
             
-            switch( stateName )
-            {
+            switch( stateName ) {            
+                case 'playerTurn':
+                    if( this.isCurrentPlayerActive() ){     
+                        this.playerHand.setSelectionMode(1);
+                    }
+                    
+                    break;
             
-            /* Example:
             
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
-                break;
-           */
-           
-           
-            case 'dummmy':
-                break;
+                case 'dummmy':
+                    break;
             }
         },
 
@@ -183,22 +180,14 @@ function (dojo, declare) {
         {
             console.log( 'Leaving state: '+stateName );
             
-            switch( stateName )
-            {
+            switch( stateName ) {
             
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Hide the HTML block we are displaying only during this game state
-                dojo.style( 'my_html_block_id', 'display', 'none' );
-                
-                break;
-           */
+                case 'playerTurn':
+                    this.playerHand.setSelectionMode(0);                    
+                    break;
            
-           
-            case 'dummmy':
-                break;
+                case 'dummmy':
+                    break;
             }               
         }, 
 
