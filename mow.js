@@ -250,8 +250,8 @@ function (dojo, declare) {
         {
             var displayedNumber = Number(value);
             var iColor = Number(color);
-            if (iColor === 5 && (displayedNumber === 70 || displayedNumber === 90)) {
-                iColor /= 10;
+            if (displayedNumber === 70 || displayedNumber === 90) {
+                displayedNumber /= 10;
             }
             //return color;
             return displayedNumber*100+iColor;

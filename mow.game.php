@@ -124,7 +124,7 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
 			   
-        $this->cards->createCards( array_slice($cards, count($cards) - 20, 20 - 4), 'deck' );   // TODO Add special cards
+        $this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );   // TODO Add special cards
 	   
 
         // Activate first player (which is in general a good idea :) )
@@ -229,73 +229,71 @@ class mow extends Table
     }
     
     */
-
-    
-    
-    // Play a card from player hand
-    function playCard($card_id) {
-        self::checkAction("playCard");
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Get all cards in player hand
-        // (note: we must get ALL cards in player's hand in order to check if the card played is correct)
-        
+    function controlCardInHand($player_id, $card_id) {
+        // Get all cards in player hand        
         $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
 
-        // Check that the card is in this hand and gets its caracteristics
-        $card = null;
+        // Check that the card is in this hand
         $bIsInHand = false;
         foreach($player_hand as $current_card) {
             if($current_card['id'] == $card_id) {
-                $card = $current_card;
                 $bIsInHand = true;
             }
         }
-        //self::dump('player_hand', $player_hand);die(json_encode($player_hand));
-        
+
         if(!$bIsInHand) {
             throw new BgaUserException(self::_("This card is not in your hand"));
         }
+    }
+
+    function controlCardPlayable($card) {        
 
         $herdCards = $this->cards->getCardsInLocation('herd');
-        //self::dump('herdCards', json_encode($herdCards));
 
-        if (count($herdCards) > 0) {
-            $minHerd = -1;
-            $maxHerd = -1;
-            $bHas7 = false;    
-            $bHas9 = false;
-            foreach($herdCards as $current_card) {
+        if (count($herdCards) == 0) {
+            return;
+        }
+
+        //self::dump('herdCards', json_encode($herdCards));
+        $herdDisplayedNumbers = array_filter(
+            array_map(function($current_card) {
                 if ($current_card['type'] != '5' || $current_card['type_arg'] == '0' || $current_card['type_arg'] == '16') {
-                    // standard numbered card
-                    $cardNumber = intval($current_card['type_arg']);
-                    if ($minHerd == -1 || $minHerd > $cardNumber) {
-                        $minHerd = $cardNumber;
-                    }
-                    if ($minHerd == -1 || $maxHerd < $cardNumber) {
-                        $maxHerd = $cardNumber;
-                    }
-                    if ($cardNumber == 7) {
-                        $bHas7 = true;
-                    }
-                    if ($cardNumber == 9) {
-                        $bHas9 = true;
-                    }
+                    return intval($current_card['type_arg']);
+                } else {
+                    return -1;
                 }
-            }
-            
-            // if it's not in the interval
-            $cardNumber = intval($card['type_arg']);
-            if (($current_card['type'] != '5' || $card['type_arg'] == '0' || $card['type_arg'] == '16') && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
+            }, $herdCards), 
+            function($k) {
+                return $k != -1;
+            });
+
+        $minHerd = min($herdDisplayedNumbers);
+        $maxHerd = max($herdDisplayedNumbers);
+        
+        // if it's not in the interval
+        $cardNumber = intval($card['type_arg']);
+        if (($card['type'] != '5' || $card['type_arg'] == '0' || $card['type_arg'] == '16') && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
+            if ($minHerd == $maxHerd) {
+                throw new BgaUserException(sprintf(self::_("You must play different than %s"), $minHerd), true);
+            } else {
                 throw new BgaUserException(sprintf(self::_("You must play less than %s or more than %s"), $minHerd, $maxHerd), true);
             }
-            // if acrobatic can't be played
-            if ($current_card['type'] == '5' && (($card['type_arg'] == '70' && !$bHas7) || ($card['type_arg'] == '90' && !$bHas9))) {
-                $cardNumber = $cardNumber / 10;
-                throw new BgaUserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber), true);
-            }
         }
+        // if acrobatic can't be played
+        if (($cardNumber == 70 && !in_array(7, $herdDisplayedNumbers)) || ($cardNumber == 90 && !in_array(9, $herdDisplayedNumbers))) {
+            $cardNumber = $cardNumber / 10;
+            throw new BgaUserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber), true);
+        }
+    }    
+    
+    // Play a card from player hand
+    function playCard($card_id) {
+        self::checkAction("playCard");        
+        $player_id = self::getActivePlayerId();
+        $card = $this->cards->getCard( $card_id );
+
+        $this->controlCardInHand($player_id, $card_id);
+        $this->controlCardPlayable($card);
         
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
@@ -320,8 +318,10 @@ class mow extends Table
             ) );
         }
         
+        // changing direction is useless with 2 players
+        $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2
         // Next player
-        $this->gamestate->nextState($card['type'] === '5' ? 'chooseDirection' : 'playCard');
+        $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
     }
 
     function setDirection($change) {
