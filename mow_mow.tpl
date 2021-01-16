@@ -31,9 +31,15 @@
     </div>	
 </div>
 
-<div id="myhand_wrap" class="whiteblock">
-    <h3>{MY_HAND}</h3>
-    <div id="myhand">
+<div id="handdeck">
+    <div id="myhand_wrap" class="whiteblock">
+        <h3>{MY_HAND}</h3>
+        <div id="myhand">
+        </div>
+    </div>
+    <div id="deck_wrap" class="whiteblock">
+        <h3>{DECK_REMAINING_CARDS}</h3>
+        <div id="remainingCards">{REMAINING_CARDS}</div>
     </div>
 </div>
 

@@ -69,6 +69,23 @@
     background-image: url('img/cards.jpg'); 
 }
 
+#handdeck {
+    display: flex;
+}
+
+#myhand_wrap {
+    flex: 1;
+}
+
+#deck_wrap {
+    margin-left: 10px;
+    text-align: center;
+}
+
+#remainingCards {
+    font-size: 200%;
+}
+
 
 /*
     Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):

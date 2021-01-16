@@ -92,6 +92,8 @@ function (dojo, declare) {
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }
 
+            $('remainingCards').innerHTML = this.gamedatas.remainingCards;
+
             /*for(var pId in this.gamedatas.players){
                 console.log(this.scoreCtrl, pId, this.gamedatas.players)
                 this.scoreCtrl[pId].toValue( this.gamedatas.players[pId].score);
@@ -393,6 +395,8 @@ function (dojo, declare) {
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             
             this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
+
+            $('remainingCards').innerHTML = notif.args.remainingCards;
         },
         
 		 notif_newCard: function( notif )

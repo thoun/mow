@@ -160,6 +160,9 @@ class mow extends Table
         
         // Cards played on the table
         $result['herd'] = $this->cards->getCardsInLocation( 'herd' );
+
+        
+        $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
   
         return $result;
     }
@@ -305,7 +308,8 @@ class mow extends Table
             'value' => $card['type_arg'],
             'value_symbol' => $card['type_arg'], // The substitution will be done in JS format_string_recursive function
             'color' => $card['type'],
-            'color_symbol' => $card['type'] // The substitution will be done in JS format_string_recursive function
+            'color_symbol' => $card['type'], // The substitution will be done in JS format_string_recursive function,
+            'remainingCards' => count($this->cards->getCardsInLocation( 'deck' ))
         ));
 
         // get new card if possible
