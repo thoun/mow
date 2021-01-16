@@ -220,11 +220,9 @@ function (dojo, declare) {
                     }
                     break;
 
-                 case 'chooseDirection': 
-                 console.log('start add button');                   
-                    this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection' );
-                    this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection' );
-                    console.log('end add button');
+                 case 'chooseDirection':                  
+                    this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection', null, false );
+                    this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection', null, false, 'red' );
                     break;
                 }
 
@@ -429,7 +427,7 @@ function (dojo, declare) {
             console.log( 'notif_herdCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, notif.args.points, 1000);
+            this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerd.removeAll();
@@ -441,7 +439,7 @@ function (dojo, declare) {
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             if (this.player_id == notif.args.player_id) {
-                this.displayScoring( 'myhand_wrap', this.gamedatas.players[notif.args.player_id].color, notif.args.points, 1000);
+                this.displayScoring( 'myhand_wrap', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             }
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
