@@ -80,11 +80,22 @@ $machinestates = array(
     	"possibleactions" => array( "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ),
     	"transitions" => array( 
             "playCard" => ST_NEXT_PLAYER, 
+            "choosePlace" => ST_CHOOSE_PLACE,
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAYER_TURN, 
             "collectLastHerd" => ST_NEW_HAND, 
             "endGame" => ST_END_GAME
         )
+    ),
+
+    ST_CHOOSE_PLACE => array(
+    	"name" => "choosePlace",
+    	"description" => clienttranslate('${actplayer} must choose the place'),
+    	"descriptionmyturn" => clienttranslate('${you} must choose the place'),
+    	"type" => "activeplayer",
+        "args" => "argChoosePlace",
+    	"possibleactions" => array( "chooseDirection" ),
+    	"transitions" => array( "chooseDirection" => ST_CHOOSE_DIRECTION )
     ),
 
     ST_CHOOSE_DIRECTION => array(

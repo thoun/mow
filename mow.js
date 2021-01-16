@@ -208,20 +208,31 @@ function (dojo, declare) {
                       
             if( this.isCurrentPlayerActive() )
             {            
-                switch( stateName )
-                {
-                 case 'playerTurn':
-                    if(this.theHerd.count() > 0) {
-                        this.addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd' );
-                    }
-                    break;
+                switch( stateName ) {
+                    case 'playerTurn':
+                        if(this.theHerd.count() > 0) {
+                            this.addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd' );
+                        }
+                        break;                    
 
-                 case 'chooseDirection': 
-                 console.log('start add button');                   
-                    this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection' );
-                    this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection' );
-                    console.log('end add button');
-                    break;
+                    case 'choosePlace':  
+                        for( var i in args.places ) {
+                            this.gamedatas.places = args.places;
+                            var place = args.places[i];
+
+                            var translated = dojo.string.substitute( _("Between ${a} and ${b}"), {
+                                a: 2,
+                                b: 4
+                            } );
+
+                            this.addActionButton( 'choosePlace_button_'+i, translated, 'onChoosePlace' );
+                        }
+                        break;
+
+                    case 'chooseDirection':                  
+                       this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection' );
+                       this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection' );
+                       break;
                 }
 
             }
@@ -364,6 +375,7 @@ function (dojo, declare) {
 			dojo.subscribe( 'newHand', this, "notif_newHand" );
             dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
             dojo.subscribe( 'newCard', this, "notif_newCard" );
+            dojo.subscribe( 'slowpokePlaced', this, "notif_slowpokePlaced" );
             dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
             dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
             dojo.subscribe( 'handCollected', this, "notif_handCollected" );
@@ -406,6 +418,13 @@ function (dojo, declare) {
             var color = card.type;
             var value = card.type_arg;
             this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+        },
+
+        notif_slowpokePlaced: function( notif )
+        {
+            console.log( 'notif_slowpokePlaced', notif );
+            console.log('theherd', this.theHerd);
+            //dojo[notif.args.reverse_direction ? 'removeClass' : 'addClass']('direction', 'reverseDirection');
         },
 		
         notif_directionChanged: function( notif )
@@ -475,6 +494,18 @@ function (dojo, declare) {
             this.takeAction("collectHerd"/*, {
             cards: items.map(item => item.id).join(';')
             }*/);
+        },
+
+        onChoosePlace: function(event){
+            console.log(event.target.id);
+            if(!this.checkAction('chooseDirection'))
+            return;
+
+            var place = this.gamedatas.places[parseInt(event.target.id.split('_')[2])];
+
+            this.takeAction("setPlace", {
+                afterid: place[0]['id']
+            });
         },
 
         onKeepDirection: function(){

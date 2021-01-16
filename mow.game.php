@@ -35,11 +35,10 @@ class mow extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
                 "reverse_direction" => 10,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
+
+                "last_played_card_id" => 20,
+                "card21afterid" => 21,
+                "card22afterid" => 22,
         ) );
 		
         $this->cards = self::getNew( "module.common.deck" );
@@ -86,6 +85,9 @@ class mow extends Table
 
         // Init global values with their initial values
         self::setGameStateInitialValue( 'reverse_direction', 0 );
+        self::setGameStateInitialValue( 'last_played_card_id', -1 );
+        self::setGameStateInitialValue( 'card21afterid', -1 );
+        self::setGameStateInitialValue( 'card22afterid', -1 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -284,6 +286,14 @@ class mow extends Table
             $cardNumber = $cardNumber / 10;
             throw new BgaUserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber), true);
         }
+
+        if ($cardNumber == 21 || $cardNumber == 22) {
+            $places = $this->getPlacesForSlowpoke();
+
+            if (count($places) == 0) {
+                throw new BgaUserException(self::_("You can't play slowpoke cow, no place available"), true);
+            }
+        }
     }    
     
     // Play a card from player hand
@@ -297,6 +307,7 @@ class mow extends Table
         
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
+        self::getGameStateValue( 'last_played_card_id', $card_id );
             
         $displayedNumber = intval($card['type_arg']);
         $precision = '';
@@ -327,10 +338,36 @@ class mow extends Table
             ) );
         }
         
-        // changing direction is useless with 2 players
-        $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
-        // Next player
-        $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
+        if ($card['type_arg'] == '21' || $card['type_arg'] == '22') {
+            $this->gamestate->nextState('choosePlace');
+        } else {
+            // changing direction is useless with 2 players
+            $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
+            // Next player
+            $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
+        }
+    }
+
+    function setPlace($afterid) {
+         $card = $this->cards->getCard(self::getGameStateValue( 'last_played_card_id'));
+         self::dump('last_played_card_id', self::getGameStateValue( 'last_played_card_id'));
+         self::dump('afterid', $afterid);
+         self::dump('card', $card);
+         
+        self::getGameStateValue( 'card'.$card['type_arg'].'afterid', $afterid);
+
+        if ($change) {
+            $reverse_direction = intval(self::getGameStateValue( 'reverse_direction' )) == 1 ? 0 : 1;
+            self::setGameStateValue('reverse_direction', $reverse_direction);
+
+            self::notifyAllPlayers('slowpokePlaced', clienttranslate('${player_name} placed slowpoke'), array(
+                'player_name' => self::getActivePlayerName(),
+                'slowpoke' => intval($card['type_arg']),
+                'afterid' => $afterid
+            ));
+        }
+
+        $this->gamestate->nextState('chooseDirection');
     }
 
     function setDirection($change) {
@@ -345,7 +382,6 @@ class mow extends Table
             ));
         }
 
-        // TODO
         $this->gamestate->nextState('setDirection');
     }
 
@@ -365,6 +401,9 @@ class mow extends Table
         self::DbQuery($sql);
 
         $this->cards->moveAllCardsInLocation( "herd", "used" );
+            
+        self::getGameStateValue( 'card21afterid', -1 );
+        self::getGameStateValue( 'card22afterid', -1 );
             
         // And notify
         self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), array(
@@ -415,30 +454,71 @@ class mow extends Table
     */
 
     function argPlayerTurn() {
-	$pId = self::getActivePlayerId();
-	$hand = $this->cards->getCardsInLocation('hand', $pId);
-	$herd = $this->cards->getCardsInLocation('herd');
-    
-    $allowedCardIds = [];
-    foreach($hand as $card) {
-        try {
-            $this->controlCardPlayable($card);
-            $allowedCardIds[] = intval($card['id']);
-        } catch (Exception $e){}
+        $pId = self::getActivePlayerId();
+        $hand = $this->cards->getCardsInLocation('hand', $pId);
+        $herd = $this->cards->getCardsInLocation('herd');
+        
+        $allowedCardIds = [];
+        foreach($hand as $card) {
+            try {
+                $this->controlCardPlayable($card);
+                $allowedCardIds[] = intval($card['id']);
+            } catch (Exception $e){}
+        }
+
+        return [
+            'allowedCardIds' => $allowedCardIds
+        ];
     }
 
-    /*if (count($herd) == 0) {
-        // TODO GBA filter unplayable cards
-        $allowedCardIds = array_map(function($card) { return $card['id']; }, $hand);
-    } else {
-        // TODO GBA
-        $allowedCardIds = [3, 4];
-    }*/
+    function getPlacesForSlowpoke() {
+        $places = [];
+        $herd = $this->cards->getCardsInLocation('herd');
 
-	return [
-		'allowedCardIds' => $allowedCardIds
-	];
-}
+        $lastDisplayedNumber = null;
+        $lastCard = null;
+        foreach($herd as $card) {
+            if ($lastDisplayedNumber != null) {
+                $currentDisplayedNumber = intval($card['type_arg']);
+                if ($currentDisplayedNumber == 70 || $currentDisplayedNumber == 90) {
+                    $currentDisplayedNumber = $currentDisplayedNumber / 10;
+                }
+
+                $diff = $currentDisplayedNumber - $lastDisplayedNumber;
+                if ($diff >= 2) {
+                    $canPlace = true;
+                    $lastId = intval($lastCard['id']);
+                    if ($diff == 2) {
+                        $canPlace = ($lastId != intval(self::getGameStateValue( 'card21afterid' )) && 
+                                     $lastId != intval(self::getGameStateValue( 'card22afterid' )));
+                    }
+                    if ($canPlace) {
+                        $places[] = [$lastCard, $card];
+                    }
+                }
+
+                $lastDisplayedNumber = $currentDisplayedNumber;
+                $lastCard = $card;
+            }            
+            $lastDisplayedNumber = intval($card['type_arg']);
+            $lastCard = $card;
+            if ($lastDisplayedNumber == 70 || $lastDisplayedNumber == 90) {
+                $lastDisplayedNumber = $lastDisplayedNumber / 10;
+            }
+        }
+
+        return $places;
+    }
+
+    function argChoosePlace() {
+        $pId = self::getActivePlayerId();
+        
+        $places = $this->getPlacesForSlowpoke();
+
+        return [
+            'places' => $places
+        ];
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions

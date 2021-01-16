@@ -49,6 +49,14 @@
         self::ajaxResponse( );
     }
 	
+    public function setPlace()
+    {
+        self::setAjaxMode();     
+        $afterid = self::getArg( "afterid", AT_posint, true );
+        $this->game->setPlace( $afterid );
+        self::ajaxResponse( );
+    }
+	
     public function setDirection()
     {
         self::setAjaxMode();     
