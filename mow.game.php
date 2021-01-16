@@ -246,13 +246,8 @@ class mow extends Table
         }
     }
 
-    function controlCardPlayable($card) {        
-
+    function controlCardPlayable($card) {
         $herdCards = $this->cards->getCardsInLocation('herd');
-
-        if (count($herdCards) == 0) {
-            return;
-        }
 
         //self::dump('herdCards', json_encode($herdCards));
         $herdDisplayedNumbers = array_filter(
@@ -267,18 +262,23 @@ class mow extends Table
                 return $k != -1;
             });
 
-        $minHerd = min($herdDisplayedNumbers);
-        $maxHerd = max($herdDisplayedNumbers);
         
-        // if it's not in the interval
         $cardNumber = intval($card['type_arg']);
-        if (($card['type'] != '5' || $card['type_arg'] == '0' || $card['type_arg'] == '16') && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
-            if ($minHerd == $maxHerd) {
-                throw new BgaUserException(sprintf(self::_("You must play different than %s"), $minHerd), true);
-            } else {
-                throw new BgaUserException(sprintf(self::_("You must play less than %s or more than %s"), $minHerd, $maxHerd), true);
+
+        if (count($herdCards) > 0) {
+            $minHerd = min($herdDisplayedNumbers);
+            $maxHerd = max($herdDisplayedNumbers);
+            
+            // if it's not in the interval
+            if (($card['type'] != '5' || $card['type_arg'] == '0' || $card['type_arg'] == '16') && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
+                if ($minHerd == $maxHerd) {
+                    throw new BgaUserException(sprintf(self::_("You must play different than %s"), $minHerd), true);
+                } else {
+                    throw new BgaUserException(sprintf(self::_("You must play less than %s or more than %s"), $minHerd, $maxHerd), true);
+                }
             }
         }
+
         // if acrobatic can't be played
         if (($cardNumber == 70 && !in_array(7, $herdDisplayedNumbers)) || ($cardNumber == 90 && !in_array(9, $herdDisplayedNumbers))) {
             $cardNumber = $cardNumber / 10;
@@ -414,22 +414,31 @@ class mow extends Table
         game state.
     */
 
-    /*
+    function argPlayerTurn() {
+	$pId = self::getActivePlayerId();
+	$hand = $this->cards->getCardsInLocation('hand', $pId);
+	$herd = $this->cards->getCardsInLocation('herd');
     
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
+    $allowedCardIds = [];
+    foreach($hand as $card) {
+        try {
+            $this->controlCardPlayable($card);
+            $allowedCardIds[] = intval($card['id']);
+        } catch (Exception $e){}
+    }
+
+    /*if (count($herd) == 0) {
+        // TODO GBA filter unplayable cards
+        $allowedCardIds = array_map(function($card) { return $card['id']; }, $hand);
+    } else {
+        // TODO GBA
+        $allowedCardIds = [3, 4];
+    }*/
+
+	return [
+		'allowedCardIds' => $allowedCardIds
+	];
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions

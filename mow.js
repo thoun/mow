@@ -167,6 +167,8 @@ function (dojo, declare) {
                 case 'playerTurn':
                     if( this.isCurrentPlayerActive() ){     
                         this.playerHand.setSelectionMode(1);
+                        dojo.query("#myhand .stockitem").addClass("disabled");
+                        args.args.allowedCardIds.forEach(ids => dojo.removeClass('myhand_item_' + ids, "disabled"));
                     }
                     
                     break;
@@ -187,7 +189,8 @@ function (dojo, declare) {
             switch( stateName ) {
             
                 case 'playerTurn':
-                    this.playerHand.setSelectionMode(0);                    
+                    this.playerHand.setSelectionMode(0);  
+                    dojo.query("#myhand .stockitem").removeClass("disabled");                  
                     break;
            
                 case 'dummmy':
@@ -428,7 +431,9 @@ function (dojo, declare) {
             console.log( 'notif_handCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            this.displayScoring( 'myhand_wrap', this.gamedatas.players[notif.args.player_id].color, notif.args.points, 1000);
+            if (this.player_id == notif.args.player_id) {
+                this.displayScoring( 'myhand_wrap', this.gamedatas.players[notif.args.player_id].color, notif.args.points, 1000);
+            }
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         },

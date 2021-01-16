@@ -76,6 +76,7 @@ $machinestates = array(
     	"description" => clienttranslate('${actplayer} must play a card or pick up the herd'),
     	"descriptionmyturn" => clienttranslate('${you} must play a card or pick up the herd'),
     	"type" => "activeplayer",
+        "args" => "argPlayerTurn",
     	"possibleactions" => array( "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ),
     	"transitions" => array( 
             "playCard" => ST_NEXT_PLAYER, 
