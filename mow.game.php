@@ -160,7 +160,19 @@ class mow extends Table
         
         // Cards played on the table
         $result['herd'] = $this->cards->getCardsInLocation( 'herd' );
-
+        
+        $sql = "SELECT card_id, card_slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
+        $slowpokes = self::getCollectionFromDb( $sql );
+        self::dump('$slowpokes', $slowpokes);
+        foreach($slowpokes as $slowpoke) {
+            foreach($result['herd'] as &$herdCard) {
+                if (intval($herdCard['id']) == intval($slowpoke['card_id'])) {
+                    self::dump('slowpoke_type_arg set to', $slowpoke['card_slowpoke_type_arg']);
+                    $herdCard['slowpoke_type_arg'] = $slowpoke['card_slowpoke_type_arg'];
+                }
+            }
+        }
+        self::dump('$result[herd]', $result['herd']);
         
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
   
@@ -303,6 +315,18 @@ class mow extends Table
 
         $this->controlCardInHand($player_id, $card_id);
         $this->controlCardPlayable($card);
+
+        $slowpokeNumber = -1;
+        if ($card['type_arg'] == 21 || $card['type_arg'] == 22) {
+            $places = $this->getPlacesForSlowpoke();
+            
+            self::dump('$places', json_encode($places));
+
+            $slowpokeNumber = intval($places[0][0]['type_arg']);
+            $card['card_slowpoke_type_arg'] = $slowpokeNumber;             
+            $sql = "UPDATE card SET card_slowpoke_type_arg=$slowpokeNumber WHERE card_id='$card_id'";
+            self::DbQuery($sql);
+        }
         
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
@@ -316,6 +340,7 @@ class mow extends Table
             $displayedNumber /= 10;
             $precision = 'acrobatic';
         }
+
         // And notify
         self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber} ${precision}'), array(
             'card_id' => $card_id,
@@ -325,7 +350,8 @@ class mow extends Table
             'displayedNumber' => $displayedNumber, // The substitution will be done in JS format_string_recursive function
             'color' => $card['type'],
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
-            'remainingCards' => count($this->cards->getCardsInLocation( 'deck' ))
+            'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
+            'slowpokeNumber' => $slowpokeNumber
         ));
 
         // get new card if possible
@@ -335,6 +361,7 @@ class mow extends Table
                 'card' => $newCard
             ) );
         }
+
         
         // changing direction is useless with 2 players
         $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
@@ -345,10 +372,19 @@ class mow extends Table
     function getPlacesForSlowpoke() {
         $places = [];
         $herd = $this->cards->getCardsInLocation('herd');
+        $herdWithoutSlowpokes = array_values(array_filter($herd, function($card) { return $card['type_arg'] != 21 && $card['type_arg'] != 22; }));
+
+        usort($herdWithoutSlowpokes, function ($a, $b) { return intval($a['type_arg']) - intval($b['type_arg']); });
+        //self::dump('$sortedHerdWithoutSlowpokes', json_encode($herdWithoutSlowpokes));
 
         $lastDisplayedNumber = null;
         $lastCard = null;
-        foreach($herd as $card) {
+        $herdHasSlowpoke = count(array_filter($herd, function($card) { return $card['type_arg'] == '21' || $card['type_arg'] == '22'; })) > 0;
+        $herdSlowPokeAlreadyPlaced = false;
+        for($i=0;$i<count(array_values($herdWithoutSlowpokes));$i++) {
+            $card = $herdWithoutSlowpokes[$i];
+            //self::dump('$card', json_encode($card));
+
             if ($lastDisplayedNumber != null) {
                 $currentDisplayedNumber = intval($card['type_arg']);
                 if ($currentDisplayedNumber == 70 || $currentDisplayedNumber == 90) {
@@ -358,11 +394,10 @@ class mow extends Table
                 $diff = $currentDisplayedNumber - $lastDisplayedNumber;
                 if ($diff >= 2) {
                     $canPlace = true;
-                    $lastId = intval($lastCard['id']);
-                    if ($diff == 2) {
-                        $canPlace = ($lastId != intval(self::getGameStateValue( 'card21afterid' )) && 
-                                     $lastId != intval(self::getGameStateValue( 'card22afterid' )));
+                    if ($diff == 2 && $herdHasSlowpoke && !$herdSlowPokeAlreadyPlaced) {
+                        $canPlace = false;
                     }
+                    $herdSlowPokeAlreadyPlaced = true;
                     if ($canPlace) {
                         $places[] = [$lastCard, $card];
                     }
@@ -378,6 +413,7 @@ class mow extends Table
             }
         }
 
+        //self::dump('$places', json_encode($places));
         return $places;
     }
 
@@ -412,7 +448,9 @@ class mow extends Table
         $sql = "UPDATE player SET player_score=player_score-$collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
 
-        $this->cards->moveAllCardsInLocation( "herd", "used" );
+        $this->cards->moveAllCardsInLocation( "herd", "discard" );
+        $sql = "UPDATE card SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
+        self::DbQuery($sql);
             
         // And notify
         self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), array(

@@ -99,6 +99,10 @@ function (dojo, declare) {
                 var color = card.type;
                 var value = card.type_arg;
                 //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
+                if (card.slowpoke_type_arg) {
+                    console.log('card.slowpoke_type_arg', card.slowpoke_type_arg);
+                    this.setSlowpokeWeight(this.getCardUniqueId( color, value ), Number(card.slowpoke_type_arg));
+                }
 				
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }
@@ -253,12 +257,15 @@ function (dojo, declare) {
             return displayedNumber*100+iColor;
         },
 		
-		showCardInHand: function()		
+		setSlowpokeWeight: function(slowpokeId, slowpokeNumber)		
 		{
-		
+            var keys = Object.keys(this.theHerd.item_type).filter(function(key) { return key % 100 == slowpokeNumber});
+            var lastKey = keys[keys.length-1];
+            lastKeyItemWeight = this.theHerd.item_type[lastKey].weight;
+            this.theHerd.item_type[slowpokeId].weight = lastKeyItemWeight + 1;
 		},
 
-		playCardOnTable: function( player_id, color, value, card_id )
+		playCardOnTable: function( player_id, color, value, card_id, slowpokeNumber )
         {
             // player_id => direction
             /*dojo.place(
@@ -267,9 +274,12 @@ function (dojo, declare) {
                     y: 0,//this.cardheight*(color),
                     player_id: player_id                
                 } ), 'playertablecard_'+player_id );*/
+
+            if (slowpokeNumber != -1) {
+                this.setSlowpokeWeight(this.getCardUniqueId( color, value ), slowpokeNumber);
+            }
                 
-            if( player_id != this.player_id )
-            {
+            if( player_id != this.player_id ) {
                 // Some opponent played a card
                 // Move card from player panel
                 //this.placeOnObject( 'cardontable_'+player_id, 'overall_player_board_'+player_id );
@@ -277,15 +287,14 @@ function (dojo, declare) {
                 //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
 				
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id );
-            }
-            else
-            {
+            } else {
                 // You played a card. If it exists in your hand, move card from there and remove
                 // corresponding item
                 
                 /*if( $('myhand_item_'+card_id) )
                 {
                     //this.placeOnObject( 'cardontable_'+player_id, 'myhand_item_'+card_id );*/
+
                     this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id );
                     this.playerHand.removeFromStockById( card_id );
                 /*}*/
@@ -393,7 +402,7 @@ function (dojo, declare) {
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             
-            this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
+            this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, notif.args.slowpokeNumber);
 
             $('remainingCards').innerHTML = notif.args.remainingCards;
         },
