@@ -298,15 +298,24 @@ class mow extends Table
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
             
+        $displayedNumber = intval($card['type_arg']);
+        $precision = '';
+        if ($displayedNumber == 21 || $displayedNumber == 22) {
+            $displayedNumber = '';
+            $precision = 'slowpoke';
+        } else if ($displayedNumber == 70 || $displayedNumber == 90) {
+            $displayedNumber /= 10;
+            $precision = 'acrobatic';
+        }
         // And notify
-        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${value_symbol}${color_symbol}'), array(
+        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber} ${precision}'), array(
             'card_id' => $card_id,
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'value' => $card['type_arg'],
-            'value_symbol' => $card['type_arg'], // The substitution will be done in JS format_string_recursive function
+            'displayedNumber' => $displayedNumber, // The substitution will be done in JS format_string_recursive function
             'color' => $card['type'],
-            'color_symbol' => $card['type'], // The substitution will be done in JS format_string_recursive function,
+            'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' ))
         ));
 
