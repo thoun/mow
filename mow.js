@@ -283,20 +283,16 @@ function (dojo, declare) {
 				
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id );
             } else {
-                // You played a card. If it exists in your hand, move card from there and remove
-                // corresponding item
+                // You played a card. Move card from the hand and remove corresponding item
                 
-                /*if( $('myhand_item_'+card_id) )
-                {
-                    //this.placeOnObject( 'cardontable_'+player_id, 'myhand_item_'+card_id );*/
-
-                    this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id );
-                    this.playerHand.removeFromStockById( card_id );
-                /*}*/
+                var that = this;
+                var animation_id = this.slideToObject('myhand_item_'+card_id, 'theherd' );
+                dojo.connect(animation_id, 'onEnd', function() {
+                    that.playerHand.removeFromStockById( card_id );
+                    that.theHerd.addToStockWithId( that.getCardUniqueId( color, value ), card_id );
+                });                    
+                animation_id.play();
             }
-
-            // In any case: move it to its final destination
-            //this.slideToObject( 'cardontable_'+player_id, 'playertablecard_'+player_id ).play();
 
         },
 		
@@ -429,7 +425,21 @@ function (dojo, declare) {
             this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
-            this.theHerd.removeAll();
+            var that = this;
+            var query = dojo.query( '#theherd .stockitem' );
+            var animation_ids = [];
+            query.forEach(function (item, index) {
+                var animation_id = that.slideToObject( item.id, 'player_board_'+notif.args.player_id, 150);
+                animation_ids.push(animation_id); 
+                dojo.connect(animation_id, 'onEnd', function() {
+                    if (index === query.length - 1) {
+                        that.theHerd.removeAll();
+                    } else {
+                        animation_ids[index+1].play();
+                    }
+                });
+            });
+            animation_ids[0].play();
         },
 		
         notif_handCollected: function( notif )
