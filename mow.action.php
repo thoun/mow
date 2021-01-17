@@ -37,9 +37,7 @@
             $this->view = "mow_mow";
             self::trace( "Complete reinitialization of board game" );
       }
-  	} 
-  	
-  	// TODO: defines your action entry points there
+  	}
 	
     public function playCard()
     {
@@ -59,47 +57,10 @@
     
     public function collectHerd()
     {
-        self::setAjaxMode();     
-        /*$cards_raw = self::getArg( "cards", AT_numberlist, true );
-        
-        // Removing last ';' if exists
-        if( substr( $cards_raw, -1 ) == ';' ) {
-            $cards_raw = substr( $cards_raw, 0, -1 );
-        }
-        if( $cards_raw == '' ) {
-            $cards = array();
-        } else {
-            $cards = explode( ';', $cards_raw );
-        }
-
-        $this->game->collectHerd( $cards );*/
+        self::setAjaxMode();
         $this->game->collectHerd();
         self::ajaxResponse( );    
     }
-
-	
-	
-    /*
-    
-    Example:
-  	
-	
-    public function myAction()
-    {
-        self::setAjaxMode();     
-
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
-
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
-    }
-    
-    */
 
   }
   

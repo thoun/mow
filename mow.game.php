@@ -34,12 +34,7 @@ class mow extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
-                "reverse_direction" => 10,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
+                "reverse_direction" => 10
         ) );
 		
         $this->cards = self::getNew( "module.common.deck" );
@@ -90,13 +85,13 @@ class mow extends Table
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         self::initStat( 'table', 'collectedHerdsNumber', 0 );    // Init a table statistics
-        self::initStat( 'table', 'keepDirectionNumber', 0 );    // Init a table statistics
-        self::initStat( 'table', 'changeDirectionNumber', 0 );    // Init a table statistics
+        self::initStat( 'table', 'keepDirectionNumber', 0 ); 
+        self::initStat( 'table', 'changeDirectionNumber', 0 );
         self::initStat( 'player', 'nbrNoPointCards', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'nbrOnePointCards', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'nbrTwoPointsCards', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'nbrThreePointsCards', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'nbrFivePointsCards', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'nbrOnePointCards', 0 );
+        self::initStat( 'player', 'nbrTwoPointsCards', 0 );
+        self::initStat( 'player', 'nbrThreePointsCards', 0 );
+        self::initStat( 'player', 'nbrFivePointsCards', 0 );
 
         // setup the initial game situation here
 	    // Create the cards:	   
@@ -158,8 +153,6 @@ class mow extends Table
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
-  
 		// Cards in player hand      
         $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
         
@@ -177,6 +170,7 @@ class mow extends Table
             }
         }
         
+        // Remaining cards on deck
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
   
         return $result;
@@ -194,9 +188,10 @@ class mow extends Table
     */
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $sql = "SELECT min(player_score) FROM player ";
+        $minscore = self::getUniqueValueFromDB( $sql );
 
-        return 0;
+        return -100 * $minscore / END_SCORE;
     }
 
 
@@ -219,31 +214,6 @@ class mow extends Table
         (note: each method below must match an input method in mow.action.php)
     */
 
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} played ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
-    */
     function controlCardInHand($player_id, $card_id) {
         // Get all cards in player hand        
         $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
@@ -436,7 +406,6 @@ class mow extends Table
             self::incStat( 1, "keepDirectionNumber" );
         }
 
-        // TODO
         $this->gamestate->nextState('setDirection');
     }
 
@@ -582,9 +551,7 @@ class mow extends Table
                 'cards' => $cards,
                 'remainingCards' => $remainingCards
             ) );
-        }        
-        
-       // self::setGameStateValue( 'alreadyPlayedHearts', 0 );
+        }
 
         $this->gamestate->nextState( "" );
     }
@@ -595,7 +562,6 @@ function stNextPlayer()
 	$players = self::loadPlayersBasicInfos();
 	$nbr_players = self::getPlayersNumber();
 
-    // Standard case (not the end of the trick) => just active the next player
     if (intval(self::getGameStateValue( 'reverse_direction' )) == 1) {
         $player_id = self::activePrevPlayer();
     } else {

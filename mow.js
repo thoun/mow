@@ -26,9 +26,6 @@ function (dojo, declare) {
         constructor: function(){
             console.log('mow constructor');
               
-            // Here, you can init the global variables of your user interface
-            // Example:
-            // this.myGlobalValue = 0;
 			this.playerHand = null;
 			this.cardwidth = 121;
             this.cardheight = 178;
@@ -316,41 +313,41 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+       
+
+        onCollectHerd: function(){
+            if(!this.checkAction('collectHerd'))
+            return;
         
-        /* Example:
+            //var items = this.playerHand.getSelectedItems();
+            // Should be useless now
+            /*if(items.length != this.nbr_cards_to_give){
+            this.showMessage(dojo.string.substitute(_("You must select exactly ${n} cards"), {n: this.nbr_cards_to_give}), 'error');
+            return;
+            }*/
         
-        onMyMethodToCall1: function( evt )
-        {
-            console.log( 'onMyMethodToCall1' );
-            
-            // Preventing default browser reaction
-            dojo.stopEvent( evt );
+            this.takeAction("collectHerd"/*, {
+            cards: items.map(item => item.id).join(';')
+            }*/);
+        },
 
-            // Check that this action is possible (see "possibleactions" in states.inc.php)
-            if( ! this.checkAction( 'myAction' ) )
-            {   return; }
+        onKeepDirection: function(){
+            if(!this.checkAction('setDirection'))
+            return;
+            this.takeAction("setDirection", {
+                change: false
+            });
+        },
 
-            this.ajaxcall( "/mow/mow/myAction.html", { 
-                                                                    lock: true, 
-                                                                    myArgument1: arg1, 
-                                                                    myArgument2: arg2,
-                                                                    ...
-                                                                 }, 
-                         this, function( result ) {
-                            
-                            // What to do after the server call if it succeeded
-                            // (most of the time: nothing)
-                            
-                         }, function( is_error) {
-
-                            // What to do after the server call in anyway (success or failure)
-                            // (most of the time: nothing)
-
-                         } );        
-        },        
+        onChangeDirection: function(){
+            if(!this.checkAction('setDirection'))
+            return;
+            this.takeAction("setDirection", {
+                change: true
+            });
+        },
+              
         
-        */
-
         
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
@@ -468,38 +465,6 @@ function (dojo, declare) {
                     this.playerHand.unselectAll();
                 }
             }
-        },
-
-        onCollectHerd: function(){
-            if(!this.checkAction('collectHerd'))
-            return;
-        
-            //var items = this.playerHand.getSelectedItems();
-            // Should be useless now
-            /*if(items.length != this.nbr_cards_to_give){
-            this.showMessage(dojo.string.substitute(_("You must select exactly ${n} cards"), {n: this.nbr_cards_to_give}), 'error');
-            return;
-            }*/
-        
-            this.takeAction("collectHerd"/*, {
-            cards: items.map(item => item.id).join(';')
-            }*/);
-        },
-
-        onKeepDirection: function(){
-            if(!this.checkAction('setDirection'))
-            return;
-            this.takeAction("setDirection", {
-                change: false
-            });
-        },
-
-        onChangeDirection: function(){
-            if(!this.checkAction('setDirection'))
-            return;
-            this.takeAction("setDirection", {
-                change: true
-            });
         },
 
 
