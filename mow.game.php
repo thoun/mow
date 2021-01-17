@@ -164,7 +164,6 @@ class mow extends Table
         foreach($slowpokes as $slowpoke) {
             foreach($result['herd'] as &$herdCard) {
                 if (intval($herdCard['id']) == intval($slowpoke['card_id'])) {
-                    self::dump('slowpoke_type_arg set to', $slowpoke['card_slowpoke_type_arg']);
                     $herdCard['slowpoke_type_arg'] = $slowpoke['card_slowpoke_type_arg'];
                 }
             }
@@ -293,7 +292,7 @@ class mow extends Table
         if ($card['type_arg'] == 21 || $card['type_arg'] == 22) {
             $places = $this->getPlacesForSlowpoke();
             
-            self::dump('$places', json_encode($places));
+            //self::dump('$places', json_encode($places));
 
             $slowpokeNumber = intval($places[0][0]['type_arg']);
             $card['card_slowpoke_type_arg'] = $slowpokeNumber;             

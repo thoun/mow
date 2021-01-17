@@ -24,7 +24,7 @@ define([
 function (dojo, declare) {
     return declare("bgagame.mow", ebg.core.gamegui, {
         constructor: function(){
-            console.log('mow constructor');
+            //console.log('mow constructor');
               
 			this.playerHand = null;
 			this.cardwidth = 121;
@@ -47,7 +47,7 @@ function (dojo, declare) {
         
         setup: function( gamedatas )
         {
-            console.log( "Starting game setup" );
+            //console.log( "Starting game setup" );
             
             // Setting up player boards
             for( var player_id in gamedatas.players )
@@ -76,7 +76,7 @@ function (dojo, declare) {
 
             this.createCards();
             
-            console.log('this.gamedatas', this.gamedatas);
+            //console.log('this.gamedatas', this.gamedatas);
 			
 			// Cards in player's hand
             for( var i in this.gamedatas.hand )
@@ -97,7 +97,6 @@ function (dojo, declare) {
                 var value = card.type_arg;
                 //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
                 if (card.slowpoke_type_arg) {
-                    console.log('card.slowpoke_type_arg', card.slowpoke_type_arg);
                     this.setSlowpokeWeight(this.getCardUniqueId( color, value ), Number(card.slowpoke_type_arg));
                 }
 				
@@ -107,10 +106,10 @@ function (dojo, declare) {
             this.setRemainingCards(this.gamedatas.remainingCards);
 
             // Setup game notifications to handle (see "setupNotifications" method below)
-            console.log('setupNotifications');
+            //console.log('setupNotifications');
             this.setupNotifications();
 
-            console.log( "Ending game setup" );
+            //console.log( "Ending game setup" );
         },
 
         createCards: function () {
@@ -162,7 +161,7 @@ function (dojo, declare) {
         //
         onEnteringState: function( stateName, args )
         {
-            console.log( 'Entering state: '+stateName );
+            //console.log( 'Entering state: '+stateName );
             
             switch( stateName ) {            
                 case 'playerTurn':
@@ -185,7 +184,7 @@ function (dojo, declare) {
         //
         onLeavingState: function( stateName )
         {
-            console.log( 'Leaving state: '+stateName );
+            //console.log( 'Leaving state: '+stateName );
             
             switch( stateName ) {
             
@@ -204,7 +203,7 @@ function (dojo, declare) {
         //        
         onUpdateActionButtons: function( stateName, args )
         {
-            console.log( 'onUpdateActionButtons: '+stateName );
+            //console.log( 'onUpdateActionButtons: '+stateName );
             this.removeActionButtons();
                       
             if( this.isCurrentPlayerActive() )
@@ -359,7 +358,7 @@ function (dojo, declare) {
         */
         setupNotifications: function()
         {
-            console.log( 'notifications subscriptions setup' );
+            //console.log( 'notifications subscriptions setup' );
             
 			dojo.subscribe( 'newHand', this, "notif_newHand" );
             dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
@@ -373,7 +372,7 @@ function (dojo, declare) {
         
 		 notif_newHand: function( notif )
         {
-            console.log( 'notif_newHand', notif );
+            //console.log( 'notif_newHand', notif );
 
             // We received a new full hand of 5 cards.
             this.playerHand.removeAll();
@@ -391,7 +390,7 @@ function (dojo, declare) {
 		
         notif_cardPlayed: function( notif )
         {
-            console.log( 'notif_cardPlayed', notif );
+            //console.log( 'notif_cardPlayed', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             
@@ -402,7 +401,7 @@ function (dojo, declare) {
         
 		 notif_newCard: function( notif )
         {
-            console.log( 'notif_newCard', notif );
+            //console.log( 'notif_newCard', notif );
 
             var card = notif.args.card;
             var color = card.type;
@@ -412,14 +411,14 @@ function (dojo, declare) {
 		
         notif_directionChanged: function( notif )
         {
-            console.log( 'notif_directionChanged', notif );
+            //console.log( 'notif_directionChanged', notif );
 
             dojo[notif.args.reverse_direction ? 'removeClass' : 'addClass']('direction', 'reverseDirection');
         },
 		
         notif_herdCollected: function( notif )
         {
-            console.log( 'notif_herdCollected', notif );
+            //console.log( 'notif_herdCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
@@ -444,7 +443,7 @@ function (dojo, declare) {
 		
         notif_handCollected: function( notif )
         {
-            console.log( 'notif_handCollected', notif );
+            //console.log( 'notif_handCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
             if (this.player_id == notif.args.player_id) {
