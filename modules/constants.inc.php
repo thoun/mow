@@ -14,5 +14,5 @@ define('ST_END_HAND', 90);
 
 define('ST_END_GAME', 99);
 
-define('END_SCORE', 10);
+define('END_SCORE', 100);
 ?>
