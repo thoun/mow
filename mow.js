@@ -276,21 +276,11 @@ function (dojo, declare) {
             if( player_id != this.player_id ) {
                 // Some opponent played a card
                 // Move card from player panel
-                //this.placeOnObject( 'cardontable_'+player_id, 'overall_player_board_'+player_id );
-
-                //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
-				
-                this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id );
+                this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'overall_player_board_'+player_id );
             } else {
                 // You played a card. Move card from the hand and remove corresponding item
-                
-                var that = this;
-                var animation_id = this.slideToObject('myhand_item_'+card_id, 'theherd' );
-                dojo.connect(animation_id, 'onEnd', function() {
-                    that.playerHand.removeFromStockById( card_id );
-                    that.theHerd.addToStockWithId( that.getCardUniqueId( color, value ), card_id );
-                });                    
-                animation_id.play();
+                this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'myhand_item_'+card_id );
+                this.playerHand.removeFromStockById( card_id );
             }
 
         },
@@ -406,7 +396,12 @@ function (dojo, declare) {
             var card = notif.args.card;
             var color = card.type;
             var value = card.type_arg;
-            this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+            var ctrl = this;
+            setTimeout(function () {
+                // timeout so new card appear after played card animation
+                ctrl.playerHand.addToStockWithId( ctrl.getCardUniqueId( color, value ), card.id, 'remainingCards' );
+            }, 1000);
+            
         },
 		
         notif_directionChanged: function( notif )
@@ -424,21 +419,7 @@ function (dojo, declare) {
             this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
-            var that = this;
-            var query = dojo.query( '#theherd .stockitem' );
-            var animation_ids = [];
-            query.forEach(function (item, index) {
-                var animation_id = that.slideToObject( item.id, 'player_board_'+notif.args.player_id, 150);
-                animation_ids.push(animation_id); 
-                dojo.connect(animation_id, 'onEnd', function() {
-                    if (index === query.length - 1) {
-                        that.theHerd.removeAll();
-                    } else {
-                        animation_ids[index+1].play();
-                    }
-                });
-            });
-            animation_ids[0].play();
+            this.theHerd.removeAllTo( 'player_board_'+notif.args.player_id );
         },
 		
         notif_handCollected: function( notif )
@@ -461,7 +442,7 @@ function (dojo, declare) {
         onPlayerHandSelectionChanged: function(control_name, item_id)
         {            
             var items = this.playerHand.getSelectedItems();
-            if (items.length == 1) {console.log(this);
+            if (items.length == 1) {
                 if (this.checkAction('playCard', true)) {
                     // Can play a card
                     var card_id = items[0].id;//items[0].type
