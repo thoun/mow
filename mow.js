@@ -391,7 +391,9 @@ function (dojo, declare) {
                 var color = card.type;
                 var value = card.type_arg;
                 this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
-            }            
+            }  
+
+            $('remainingCards').innerHTML = notif.args.remainingCards;          
         },
 		
         notif_cardPlayed: function( notif )

@@ -125,7 +125,7 @@ class mow extends Table
         }
                
         $this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );
-        // $this->cards->createCards( $cards, 'deck' );
+        //$this->cards->createCards( $cards, 'deck' );
 	   
 
         // Activate first player (which is in general a good idea :) )
@@ -164,7 +164,6 @@ class mow extends Table
         
         $sql = "SELECT card_id, card_slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
         $slowpokes = self::getCollectionFromDb( $sql );
-        self::dump('$slowpokes', $slowpokes);
         foreach($slowpokes as $slowpoke) {
             foreach($result['herd'] as &$herdCard) {
                 if (intval($herdCard['id']) == intval($slowpoke['card_id'])) {
@@ -173,7 +172,6 @@ class mow extends Table
                 }
             }
         }
-        self::dump('$result[herd]', $result['herd']);
         
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
   
@@ -446,7 +444,7 @@ class mow extends Table
         $herdCards = $this->cards->getCardsInLocation( "herd" );
         $collectedPoints = $this->getCardsValues($herdCards);
 
-        $sql = "UPDATE player SET player_score=player_score-$collectedPoints WHERE player_id='$player_id'";
+        $sql = "UPDATE player SET player_score=player_score-$collectedPoints, hand_points=hand_points-$collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
 
         $this->cards->moveAllCardsInLocation( "herd", "discard" );
@@ -470,7 +468,7 @@ class mow extends Table
                 $cardsValue = $this->getCardsValues($player_hand);
 
                 if ($cardsValue > 0) {
-                    $sql = "UPDATE player SET player_score=player_score-$cardsValue WHERE player_id='$player_id'";
+                    $sql = "UPDATE player SET player_score=player_score-$cardsValue, hand_points=hand_points-$cardsValue WHERE player_id='$player_id'";
                     self::DbQuery($sql);
                         
                     // And notify
@@ -482,11 +480,7 @@ class mow extends Table
                 }
             }
 
-
-            $sql = "SELECT min(player_score) FROM player ";
-            $minscore = self::getUniqueValueFromDB( $sql );
-
-            $this->gamestate->nextState(intval($minscore) <= -END_SCORE ? 'endGame' : 'collectLastHerd');
+            $this->gamestate->nextState('collectLastHerd');
         }
     }
 
@@ -545,18 +539,22 @@ class mow extends Table
         $this->cards->moveAllCardsInLocation( null, "deck" );
         $this->cards->shuffle( 'deck' );
     
+	    self::DbQuery("UPDATE player SET hand_points = 0 WHERE 1");
         //self::notifyAllPlayers('cleanUp');
+
+        $players = self::loadPlayersBasicInfos();
+        $remainingCards = count($this->cards->getCardsInLocation( 'deck' )) - (5 * count($players));
 
         // Deal 5 cards to each players
         // Create deck, shuffle it and give 5 initial cards
-        $players = self::loadPlayersBasicInfos();
         foreach( $players as $player_id => $player )
         {
             $cards = $this->cards->pickCards( 5, 'deck', $player_id );
             
             // Notify player about his cards
             self::notifyPlayer( $player_id, 'newHand', '', array( 
-                'cards' => $cards
+                'cards' => $cards,
+                'remainingCards' => $remainingCards
             ) );
         }        
         
@@ -581,19 +579,50 @@ function stNextPlayer()
 	$this->gamestate->nextState( 'nextPlayer' );
 }
 
+function stEndHand()
+{
+	$players = self::getObjectListFromDB("SELECT * FROM player");
+	/*foreach($players as $player){
+		$score = $player['hand_points'];
+		$msg = $score == 0? clienttranslate( '${player_name} did not get any point' ) : clienttranslate( '${player_name} wins ${points} points' );
+		self::notifyAllPlayers( "points", $msg, [
+			'player_id' => $player['player_id'],
+			'player_name' => $player['player_name'],
+			'points' => $score
+		]);
+	}*/
 
-    /*
-    
-    Example for game state "MyGameState":
+	/// Display table window with results ////
 
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
+	// Header line
+	$headers = [''];
+	$handPoints = [ ['str' => clienttranslate('Hand points'), 'args' => [] ] ];
+	$totalPoints = [ ['str' => clienttranslate('Total points'), 'args' => [] ] ];
+	foreach($players as $player){
+		$headers[] = [
+				'str' => '${player_name}',
+				'args' => ['player_name' => $player['player_name']],
+				'type' => 'header'
+    ];
+		$handPoints[] = $player['hand_points'];
+		$totalPoints[] = $player['player_score'];
+	}
+	$table = [$headers, $handPoints, $totalPoints];
+
+    // Test if this is the end of the game
+    $sql = "SELECT min(player_score) FROM player ";
+    $minscore = self::getUniqueValueFromDB( $sql );
+    $end = intval($minscore) <= -END_SCORE;
+
+	$this->notifyAllPlayers( "tableWindow", '', array(
+		"id" => 'finalScoring',
+		"title" => clienttranslate('Result of hand'),
+		"table" => $table,
+		"closing" => $end ? clienttranslate("End of game") : clienttranslate("Next hand")
+	));
+
+	$this->gamestate->nextState($end ? "endGame" : "nextHand");
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
@@ -609,6 +638,6 @@ function stNextPlayer()
 
     function zombieTurn( $state, $active_player )
     {   
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        $this->gamestate->nextState("playCard");
     }
 }

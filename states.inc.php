@@ -82,8 +82,7 @@ $machinestates = array(
             "playCard" => ST_NEXT_PLAYER, 
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAYER_TURN, 
-            "collectLastHerd" => ST_NEW_HAND, 
-            "endGame" => ST_END_GAME
+            "collectLastHerd" => ST_END_HAND
         )
     ),
 
@@ -110,8 +109,18 @@ $machinestates = array(
         "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "transitions" => array( "nextPlayer" => ST_PLAYER_TURN,  "endGame" => ST_END_GAME )
+        "transitions" => array( "nextPlayer" => ST_PLAYER_TURN/*, "endGame" => ST_END_HAND*/ )
     ), 
+
+
+    // End of the hand (scoring, etc...)
+    ST_END_HAND => array(
+      "name" => "endHand",
+      "description" => "",
+      "type" => "game",
+      "action" => "stEndHand",
+      "transitions" => array( "nextHand" => ST_NEW_HAND, "endGame" => ST_END_GAME )
+    ),
 
    
     // Final state.
