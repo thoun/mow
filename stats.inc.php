@@ -52,44 +52,59 @@ $stats_type = array(
     // Statistics global to table
     "table" => array(
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
+        "collectedHerdsNumber" => array(
+            "id"=> 10,
+            "name" => totranslate("Number of collected herds"),
+            "type" => "int"
+        ),
 
-/*
-        Examples:
+        "keepDirectionNumber" => array(
+            "id"=> 11,
+            "name" => totranslate("Number of times player choosed to keep direction"),
+            "type" => "int" 
+        ),
 
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
+        "changeDirectionNumber" => array(
+            "id"=> 12,
+            "name" => totranslate("Number of times player choosed to change direction"),
+            "type" => "int" 
+        )
+        
     ),
     
     // Statistics existing for each player
-    "player" => array(
+    "player" => array(    
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
-                                "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
+        "nbrNoPointCards" => array(   
+            "id"=> 20,
+            "name" => totranslate("Number of cards with no points collected"), 
+            "type" => "int" 
+        ),
 
-*/    
+        "nbrOnePointCards" => array(   
+            "id"=> 21,
+            "name" => totranslate("Number of cards with 1 point collected"), 
+            "type" => "int" 
+        ),
+
+        "nbrTwoPointsCards" => array(   
+            "id"=> 22,
+            "name" => totranslate("Number of cards with 2 points collected"), 
+            "type" => "int" 
+        ),
+
+        "nbrThreePointsCards" => array(   
+            "id"=> 23,
+            "name" => totranslate("Number of cards with 3 points collected"), 
+            "type" => "int" 
+        ),
+
+        "nbrFivePointsCards" => array(   
+            "id"=> 25,
+            "name" => totranslate("Number of cards with 5 points collected"), 
+            "type" => "int" 
+        )
+
     )
 
 );

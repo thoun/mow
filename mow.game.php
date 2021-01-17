@@ -89,12 +89,16 @@ class mow extends Table
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'table', 'collectedHerdsNumber', 0 );    // Init a table statistics
+        self::initStat( 'table', 'keepDirectionNumber', 0 );    // Init a table statistics
+        self::initStat( 'table', 'changeDirectionNumber', 0 );    // Init a table statistics
+        self::initStat( 'player', 'nbrNoPointCards', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'nbrOnePointCards', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'nbrTwoPointsCards', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'nbrThreePointsCards', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'nbrFivePointsCards', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
-       
-	   
+        // setup the initial game situation here
 	    // Create the cards:	   
 	    $cards = array();
 		
@@ -426,6 +430,10 @@ class mow extends Table
                 'player_name' => self::getActivePlayerName(),
                 'reverse_direction' => $reverse_direction == 1
             ));
+
+            self::incStat( 1, "changeDirectionNumber" );
+        } else {
+            self::incStat( 1, "keepDirectionNumber" );
         }
 
         // TODO
@@ -436,6 +444,30 @@ class mow extends Table
         return array_sum(array_map(function($card) { return intval($card['type']); }, $cards));
     }
 
+    function collectedCardsStats($cards, $player_id) {
+        foreach( $cards as $card ) {
+            switch (intval($card['type'])) {
+                case 0:
+                    self::incStat( 1, "nbrNoPointCards", $player_id );
+                    break;
+                case 1:
+                    self::incStat( 1, "nbrOnePointCards", $player_id );
+                    break;
+                case 2:
+                    self::incStat( 1, "nbrTwoPointsCards", $player_id );
+                    break;
+                case 3:
+                    self::incStat( 1, "nbrThreePointsCards", $player_id );
+                    break;
+                case 5:
+                    self::incStat( 1, "nbrFivePointsCards", $player_id );
+                    break;
+            }
+        }
+        
+        
+    }
+
     function collectHerd() {
         // collected cards go to the side
         
@@ -443,6 +475,7 @@ class mow extends Table
 
         $herdCards = $this->cards->getCardsInLocation( "herd" );
         $collectedPoints = $this->getCardsValues($herdCards);
+        $this->collectedCardsStats($herdCards, $player_id);
 
         $sql = "UPDATE player SET player_score=player_score-$collectedPoints, hand_points=hand_points-$collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
@@ -450,6 +483,8 @@ class mow extends Table
         $this->cards->moveAllCardsInLocation( "herd", "discard" );
         $sql = "UPDATE card SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
+
+        self::incStat( 1, "collectedHerdsNumber" );
             
         // And notify
         self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), array(
@@ -466,6 +501,7 @@ class mow extends Table
             {
                 $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
                 $cardsValue = $this->getCardsValues($player_hand);
+                $this->collectedCardsStats($player_hand, $player_id);
 
                 if ($cardsValue > 0) {
                     $sql = "UPDATE player SET player_score=player_score-$cardsValue, hand_points=hand_points-$cardsValue WHERE player_id='$player_id'";
@@ -508,14 +544,6 @@ class mow extends Table
         } catch (Exception $e){}
     }
 
-    /*if (count($herd) == 0) {
-        // TODO GBA filter unplayable cards
-        $allowedCardIds = array_map(function($card) { return $card['id']; }, $hand);
-    } else {
-        // TODO GBA
-        $allowedCardIds = [3, 4];
-    }*/
-
 	return [
 		'allowedCardIds' => $allowedCardIds
 	];
@@ -533,8 +561,6 @@ class mow extends Table
 	
     function stNewHand()
     {
-      //  self::incStat( 1, "handNbr" );
-    
         // Take back all cards (from any location => null) to deck
         $this->cards->moveAllCardsInLocation( null, "deck" );
         $this->cards->shuffle( 'deck' );
