@@ -104,7 +104,7 @@ function (dojo, declare) {
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }
 
-            $('remainingCards').innerHTML = this.gamedatas.remainingCards;
+            this.setRemainingCards(this.gamedatas.remainingCards);
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             console.log('setupNotifications');
@@ -212,7 +212,7 @@ function (dojo, declare) {
                 switch( stateName )
                 {
                  case 'playerTurn':
-                    if(this.theHerd.count() > 0) {
+                    if(args.canCollect) {
                         this.addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd' );
                     }
                     break;
@@ -386,7 +386,7 @@ function (dojo, declare) {
                 this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
             }  
 
-            $('remainingCards').innerHTML = notif.args.remainingCards;          
+            this.setRemainingCards(notif.args.remainingCards);         
         },
 		
         notif_cardPlayed: function( notif )
@@ -397,7 +397,7 @@ function (dojo, declare) {
             
             this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, notif.args.slowpokeNumber);
 
-            $('remainingCards').innerHTML = notif.args.remainingCards;
+            this.setRemainingCards(notif.args.remainingCards);
         },
         
 		 notif_newCard: function( notif )
@@ -490,5 +490,14 @@ function (dojo, declare) {
           callback = callback || function (res) { };
           this.ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
         },
+
+        setRemainingCards(remainingCards) {
+            $('remainingCards').innerHTML = remainingCards;
+            if (remainingCards > 0) {
+                dojo.removeClass('remainingCards', 'remainingCardsEmpty');
+            } else {
+                dojo.addClass('remainingCards', 'remainingCardsEmpty');
+            }
+        }
    });             
 });

@@ -85,6 +85,11 @@
     font-size: 200%;
 }
 
+.remainingCardsEmpty {
+    color: red;
+}
+
+
 #myhand .stockitem, #theherd .stockitem {
     border-radius:10px;
     margin:5px;

@@ -514,7 +514,8 @@ class mow extends Table
     }
 
 	return [
-		'allowedCardIds' => $allowedCardIds
+        'allowedCardIds' => $allowedCardIds,
+        'canCollect' => count($herd) > 0
 	];
 }
 
