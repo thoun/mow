@@ -15,6 +15,10 @@
     <div id="direction_wrap" class="whiteblock">
         <h3>{DIRECTION}</h3>
         <div id="direction"></div>
+        <div id="surrounding_players">
+            <div class="player_before" style="color: #{player_before_color}">{player_before_name}</div>
+            <div class="player_after" style="color: #{player_after_color}">{player_after_name}</div>
+        </div>
     </div>
     <div id="deck_wrap" class="whiteblock">
         <h3>{DECK_REMAINING_CARDS}</h3>

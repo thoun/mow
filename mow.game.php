@@ -193,6 +193,10 @@ class mow extends Table
         return -100 * $minscore / END_SCORE;
     }
 
+    function getCurrentPlayerIdForDirection() {
+        return self::getCurrentPlayerId();
+    }
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Utility functions
