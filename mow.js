@@ -62,7 +62,7 @@ function (dojo, declare) {
                 }*/
             }
             
-            if (gamedatas.playerorder.length == 2) {
+            if (Object.keys(gamedatas.players).length == 2) {
                 dojo.style( 'direction_wrap', 'display', 'none' );
             }
             

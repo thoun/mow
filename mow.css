@@ -90,7 +90,7 @@
 }
 
 
-#myhand .stockitem, #theherd .stockitem {
+#myhand .stockitem, #theherd .stockitem, #direction {
     border-radius:10px;
     margin:5px;
     border:1px solid grey;
