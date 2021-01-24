@@ -118,3 +118,7 @@
     margin:5px;
     border:1px solid gray !important;
 }
+
+.spectatorMode #myhand_wrap {
+    display: none;
+}
