@@ -22,7 +22,9 @@
     </div>
     <div id="deck_wrap" class="whiteblock">
         <h3>{DECK_REMAINING_CARDS}</h3>
-        <div id="remainingCards">{REMAINING_CARDS}</div>
+        <div id="deck">
+            <div id="remainingCards">{REMAINING_CARDS}</div>
+        </div>
     </div>
 </div>
 
