@@ -104,6 +104,7 @@ function (dojo, declare) {
             }
 
             this.setRemainingCards(this.gamedatas.remainingCards);
+            this.enableAllowedCards(this.gamedatas.allowedCardsIds);
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             //console.log('setupNotifications');
@@ -167,8 +168,6 @@ function (dojo, declare) {
                 case 'playerTurn':
                     if( this.isCurrentPlayerActive() ){     
                         this.playerHand.setSelectionMode(1);
-                        dojo.query("#myhand .stockitem").addClass("disabled");
-                        args.args.allowedCardIds.forEach(ids => dojo.removeClass('myhand_item_' + ids, "disabled"));
                     }
                     
                     break;
@@ -189,8 +188,7 @@ function (dojo, declare) {
             switch( stateName ) {
             
                 case 'playerTurn':
-                    this.playerHand.setSelectionMode(0);  
-                    dojo.query("#myhand .stockitem").removeClass("disabled");                  
+                    this.playerHand.setSelectionMode(0);                 
                     break;
            
                 case 'dummmy':
@@ -353,6 +351,7 @@ function (dojo, declare) {
 			dojo.subscribe( 'newHand', this, "notif_newHand" );
             dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
             dojo.subscribe( 'newCard', this, "notif_newCard" );
+            dojo.subscribe( 'allowedCards', this, "notif_allowedCards" );  
             dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
             dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
             dojo.subscribe( 'handCollected', this, "notif_handCollected" );
@@ -388,6 +387,12 @@ function (dojo, declare) {
 
             this.setRemainingCards(notif.args.remainingCards);
         },
+		
+        notif_allowedCards: function( notif )
+        {
+            // console.log( 'notif_allowedCards', notif );            
+            this.enableAllowedCards(notif.args.allowedCardsIds);
+        },
         
 		 notif_newCard: function( notif )
         {
@@ -397,9 +402,13 @@ function (dojo, declare) {
             var color = card.type;
             var value = card.type_arg;
             var ctrl = this;
-            setTimeout(function () {
+            setTimeout(() => {
                 // timeout so new card appear after played card animation
                 ctrl.playerHand.addToStockWithId( ctrl.getCardUniqueId( color, value ), card.id, 'remainingCards' );
+                console.log(this.allowedCardsIds, card.id);
+                if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
+                    dojo.query('#myhand_item_' + card.id).addClass("disabled");
+                }
             }, 1000);
             
         },
@@ -420,6 +429,8 @@ function (dojo, declare) {
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerd.removeAllTo( 'player_board_'+notif.args.player_id );
+            dojo.query("#myhand .stockitem").removeClass("disabled");
+            this.allowedCardsIds = null; 
         },
 		
         notif_handCollected: function( notif )
@@ -478,6 +489,14 @@ function (dojo, declare) {
             } else {
                 dojo.addClass('remainingCards', 'remainingCardsEmpty');
             }
+        },
+
+        enableAllowedCards(allowedCardsIds) {
+            this.allowedCardsIds = allowedCardsIds;
+            try {
+                dojo.query("#myhand .stockitem").addClass("disabled");
+                allowedCardsIds.forEach(id => dojo.removeClass('myhand_item_' + id, "disabled"));
+            } catch(e) {}
         }
    });             
 });

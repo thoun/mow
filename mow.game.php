@@ -171,6 +171,8 @@ class mow extends Table
         
         // Remaining cards on deck
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
+
+        $result['allowedCardsIds'] = $this->getAllowedCardsIds($current_player_id);
   
         return $result;
     }
@@ -206,6 +208,27 @@ class mow extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    
+    /*
+        Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
+        These methods function is to return some additional information that is specific to the current
+        game state.
+    */
+
+    function getAllowedCardsIds($pId) {
+        $hand = $this->cards->getCardsInLocation('hand', $pId);
+        $herd = $this->cards->getCardsInLocation('herd');
+        
+        $allowedCardIds = [];
+        foreach($hand as $card) {
+            try {
+                $this->controlCardPlayable($card);
+                $allowedCardIds[] = intval($card['id']);
+            } catch (Exception $e){}
+        }
+    
+        return $allowedCardIds;
+    }
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -338,6 +361,16 @@ class mow extends Table
             ) );
         }
 
+        // TODO notify all players
+        $players = self::loadPlayersBasicInfos();
+        foreach( $players as $pId => $player )
+        {
+            $allowedCardsIds = $this->getAllowedCardsIds($pId);
+
+            self::notifyPlayer( $pId, 'allowedCards', '', array( 
+                'allowedCardsIds' => $allowedCardsIds
+            ) );
+        }
         
         // changing direction is useless with 2 players
         $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
@@ -504,20 +537,9 @@ class mow extends Table
     */
 
     function argPlayerTurn() {
-	$pId = self::getActivePlayerId();
-	$hand = $this->cards->getCardsInLocation('hand', $pId);
 	$herd = $this->cards->getCardsInLocation('herd');
-    
-    $allowedCardIds = [];
-    foreach($hand as $card) {
-        try {
-            $this->controlCardPlayable($card);
-            $allowedCardIds[] = intval($card['id']);
-        } catch (Exception $e){}
-    }
 
 	return [
-        'allowedCardIds' => $allowedCardIds,
         'canCollect' => count($herd) > 0
 	];
 }
