@@ -69,10 +69,13 @@ function (dojo, declare) {
             // TODO: Set up your game interface here, according to "gamedatas"
             this.playerHand = new ebg.stock();
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
-            this.playerHand.setSelectionMode(0);
+            this.playerHand.setSelectionMode(1);            
+            this.playerHand.setSelectionAppearance('class');            
+            this.playerHand.centerItems = true;
             this.theHerd = new ebg.stock();
             this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
-            this.theHerd.setSelectionMode(0);
+            this.theHerd.setSelectionMode(0);            
+            this.theHerd.centerItems = true;
 
             this.createCards();
             
@@ -166,8 +169,11 @@ function (dojo, declare) {
             
             switch( stateName ) {            
                 case 'playerTurn':
-                    if( this.isCurrentPlayerActive() ){     
-                        this.playerHand.setSelectionMode(1);
+                    if( this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
+                        const selectedCardId = this.playerHand.getSelectedItems()[0].id;
+                        if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
+                            this.onPlayerHandSelectionChanged();
+                        }
                     }
                     
                     break;
@@ -187,8 +193,7 @@ function (dojo, declare) {
             
             switch( stateName ) {
             
-                case 'playerTurn':
-                    this.playerHand.setSelectionMode(0);                 
+                case 'playerTurn':             
                     break;
            
                 case 'dummmy':
@@ -405,7 +410,6 @@ function (dojo, declare) {
             setTimeout(() => {
                 // timeout so new card appear after played card animation
                 ctrl.playerHand.addToStockWithId( ctrl.getCardUniqueId( color, value ), card.id, 'remainingCards' );
-                console.log(this.allowedCardsIds, card.id);
                 if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
                     dojo.query('#myhand_item_' + card.id).addClass("disabled");
                 }

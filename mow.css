@@ -120,8 +120,11 @@
     border:1px solid grey;
 }
 
-#myhand .stockitem:hover {
+#myhand .stockitem:not(.disabled) {
     cursor:pointer;
+}
+
+#myhand .stockitem:hover {
     margin:4px;
     border:2px solid black !important;
 }
