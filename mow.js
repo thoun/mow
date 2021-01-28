@@ -109,6 +109,9 @@ function (dojo, declare) {
             this.setRemainingCards(this.gamedatas.remainingCards);
             this.enableAllowedCards(this.gamedatas.allowedCardsIds);
 
+            dojo.connect( $('keepDirectionButton'), 'onclick', this, 'onKeepDirection' );
+            dojo.connect( $('changeDirectionButton'), 'onclick', this, 'onChangeDirection' );
+
             // Setup game notifications to handle (see "setupNotifications" method below)
             //console.log('setupNotifications');
             this.setupNotifications();
@@ -177,7 +180,12 @@ function (dojo, declare) {
                     }
                     
                     break;
-            
+
+                case 'chooseDirection':    
+                    if (this.isCurrentPlayerActive()) {
+                        dojo.style( 'direction_popin', 'display', 'flex' );
+                    }
+                    break;            
             
                 case 'dummmy':
                     break;
@@ -195,6 +203,10 @@ function (dojo, declare) {
             
                 case 'playerTurn':             
                     break;
+
+                case 'chooseDirection':    
+                    dojo.style( 'direction_popin', 'display', 'none' );
+                    break;   
            
                 case 'dummmy':
                     break;
@@ -220,8 +232,8 @@ function (dojo, declare) {
                     break;
 
                  case 'chooseDirection':                  
-                    this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection', null, false );
-                    this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection', null, false, 'red' );
+                    //this.addActionButton( 'keepDirection_button', _('Keep direction'), 'onKeepDirection', null, false );
+                    //this.addActionButton( 'changeDirection_button', _('Change direction'), 'onChangeDirection', null, false, 'red' );
                     break;
                 }
 

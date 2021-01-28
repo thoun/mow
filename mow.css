@@ -67,10 +67,12 @@
     width: 200px;
 }
 #direction {
+    transition: transform 500ms ease-in-out;
+}
+.direction-card {
     width: 188px;
     height: 122px;
     background-image: url('img/card-direction.jpg'); 
-    transition: transform 500ms ease-in-out;
 }
 
 .reverseDirection {
@@ -95,7 +97,7 @@
     text-align: center;
 }
 
-#deck {
+.card-back {
     width: 183px;
     height: 122px;
     background-image: url('img/card-back.jpg');
@@ -148,4 +150,33 @@
 
 .spectatorMode #myhand_wrap {
     display: none;
+}
+
+#direction_popin {
+    display: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    /*display: flex;*/
+    justify-content: center;
+    align-items: center;
+
+    font-size: 120%;
+}
+
+
+#direction_popin .direction-button {
+    cursor: pointer;
+}
+
+#direction_popin .direction-button:last-child {
+    margin-left: 50px;
+}
+
+#direction_popin .centered {
+    padding: 30px;
+    background: white;
+    border-radius:10px;
+    display: flex;
 }

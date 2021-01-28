@@ -53,6 +53,8 @@
 		$this->tpl['player_before_color'] = $player_before['player_color'];
 		$this->tpl['player_after_name'] = $player_after['player_name'];
 		$this->tpl['player_after_color'] = $player_after['player_color'];
+		$this->tpl['KEEP_DIRECTION'] = self::_("Keep direction");
+		$this->tpl['CHANGE_DIRECTION'] = self::_("Change direction");
 
         /*********** Do not change anything below this line  ************/
   	}
