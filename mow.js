@@ -32,12 +32,12 @@ function (dojo, declare) {
 
             this.colors = [
                 'forestgreen',
-                'gold',
+                'goldenrod',
                 'lightsalmon',
                 'crimson',
                 null,
                 'teal'
-            ]
+            ];
         },
         
         /*
@@ -68,6 +68,31 @@ function (dojo, declare) {
                     console.log(this.scoreCtrl, pId, this.gamedatas.players)
                     this.scoreCtrl[pId].toValue( this.gamedatas.players[pId].score);
                 }*/
+            }
+
+            // Place payer zone
+            this.players = gamedatas.players;
+            this.player_number = Object.keys(this.players).length;
+
+            var top;
+
+            var ids = Object.keys(this.players);
+            var player_id = gamedatas.current_player_id;
+            if(!ids.includes(player_id))
+                player_id = ids[0];
+
+            const bottomPlayers = this.player_number === 5 ? 2 : 1;
+            
+            for(var i = 1; i <= this.player_number; i++) {
+                var player = this.players[player_id];
+
+                dojo.place(this.format_block( 'jstpl_playertable', {
+                    player_id: player_id,
+                    player_color: player['color'],
+                    player_name: (player['name'].length > 10? (player['name'].substr(0,10) + "...") : player['name'])
+                } ), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
+
+                player_id = gamedatas.next_players_id[player_id];
             }
             
             if (Object.keys(gamedatas.players).length == 2) {
@@ -284,14 +309,6 @@ function (dojo, declare) {
 
 		playCardOnTable: function( player_id, color, value, card_id, slowpokeNumber )
         {
-            // player_id => direction
-            /*dojo.place(
-                this.format_block( 'jstpl_cardontable', {
-                    x: 0,//this.cardwidth*(value),
-                    y: 0,//this.cardheight*(color),
-                    player_id: player_id                
-                } ), 'playertablecard_'+player_id );*/
-
             if (slowpokeNumber != -1) {
                 this.setSlowpokeWeight(this.getCardUniqueId( color, value ), slowpokeNumber);
             }
@@ -299,7 +316,7 @@ function (dojo, declare) {
             if( player_id != this.player_id ) {
                 // Some opponent played a card
                 // Move card from player panel
-                this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'overall_player_board_'+player_id );
+                this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'playertable-'+player_id );
             } else {
                 // You played a card. Move card from the hand and remove corresponding item
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'myhand_item_'+card_id );
@@ -449,7 +466,7 @@ function (dojo, declare) {
             //console.log( 'notif_herdCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            this.displayScoring( 'mainTable', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+            this.displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerd.removeAllTo( 'player_board_'+notif.args.player_id );
@@ -535,7 +552,6 @@ function (dojo, declare) {
                     }
                     // symbol for special cards
                     if (args.precision && args.precision !== '') {
-                        console.log(log, args);
                         if (args.precision === 'slowpoke') {
                             args.precision = '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
                         } else if (args.precision === 'acrobatic') {

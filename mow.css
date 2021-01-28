@@ -48,10 +48,50 @@
 
 /* Main common table */
 
-#mainTable {
+.players-row {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 15px;
+}
+
+#toprowplayers {
+    flex-direction: row-reverse;
+}
+
+/** Table layout **/
+#gamezone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
 }
 
+
+#playertables {
+    position: relative;
+    background-color: #35714a;
+    border-radius: 30px;
+    box-shadow: 2px 2px 5px black;
+    border: 1px solid #193b27;
+    padding: 0 20px;
+    width: 100%;
+}
+
+.playertablename {
+    font-weight: bold;
+}
+
+
+.playertable {
+    text-align: center;
+    border-radius:10px;
+    border:1px solid black;
+    box-sizing: border-box;
+    background-color:rgba(255,255,255,0.7);
+    padding:10px;
+    min-width: 120px;
+}
+ 
 #handdeck {
     display: flex;
     flex-wrap: wrap;
@@ -62,34 +102,21 @@
 }
 
 #direction_wrap {
-    margin-left: 10px;
-    text-align: center;
-    width: 200px;
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
 }
 #direction {
     transition: transform 500ms ease-in-out;
 }
 .direction-card {
-    width: 188px;
-    height: 122px;
+    width: 120px;
+    height: 78px;
     background-image: url('img/card-direction.jpg'); 
 }
 
 .reverseDirection {
     transform: rotate(180deg);
-}
-
-#surrounding_players {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
-.player_before::before {
-    content: '←';
-}
-.player_after::after {
-    content: '→';
 }
 
 #deck_wrap {

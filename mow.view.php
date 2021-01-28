@@ -36,23 +36,13 @@
   	    // Get players & players number
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count( $players );
-        $currentPlayerId = $this->game->getCurrentPlayerIdForDirection();
-        $playerIndex = array_search($currentPlayerId, array_column(array_values($players), 'player_id'));
-        $player_before = array_values($players)[$playerIndex === 0 ? $players_nbr-1 : $playerIndex-1];
-        $player_after = array_values($players)[$playerIndex === $players_nbr-1 ? 0 : $playerIndex+1];
         
 
         /*********** Place your code below:  ************/
 
 		
-		$this->tpl['THE_HERD'] = self::_("The Herd");
 		$this->tpl['MY_HAND'] = self::_("My hand");
-		$this->tpl['DIRECTION'] = self::_("Direction");
         $this->tpl['DECK_REMAINING_CARDS'] = self::_("Remaining cards in deck");
-		$this->tpl['player_before_name'] = $player_before['player_name'];
-		$this->tpl['player_before_color'] = $player_before['player_color'];
-		$this->tpl['player_after_name'] = $player_after['player_name'];
-		$this->tpl['player_after_color'] = $player_after['player_color'];
 		$this->tpl['KEEP_DIRECTION'] = self::_("Keep direction");
 		$this->tpl['CHANGE_DIRECTION'] = self::_("Change direction");
 
