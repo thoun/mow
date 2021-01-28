@@ -175,6 +175,8 @@ class mow extends Table
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
 
         $result['allowedCardsIds'] = $this->getAllowedCardsIds($current_player_id);
+
+        $result['reverse_direction'] = intval(self::getGameStateValue( 'reverse_direction' )) == 1;
   
         return $result;
     }
@@ -536,12 +538,18 @@ class mow extends Table
     */
 
     function argPlayerTurn() {
-	$herd = $this->cards->getCardsInLocation('herd');
+        $herd = $this->cards->getCardsInLocation('herd');
 
-	return [
-        'canCollect' => count($herd) > 0
-	];
-}
+        return [
+            'canCollect' => count($herd) > 0
+        ];
+    }
+
+    function argChooseDirection() {
+        return [
+            'reverse_direction' => intval(self::getGameStateValue( 'reverse_direction' )) == 1
+        ];  
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions

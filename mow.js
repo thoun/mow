@@ -141,6 +141,9 @@ function (dojo, declare) {
 
             this.setRemainingCards(this.gamedatas.remainingCards);
             this.enableAllowedCards(this.gamedatas.allowedCardsIds);
+            if (this.gamedatas.reverse_direction) {
+                dojo.addClass('direction', 'reverseDirection');
+            }
 
             dojo.connect( $('keepDirectionButton'), 'onclick', this, 'onKeepDirection' );
             dojo.connect( $('changeDirectionButton'), 'onclick', this, 'onChangeDirection' );
@@ -216,6 +219,9 @@ function (dojo, declare) {
 
                 case 'chooseDirection':    
                     if (this.isCurrentPlayerActive()) {
+                        dojo[args.args.reverse_direction ? 'addClass' : 'removeClass']('keepDirectionCard', 'reverseDirection');
+                        dojo[args.args.reverse_direction ? 'removeClass' : 'addClass']('changeDirectionCard', 'reverseDirection');
+
                         dojo.style( 'direction_popin', 'display', 'flex' );
                     }
                     break;            
@@ -458,7 +464,7 @@ function (dojo, declare) {
         {
             //console.log( 'notif_directionChanged', notif );
 
-            dojo[notif.args.reverse_direction ? 'removeClass' : 'addClass']('direction', 'reverseDirection');
+            dojo[notif.args.reverse_direction ? 'addClass' : 'removeClass']('direction', 'reverseDirection');
         },
 		
         notif_herdCollected: function( notif )

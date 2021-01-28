@@ -17,12 +17,12 @@
         <div class="centered whiteblock">
             <div id="keepDirectionButton" class="direction-button">
                 {KEEP_DIRECTION}
-                <div class="direction-card reverseDirection"></div>
+                <div id="keepDirectionCard" class="direction-card"></div>
             </div>
 
             <div id="changeDirectionButton" class="direction-button">
                 {CHANGE_DIRECTION}
-                <div class="direction-card"></div>
+                <div id="changeDirectionCard" class="direction-card"></div>
             </div>
         </div>
     </div>
