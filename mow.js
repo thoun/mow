@@ -30,6 +30,14 @@ function (dojo, declare) {
 			this.cardwidth = 121;
             this.cardheight = 178;
 
+            this.colors = [
+                'forestgreen',
+                'gold',
+                'lightsalmon',
+                'crimson',
+                null,
+                'teal'
+            ]
         },
         
         /*
@@ -513,6 +521,32 @@ function (dojo, declare) {
                 dojo.query("#myhand .stockitem").addClass("disabled");
                 allowedCardsIds.forEach(id => dojo.removeClass('myhand_item_' + id, "disabled"));
             } catch(e) {}
+        },
+        
+        /* This enable to inject translatable styled things to logs or action bar */
+        /* @Override */
+        format_string_recursive : function(log, args) {
+            try {
+                if (log && args && !args.processed) {
+                    // Representation of the color of a card
+                    if (args.displayedColor !== undefined) {
+                        args.displayedColor = this.colors[Number(args.displayedColor)];
+                        args.displayedNumber = dojo.string.substitute("<strong style='color: ${displayedColor}'>${displayedNumber}</strong>", {'displayedColor' : args.displayedColor, 'displayedNumber' : args.displayedNumber});
+                    }
+                    // symbol for special cards
+                    if (args.precision && args.precision !== '') {
+                        console.log(log, args);
+                        if (args.precision === 'slowpoke') {
+                            args.precision = '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
+                        } else if (args.precision === 'acrobatic') {
+                            args.precision = '<span class="log-arrow rotate180"></span>';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(log,args,"Exception thrown", e.stack);
+            }
+            return this.inherited(arguments);
         }
    });             
 });

@@ -341,12 +341,13 @@ class mow extends Table
         }
 
         // And notify
-        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber} ${precision}'), array(
+        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber_rec}${precision}'), array(
             'card_id' => $card_id,
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'value' => $card['type_arg'],
             'displayedNumber' => $displayedNumber, // The substitution will be done in JS format_string_recursive function
+            'displayedNumber_rec'=> ['log'=>'${displayedNumber}', 'args'=> ['displayedNumber'=>$displayedNumber, 'displayedColor'=>$card['type'] ]],
             'color' => $card['type'],
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
