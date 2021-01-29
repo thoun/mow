@@ -110,6 +110,7 @@ function (dojo, declare) {
             this.theHerd.setSelectionMode(0);            
             this.theHerd.centerItems = true;
             this.theHerd.updateDisplay = (from) => this.updateDisplay.apply(this.theHerd, [from]);
+            this.theHerd.isAcrobatic = (stockItemId) => this.isAcrobatic.apply(this.theHerd, [stockItemId]);
 
             this.createCards();
             
@@ -572,6 +573,11 @@ function (dojo, declare) {
             return this.inherited(arguments);
         },
 
+        isAcrobatic: function(stockItemId) {
+            var item = this.items[stockItemId];
+            return item.type === 570 || item.type === 590;
+        },
+
         /* stock method override to place acrobatics */
         updateDisplay: function(from) {
             if (!$(this.control_name)) {
@@ -579,17 +585,6 @@ function (dojo, declare) {
             }
             var controlMarginBox = dojo.marginBox(this.control_name);
             var itemWidth = this.item_width;
-            /*var horizontal_overlap_constant_0 = 0;
-            var stockItemZIndex = "auto";
-            if (this.horizontal_overlap != 0) {
-                itemWidth = Math.round(this.item_width * this.horizontal_overlap / 100);
-                horizontal_overlap_constant_0 = this.item_width - itemWidth;
-                stockItemZIndex = 1;
-            }*/
-            /*var vertical_overlap_constant_0 = 0;
-            if (this.vertical_overlap != 0) {
-                vertical_overlap_constant_0 = Math.round(this.item_height * this.vertical_overlap / 100) * (this.use_vertical_overlap_as_offset ? 1 : -1);
-            }*/
             var pageContentMarginWidth = controlMarginBox.w;
             if (this.autowidth) {
                 var pageContentMarginBox = dojo.marginBox($("page-content"));
@@ -597,32 +592,92 @@ function (dojo, declare) {
             }
             var topDestination = 0;
             var leftDestination = 0;
-            /*var _1183 = 0;*/
-            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth /*- horizontal_overlap_constant_0*/) / (itemWidth + this.item_margin)));
-            var lastRowIndex = 0;
+            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth) / (itemWidth + this.item_margin)));
             var controlWidth = 0;
-            var placedItemIndex = 0;
+            var topDestinations = [];
+            var leftDestinations = [];
+            var rows = [];
             for (var i in this.items) {
                 var item = this.items[i];
-                var itemDivId = this.getItemDivId(item.id);
-                /*if (stockItemZIndex != "auto") {
-                    stockItemZIndex++;
-                }*/
                 if (typeof item.loc == "undefined") {
-                    var rowIndex = Math.floor(placedItemIndex / itemsByRow);
-                    lastRowIndex = Math.max(lastRowIndex, rowIndex);
-                    topDestination = lastRowIndex * (this.item_height /*+ vertical_overlap_constant_0*/ + this.item_margin);
-                    leftDestination = (placedItemIndex - lastRowIndex * itemsByRow) * (itemWidth + this.item_margin);
-                    controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
-                    /*if (this.vertical_overlap != 0 && itemIndex % 2 == 0 && this.use_vertical_overlap_as_offset) {
-                        topDestination += vertical_overlap_constant_0;
-                    }*/
-                    if (this.centerItems) {
-                        var itemsInCurrentRow = (rowIndex == Math.floor(this.count() / itemsByRow) ? this.count() % itemsByRow : itemsByRow);
-                        leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + this.item_margin)) / 2;
+                    var rowIndex = Math.max(0, rows.length - 1);
+                    //console.log(`item ${i}, rowIndex ${rowIndex}, arobatic ${this.isAcrobatic(i)}`);
+                    if (this.isAcrobatic(i)) { 
+                        console.log(rows)
+                        if (rowIndex === 0 || rows[rowIndex-1].some(id => !this.isAcrobatic(id))) { // previous row is not acrobatics
+                            rows.splice(rowIndex, 0, [Number(i)]);
+                        } else { // previous row is already acrobatics
+                            rows[rowIndex-1].push(Number(i));
+                        }
+                    } else {                        
+                        if (!rows[rowIndex]) {
+                            rows[rowIndex] = [Number(i)];
+                        } else {
+                            if (rows[rowIndex].length >= itemsByRow) {
+                                rows.push([Number(i)]);
+                            } else {
+                                rows[rowIndex].push(Number(i));
+                            }
+                        }
                     }
-                    placedItemIndex++;
-                } else {}
+                }
+            }
+
+            //console.log('rows', rows);
+            //console.log('this.items', this.items);
+
+            var lastRowIndex = rows.length - 1;
+
+            for (var iRow in rows) {
+                var row = rows[iRow];
+                var rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
+                if (!rowIsAcrobatic) {
+                    for (var iIndex in row) {
+                        var i = row[iIndex];
+                        //console.log('i: ',i, 'items', this.items);
+                        var item = this.items[i];
+                        if (typeof item.loc == "undefined") {
+                            topDestination = iRow * (this.item_height + this.item_margin);
+                            leftDestination = iIndex * (itemWidth + this.item_margin);
+                            controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
+                            if (this.centerItems) {
+                                var itemsInCurrentRow = row.length;
+                                leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + this.item_margin)) / 2;
+                            }
+
+                            topDestinations[i] = topDestination;
+                            leftDestinations[i] = leftDestination;
+                        }
+                    }
+                }
+            }
+            for (var iRow in rows) {
+                var row = rows[iRow];
+                var rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
+                if (rowIsAcrobatic) {
+                    for (var iIndex in row) {
+                        var i = row[iIndex];
+                        var acrobaticDisplayedNumber = (this.items[i].type / 10) % 10;
+                        var matchingItemIndex = this.items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
+                        //console.log('i: ',i, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
+                        var item = this.items[i];
+                        if (typeof item.loc == "undefined") {
+                            topDestination = iRow * (this.item_height + this.item_margin);
+
+                            topDestinations[i] = topDestination;
+                            leftDestinations[i] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                        }
+                    }
+                }
+            }
+
+            for (var i in this.items) {
+                topDestination = topDestinations[i];
+                leftDestination = leftDestinations[i];
+
+                var item = this.items[i];
+                var itemDivId = this.getItemDivId(item.id);
+
                 var $itemDiv = $(itemDivId);
                 if ($itemDiv) {
                     if (typeof item.loc == "undefined") {
@@ -636,9 +691,6 @@ function (dojo, declare) {
                     } else {
                         this.page.slideToObject($itemDiv, item.loc, 1000).play();
                     }
-                    /*if (stockItemZIndex != "auto") {
-                        dojo.style($itemDiv, "zIndex", stockItemZIndex);
-                    }*/
                 } else {
                     var type = this.item_type[item.type];
                     if (!type) {
@@ -663,7 +715,7 @@ function (dojo, declare) {
                         top: topDestination,
                         left: leftDestination,
                         image: type.image,
-                        position: /*(stockItemZIndex == "auto") ?*/ "" /*: ("z-index:" + stockItemZIndex)*/,
+                        position: "",
                         extra_classes: this.extraClasses,
                         additional_style: additional_style
                     }));
@@ -720,7 +772,7 @@ function (dojo, declare) {
                     }
                 }
             }
-            var controlHeight = (lastRowIndex + 1) * (this.item_height /*+ vertical_overlap_constant_0*/ + this.item_margin);
+            var controlHeight = (lastRowIndex + 1) * (this.item_height + this.item_margin);
             dojo.style(this.control_name, "height", controlHeight + "px");
             if (this.autowidth) {
                 if (controlWidth > 0) {
