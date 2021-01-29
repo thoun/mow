@@ -109,6 +109,7 @@ function (dojo, declare) {
             this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
             this.theHerd.setSelectionMode(0);            
             this.theHerd.centerItems = true;
+            this.theHerd.updateDisplay = (from) => this.updateDisplay.apply(this.theHerd, [from]);
 
             this.createCards();
             
@@ -569,6 +570,164 @@ function (dojo, declare) {
                 console.error(log,args,"Exception thrown", e.stack);
             }
             return this.inherited(arguments);
+        },
+
+        /* stock method override to place acrobatics */
+        updateDisplay: function(from) {
+            if (!$(this.control_name)) {
+                return;
+            }
+            var controlMarginBox = dojo.marginBox(this.control_name);
+            var itemWidth = this.item_width;
+            /*var horizontal_overlap_constant_0 = 0;
+            var stockItemZIndex = "auto";
+            if (this.horizontal_overlap != 0) {
+                itemWidth = Math.round(this.item_width * this.horizontal_overlap / 100);
+                horizontal_overlap_constant_0 = this.item_width - itemWidth;
+                stockItemZIndex = 1;
+            }*/
+            /*var vertical_overlap_constant_0 = 0;
+            if (this.vertical_overlap != 0) {
+                vertical_overlap_constant_0 = Math.round(this.item_height * this.vertical_overlap / 100) * (this.use_vertical_overlap_as_offset ? 1 : -1);
+            }*/
+            var pageContentMarginWidth = controlMarginBox.w;
+            if (this.autowidth) {
+                var pageContentMarginBox = dojo.marginBox($("page-content"));
+                pageContentMarginWidth = pageContentMarginBox.w;
+            }
+            var topDestination = 0;
+            var leftDestination = 0;
+            /*var _1183 = 0;*/
+            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth /*- horizontal_overlap_constant_0*/) / (itemWidth + this.item_margin)));
+            var lastRowIndex = 0;
+            var controlWidth = 0;
+            var placedItemIndex = 0;
+            for (var i in this.items) {
+                var item = this.items[i];
+                var itemDivId = this.getItemDivId(item.id);
+                /*if (stockItemZIndex != "auto") {
+                    stockItemZIndex++;
+                }*/
+                if (typeof item.loc == "undefined") {
+                    var rowIndex = Math.floor(placedItemIndex / itemsByRow);
+                    lastRowIndex = Math.max(lastRowIndex, rowIndex);
+                    topDestination = lastRowIndex * (this.item_height /*+ vertical_overlap_constant_0*/ + this.item_margin);
+                    leftDestination = (placedItemIndex - lastRowIndex * itemsByRow) * (itemWidth + this.item_margin);
+                    controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
+                    /*if (this.vertical_overlap != 0 && itemIndex % 2 == 0 && this.use_vertical_overlap_as_offset) {
+                        topDestination += vertical_overlap_constant_0;
+                    }*/
+                    if (this.centerItems) {
+                        var itemsInCurrentRow = (rowIndex == Math.floor(this.count() / itemsByRow) ? this.count() % itemsByRow : itemsByRow);
+                        leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + this.item_margin)) / 2;
+                    }
+                    placedItemIndex++;
+                } else {}
+                var $itemDiv = $(itemDivId);
+                if ($itemDiv) {
+                    if (typeof item.loc == "undefined") {
+                        dojo.fx.slideTo({
+                            node: $itemDiv,
+                            top: topDestination,
+                            left: leftDestination,
+                            duration: 1000,
+                            unit: "px"
+                        }).play();
+                    } else {
+                        this.page.slideToObject($itemDiv, item.loc, 1000).play();
+                    }
+                    /*if (stockItemZIndex != "auto") {
+                        dojo.style($itemDiv, "zIndex", stockItemZIndex);
+                    }*/
+                } else {
+                    var type = this.item_type[item.type];
+                    if (!type) {
+                        console.error("Stock control: Unknow type: " + type);
+                    }
+                    if (typeof itemDivId == "undefined") {
+                        console.error("Stock control: Undefined item id");
+                    } else {
+                        if (typeof itemDivId == "object") {
+                            console.error("Stock control: Item id with 'object' type");
+                            console.error(itemDivId);
+                        }
+                    }
+                    additional_style = "";
+                    if (this.backgroundSize !== null) {
+                        additional_style += "background-size:" + this.backgroundSize;
+                    }
+                    var jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
+                        id: itemDivId,
+                        width: this.item_width,
+                        height: this.item_height,
+                        top: topDestination,
+                        left: leftDestination,
+                        image: type.image,
+                        position: /*(stockItemZIndex == "auto") ?*/ "" /*: ("z-index:" + stockItemZIndex)*/,
+                        extra_classes: this.extraClasses,
+                        additional_style: additional_style
+                    }));
+                    dojo.place(jstpl_stock_item_template, this.control_name);
+                    $itemDiv = $(itemDivId);
+                    if (typeof item.loc != "undefined") {
+                        this.page.placeOnObject($itemDiv, item.loc);
+                    }
+                    if (this.selectable == 0) {
+                        dojo.addClass($itemDiv, "stockitem_unselectable");
+                    }
+                    dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
+                    if (toint(type.image_position) !== 0) {
+                        var backgroundPositionWidth = 0;
+                        var backgroundPositionHeight = 0;
+                        if (this.image_items_per_row) {
+                            var row = Math.floor(type.image_position / this.image_items_per_row);
+                            if (!this.image_in_vertical_row) {
+                                backgroundPositionWidth = (type.image_position - (row * this.image_items_per_row)) * 100;
+                                backgroundPositionHeight = row * 100;
+                            } else {
+                                backgroundPositionHeight = (type.image_position - (row * this.image_items_per_row)) * 100;
+                                backgroundPositionWidth = row * 100;
+                            }
+                            dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% -" + backgroundPositionHeight + "%");
+                        } else {
+                            backgroundPositionWidth = type.image_position * 100;
+                            dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
+                        }
+                    }
+                    if (this.onItemCreate) {
+                        this.onItemCreate($itemDiv, item.type, itemDivId);
+                    }
+                    if (typeof from != "undefined") {
+                        this.page.placeOnObject($itemDiv, from);
+                        if (typeof item.loc == "undefined") {
+                            var anim = dojo.fx.slideTo({
+                                node: $itemDiv,
+                                top: topDestination,
+                                left: leftDestination,
+                                duration: 1000,
+                                unit: "px"
+                            });
+                            anim = this.page.transformSlideAnimTo3d(anim, $itemDiv, 1000, null);
+                            anim.play();
+                        } else {
+                            this.page.slideToObject($itemDiv, item.loc, 1000).play();
+                        }
+                    } else {
+                        dojo.style($itemDiv, "opacity", 0);
+                        dojo.fadeIn({
+                            node: $itemDiv
+                        }).play();
+                    }
+                }
+            }
+            var controlHeight = (lastRowIndex + 1) * (this.item_height /*+ vertical_overlap_constant_0*/ + this.item_margin);
+            dojo.style(this.control_name, "height", controlHeight + "px");
+            if (this.autowidth) {
+                if (controlWidth > 0) {
+                    controlWidth += (this.item_width - itemWidth);
+                }
+                dojo.style(this.control_name, "width", controlWidth + "px");
+            }
         }
    });             
 });
