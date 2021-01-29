@@ -87,7 +87,8 @@ function (dojo, declare) {
                 dojo.place(this.format_block( 'jstpl_playertable', {
                     player_id: player_id,
                     player_color: player['color'],
-                    player_name: (player['name'].length > 10? (player['name'].substr(0,10) + "...") : player['name'])
+                    player_name: (player['name'].length > 10? (player['name'].substr(0,10) + "...") : player['name']),
+                    direction: player['id'] === player_id ? '<div id="direction" class="direction-card"></div>' : ''
                 } ), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
 
                 player_id = gamedatas.next_players_id[player_id];

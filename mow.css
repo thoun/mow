@@ -83,6 +83,7 @@
 
 
 .playertable {
+    position: relative;
     text-align: center;
     border-radius:10px;
     border:1px solid black;
@@ -105,11 +106,6 @@
     flex: 1;
 }
 
-#direction_wrap {
-    display: flex;
-    justify-content: center;
-    padding-top: 20px;
-}
 #direction {
     transition: transform 500ms ease-in-out;
 }
@@ -117,6 +113,19 @@
     width: 120px;
     height: 78px;
     background-image: url('img/card-direction.jpg'); 
+}
+
+#playertables #direction {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: 58px;
+    height: 38px;
+    transform: translateX(120px);
+    background-size: 100%;
+}
+#playertables #direction.reverseDirection {
+    transform: rotate(180deg) translateX(60px);
 }
 
 .reverseDirection {
@@ -192,7 +201,7 @@
     /*display: flex;*/
     justify-content: center;
     align-items: center;
-
+    z-index: 2;
     font-size: 120%;
 }
 

@@ -7,10 +7,6 @@ Cards images are not definitive, waiting for official images
 
         <div id="theherd"></div>
 
-        <div id="direction_wrap">
-            <div id="direction" class="direction-card"></div>
-        </div>
-
         <div id="bottomrowplayers" class="players-row"></div>
     </div>
 
@@ -33,6 +29,7 @@ Cards images are not definitive, waiting for official images
 var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable">
   <div class="playertablename" style="color:#\${player_color}">
     \${player_name}
+    \${direction}
   </div>
 </div>`;
 
