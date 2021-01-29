@@ -210,6 +210,7 @@ function (dojo, declare) {
             
             switch( stateName ) {            
                 case 'playerTurn':
+                    dojo.addClass("playertable-" + args.active_player, "active");
                     if( this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
                         const selectedCardId = this.playerHand.getSelectedItems()[0].id;
                         if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
@@ -242,7 +243,8 @@ function (dojo, declare) {
             
             switch( stateName ) {
             
-                case 'playerTurn':             
+                case 'playerTurn':  
+                    dojo.query(".playertable").removeClass("active");           
                     break;
 
                 case 'chooseDirection':    
@@ -480,6 +482,7 @@ function (dojo, declare) {
             this.theHerd.removeAllTo( 'player_board_'+notif.args.player_id );
             dojo.query("#myhand .stockitem").removeClass("disabled");
             this.allowedCardsIds = null; 
+            this.playerHand.unselectAll();
         },
 		
         notif_handCollected: function( notif )

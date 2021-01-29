@@ -92,6 +92,9 @@
     padding:10px;
     min-width: 120px;
 }
+.playertable.active {
+    border:2px solid orange;
+}
 
 #theherd {
     min-height: 183px;
