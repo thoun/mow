@@ -109,6 +109,8 @@ function (dojo, declare) {
             this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
             this.theHerd.setSelectionMode(0);            
             this.theHerd.centerItems = true;
+            this.theHerd.updateDisplay = (from) => this.updateDisplay.apply(this.theHerd, [from]);
+            this.theHerd.isAcrobatic = (stockItemId) => this.isAcrobatic.apply(this.theHerd, [stockItemId]);
 
             this.createCards();
             
@@ -569,6 +571,215 @@ function (dojo, declare) {
                 console.error(log,args,"Exception thrown", e.stack);
             }
             return this.inherited(arguments);
+        },
+
+        isAcrobatic: function(stockItemId) {
+            var item = this.items[stockItemId];
+            return item.type === 570 || item.type === 590;
+        },
+
+        /* stock method override to place acrobatics */
+        updateDisplay: function(from) {
+            if (!$(this.control_name)) {
+                return;
+            }
+            var controlMarginBox = dojo.marginBox(this.control_name);
+            var itemWidth = this.item_width;
+            var pageContentMarginWidth = controlMarginBox.w;
+            if (this.autowidth) {
+                var pageContentMarginBox = dojo.marginBox($("page-content"));
+                pageContentMarginWidth = pageContentMarginBox.w;
+            }
+            var topDestination = 0;
+            var leftDestination = 0;
+            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth) / (itemWidth + this.item_margin)));
+            var controlWidth = 0;
+            var topDestinations = [];
+            var leftDestinations = [];
+            var rows = [];
+            for (var i in this.items) {
+                var item = this.items[i];
+                if (typeof item.loc == "undefined") {
+                    var rowIndex = Math.max(0, rows.length - 1);
+                    //console.log(`item ${i}, rowIndex ${rowIndex}, arobatic ${this.isAcrobatic(i)}`);
+                    if (this.isAcrobatic(i)) { 
+                        console.log(rows)
+                        if (rowIndex === 0 || rows[rowIndex-1].some(id => !this.isAcrobatic(id))) { // previous row is not acrobatics
+                            rows.splice(rowIndex, 0, [Number(i)]);
+                        } else { // previous row is already acrobatics
+                            rows[rowIndex-1].push(Number(i));
+                        }
+                    } else {                        
+                        if (!rows[rowIndex]) {
+                            rows[rowIndex] = [Number(i)];
+                        } else {
+                            if (rows[rowIndex].length >= itemsByRow) {
+                                rows.push([Number(i)]);
+                            } else {
+                                rows[rowIndex].push(Number(i));
+                            }
+                        }
+                    }
+                }
+            }
+
+            //console.log('rows', rows);
+            //console.log('this.items', this.items);
+
+            var lastRowIndex = rows.length - 1;
+
+            for (var iRow in rows) {
+                var row = rows[iRow];
+                var rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
+                if (!rowIsAcrobatic) {
+                    for (var iIndex in row) {
+                        var i = row[iIndex];
+                        //console.log('i: ',i, 'items', this.items);
+                        var item = this.items[i];
+                        if (typeof item.loc == "undefined") {
+                            topDestination = iRow * (this.item_height + this.item_margin);
+                            leftDestination = iIndex * (itemWidth + this.item_margin);
+                            controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
+                            if (this.centerItems) {
+                                var itemsInCurrentRow = row.length;
+                                leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + this.item_margin)) / 2;
+                            }
+
+                            topDestinations[i] = topDestination;
+                            leftDestinations[i] = leftDestination;
+                        }
+                    }
+                }
+            }
+            for (var iRow in rows) {
+                var row = rows[iRow];
+                var rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
+                if (rowIsAcrobatic) {
+                    for (var iIndex in row) {
+                        var i = row[iIndex];
+                        var acrobaticDisplayedNumber = (this.items[i].type / 10) % 10;
+                        var matchingItemIndex = this.items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
+                        //console.log('i: ',i, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
+                        var item = this.items[i];
+                        if (typeof item.loc == "undefined") {
+                            topDestination = iRow * (this.item_height + this.item_margin);
+
+                            topDestinations[i] = topDestination;
+                            leftDestinations[i] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                        }
+                    }
+                }
+            }
+
+            for (var i in this.items) {
+                topDestination = topDestinations[i];
+                leftDestination = leftDestinations[i];
+
+                var item = this.items[i];
+                var itemDivId = this.getItemDivId(item.id);
+
+                var $itemDiv = $(itemDivId);
+                if ($itemDiv) {
+                    if (typeof item.loc == "undefined") {
+                        dojo.fx.slideTo({
+                            node: $itemDiv,
+                            top: topDestination,
+                            left: leftDestination,
+                            duration: 1000,
+                            unit: "px"
+                        }).play();
+                    } else {
+                        this.page.slideToObject($itemDiv, item.loc, 1000).play();
+                    }
+                } else {
+                    var type = this.item_type[item.type];
+                    if (!type) {
+                        console.error("Stock control: Unknow type: " + type);
+                    }
+                    if (typeof itemDivId == "undefined") {
+                        console.error("Stock control: Undefined item id");
+                    } else {
+                        if (typeof itemDivId == "object") {
+                            console.error("Stock control: Item id with 'object' type");
+                            console.error(itemDivId);
+                        }
+                    }
+                    additional_style = "";
+                    if (this.backgroundSize !== null) {
+                        additional_style += "background-size:" + this.backgroundSize;
+                    }
+                    var jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
+                        id: itemDivId,
+                        width: this.item_width,
+                        height: this.item_height,
+                        top: topDestination,
+                        left: leftDestination,
+                        image: type.image,
+                        position: "",
+                        extra_classes: this.extraClasses,
+                        additional_style: additional_style
+                    }));
+                    dojo.place(jstpl_stock_item_template, this.control_name);
+                    $itemDiv = $(itemDivId);
+                    if (typeof item.loc != "undefined") {
+                        this.page.placeOnObject($itemDiv, item.loc);
+                    }
+                    if (this.selectable == 0) {
+                        dojo.addClass($itemDiv, "stockitem_unselectable");
+                    }
+                    dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
+                    if (toint(type.image_position) !== 0) {
+                        var backgroundPositionWidth = 0;
+                        var backgroundPositionHeight = 0;
+                        if (this.image_items_per_row) {
+                            var row = Math.floor(type.image_position / this.image_items_per_row);
+                            if (!this.image_in_vertical_row) {
+                                backgroundPositionWidth = (type.image_position - (row * this.image_items_per_row)) * 100;
+                                backgroundPositionHeight = row * 100;
+                            } else {
+                                backgroundPositionHeight = (type.image_position - (row * this.image_items_per_row)) * 100;
+                                backgroundPositionWidth = row * 100;
+                            }
+                            dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% -" + backgroundPositionHeight + "%");
+                        } else {
+                            backgroundPositionWidth = type.image_position * 100;
+                            dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
+                        }
+                    }
+                    if (this.onItemCreate) {
+                        this.onItemCreate($itemDiv, item.type, itemDivId);
+                    }
+                    if (typeof from != "undefined") {
+                        this.page.placeOnObject($itemDiv, from);
+                        if (typeof item.loc == "undefined") {
+                            var anim = dojo.fx.slideTo({
+                                node: $itemDiv,
+                                top: topDestination,
+                                left: leftDestination,
+                                duration: 1000,
+                                unit: "px"
+                            });
+                            anim = this.page.transformSlideAnimTo3d(anim, $itemDiv, 1000, null);
+                            anim.play();
+                        } else {
+                            this.page.slideToObject($itemDiv, item.loc, 1000).play();
+                        }
+                    } else {
+                        dojo.style($itemDiv, "opacity", 0);
+                        dojo.fadeIn({
+                            node: $itemDiv
+                        }).play();
+                    }
+                }
+            }
+            var controlHeight = (lastRowIndex + 1) * (this.item_height + this.item_margin);
+            dojo.style(this.control_name, "height", controlHeight + "px");
+            if (this.autowidth) {
+                if (controlWidth > 0) {
+                    controlWidth += (this.item_width - itemWidth);
+                }
+                dojo.style(this.control_name, "width", controlWidth + "px");
+            }
         }
    });             
 });
