@@ -1,5 +1,6 @@
 {OVERALL_GAME_HEADER}
 
+Cards images are not definitive, waiting for official images
 <div id="gamezone">
     <div id="playertables">
         <div id="toprowplayers" class="players-row"></div>
