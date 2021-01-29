@@ -74,8 +74,6 @@ function (dojo, declare) {
             this.players = gamedatas.players;
             this.player_number = Object.keys(this.players).length;
 
-            var top;
-
             var ids = Object.keys(this.players);
             var player_id = gamedatas.current_player_id;
             if(!ids.includes(player_id))
@@ -109,6 +107,7 @@ function (dojo, declare) {
             this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
             this.theHerd.setSelectionMode(0);            
             this.theHerd.centerItems = true;
+            this.theHerd.acrobatic_overlap = 48;
             this.theHerd.updateDisplay = (from) => this.updateDisplay.apply(this.theHerd, [from]);
             this.theHerd.isAcrobatic = (stockItemId) => this.isAcrobatic.apply(this.theHerd, [stockItemId]);
 
@@ -596,15 +595,17 @@ function (dojo, declare) {
             var controlWidth = 0;
             var topDestinations = [];
             var leftDestinations = [];
+            var zIndexes = [];
             var rows = [];
+            var acrobaticRowsIndexes = [];
             for (var i in this.items) {
                 var item = this.items[i];
                 if (typeof item.loc == "undefined") {
                     var rowIndex = Math.max(0, rows.length - 1);
                     //console.log(`item ${i}, rowIndex ${rowIndex}, arobatic ${this.isAcrobatic(i)}`);
                     if (this.isAcrobatic(i)) { 
-                        console.log(rows)
                         if (rowIndex === 0 || rows[rowIndex-1].some(id => !this.isAcrobatic(id))) { // previous row is not acrobatics
+                            acrobaticRowsIndexes.push(rowIndex);
                             rows.splice(rowIndex, 0, [Number(i)]);
                         } else { // previous row is already acrobatics
                             rows[rowIndex-1].push(Number(i));
@@ -637,7 +638,10 @@ function (dojo, declare) {
                         //console.log('i: ',i, 'items', this.items);
                         var item = this.items[i];
                         if (typeof item.loc == "undefined") {
-                            topDestination = iRow * (this.item_height + this.item_margin);
+                            var acrobaticRowsNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) !== -1).length;
+                            var classicRowNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) === -1).length;
+
+                            topDestination = classicRowNumber * (this.item_height + this.item_margin) + acrobaticRowsNumber * this.acrobatic_overlap;
                             leftDestination = iIndex * (itemWidth + this.item_margin);
                             controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
                             if (this.centerItems) {
@@ -647,6 +651,7 @@ function (dojo, declare) {
 
                             topDestinations[i] = topDestination;
                             leftDestinations[i] = leftDestination;
+                            zIndexes[i] = 1;
                         }
                     }
                 }
@@ -666,6 +671,7 @@ function (dojo, declare) {
 
                             topDestinations[i] = topDestination;
                             leftDestinations[i] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                            zIndexes[i] = 0;
                         }
                     }
                 }
@@ -715,7 +721,7 @@ function (dojo, declare) {
                         top: topDestination,
                         left: leftDestination,
                         image: type.image,
-                        position: "",
+                        position: "z-index:" + zIndexes[i],
                         extra_classes: this.extraClasses,
                         additional_style: additional_style
                     }));
@@ -772,7 +778,7 @@ function (dojo, declare) {
                     }
                 }
             }
-            var controlHeight = (lastRowIndex + 1) * (this.item_height + this.item_margin);
+            var controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (this.item_height + this.item_margin) + acrobaticRowsIndexes.length * this.acrobatic_overlap;
             dojo.style(this.control_name, "height", controlHeight + "px");
             if (this.autowidth) {
                 if (controlWidth > 0) {

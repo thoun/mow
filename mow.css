@@ -91,6 +91,10 @@
     padding:10px;
     min-width: 120px;
 }
+
+#theherd {
+    min-height: 183px;
+}
  
 #handdeck {
     display: flex;
