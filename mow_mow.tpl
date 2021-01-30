@@ -12,12 +12,12 @@ Cards images are not definitive, waiting for official images
 
     <div id="direction_popin">
         <div class="centered whiteblock">
-            <div id="keepDirectionButton" class="direction-button">
+            <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
                 {KEEP_DIRECTION}
                 <div id="keepDirectionCard" class="direction-card"></div>
             </div>
 
-            <div id="changeDirectionButton" class="direction-button">
+            <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
                 {CHANGE_DIRECTION}
                 <div id="changeDirectionCard" class="direction-card"></div>
             </div>

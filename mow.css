@@ -127,11 +127,11 @@
     transform: translateX(120px);
     background-size: 100%;
 }
-#playertables #direction.reverseDirection {
+#playertables #direction.direction-clockwise {
     transform: rotate(180deg) translateX(60px);
 }
 
-.reverseDirection {
+.direction-clockwise {
     transform: rotate(180deg);
 }
 
@@ -205,23 +205,31 @@
     justify-content: center;
     align-items: center;
     z-index: 2;
-    font-size: 120%;
 }
 
 
 #direction_popin .direction-button {
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px;
 }
 
-#direction_popin .direction-button:last-child {
-    margin-left: 50px;
+#direction_popin .direction-button .direction-card {
+    margin-top: 10px;
+    border-radius: 5px;
 }
 
 #direction_popin .centered {
-    padding: 30px;
     background: white;
     border-radius:10px;
     display: flex;
+}
+
+
+#direction_popin.swap .centered {
+    flex-direction: row-reverse;
 }
 
 .log-arrow:before {
