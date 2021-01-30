@@ -60,7 +60,7 @@ class mow extends Table
 
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
-        // The number of colors defined here must correspond to the maximum number of players allowed for the gams
+        // The number of colors defined here must correspond to the maximum number of players allowed for the game
         $default_colors = array( "ff0000", "008000", "0000ff", "ffa500", "773300" );
 
  
