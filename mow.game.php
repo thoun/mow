@@ -522,6 +522,8 @@ class mow extends Table
                 }
             }
 
+            // TODO
+
             $this->gamestate->nextState('collectLastHerd');
         }
     }
@@ -644,7 +646,12 @@ function stEndHand()
 		"title" => clienttranslate('Result of hand'),
 		"table" => $table,
 		"closing" => $end ? clienttranslate("End of game") : clienttranslate("Next hand")
-	));
+    ));
+    
+    $sql = "SELECT player_id  FROM player where player_score=(select min(player_score) from player) limit 1";
+    $minscore_player_id = self::getUniqueValueFromDB( $sql );
+
+    $this->gamestate->changeActivePlayer( $minscore_player_id );
 
 	$this->gamestate->nextState($end ? "endGame" : "nextHand");
 }
