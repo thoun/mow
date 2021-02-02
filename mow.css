@@ -50,7 +50,8 @@
 
 #direction-text {
     text-align: right;
-    font-weight: bold;
+    font-size: 110%;
+    margin-right: 10px;
 }
 
 #direction-play-symbol {
