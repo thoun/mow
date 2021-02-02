@@ -45,6 +45,7 @@
         $this->tpl['DECK_REMAINING_CARDS'] = self::_("Remaining cards in deck");
 		$this->tpl['KEEP_DIRECTION'] = self::_("Keep direction");
 		$this->tpl['CHANGE_DIRECTION'] = self::_("Change direction");
+		$this->tpl['NEXT_PLAYER'] = self::_("Next player");
 
         /*********** Do not change anything below this line  ************/
   	}

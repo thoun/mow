@@ -224,6 +224,10 @@
     flex-direction: row-reverse;
 }
 
+.next-player {
+    font-weight: bold;
+}
+
 .tooltip-fly {
     display: inline-block;
     width: 20px;

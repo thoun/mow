@@ -241,6 +241,14 @@ function (dojo, declare) {
                         dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
                         dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
 
+                        var keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+                        var changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+
+                        $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
+                        $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
+                        dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
+                        dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
+
                         dojo.style( 'direction_popin', 'display', 'flex' );
                         dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
                         
@@ -856,7 +864,22 @@ function (dojo, declare) {
                     break;
             }
             this.addTooltip( card_div.id, tooltip, '' );
-        }
+        },
 
+        getNextPlayer: function() {
+            var activePlayerId = this.getActivePlayerId();
+            var activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
+            var nextPlayerIndex = activePlayerIndex >= this.gamedatas.playerorder.length-1 ? 0 : activePlayerIndex+1;
+            //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[nextPlayerIndex]);
+            return this.gamedatas.players[Number(this.gamedatas.playerorder[nextPlayerIndex])];
+        },
+
+        getPreviousPlayer: function() {
+            var activePlayerId = this.getActivePlayerId();
+            var activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
+            var previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length-1 : activePlayerIndex-1;
+            //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[previousPlayerIndex]);
+            return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];
+        }
    });             
 });
