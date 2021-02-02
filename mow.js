@@ -813,24 +813,22 @@ function (dojo, declare) {
 
         setupNewCard: function( card_div, card_type_id, card_id )
         {
-            var tooltip = null;
+            var tooltip = "<span class='tooltip-fly'></span> : " + Math.floor(card_type_id / 100) + "<br/>";
             switch( card_type_id ) {
                 case 500:
                 case 516:
-                    tooltip = _("Blocker: Play this cow to close off one end of the line.");
+                    tooltip += _("Blocker: Play this cow to close off one end of the line.");
                     break;    
                 case 570:
                 case 590:
-                    tooltip = _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
+                    tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
                     break;            
                 case 521:
                 case 522:
-                    tooltip = _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
+                    tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
                     break;
             }
-            if (tooltip) {
-                this.addTooltip( card_div.id, tooltip, '' );
-            }
+            this.addTooltip( card_div.id, tooltip, '' );
         }
 
    });             

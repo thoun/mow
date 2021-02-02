@@ -230,6 +230,13 @@
     flex-direction: row-reverse;
 }
 
+.tooltip-fly {
+    display: inline-block;
+    width: 20px;
+    height: 18px;
+    background-image: url('img/fly.png'); 
+}
+
 .log-arrow:before {
     content: '▲';
     display: inline-block;
