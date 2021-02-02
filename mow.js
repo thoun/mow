@@ -223,7 +223,14 @@ function (dojo, declare) {
                     if( this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
                         const selectedCardId = this.playerHand.getSelectedItems()[0].id;
                         if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
-                            this.onPlayerHandSelectionChanged();
+
+                            setTimeout(() => {
+                                if (this.isInterfaceLocked()) {
+                                    this.playerHand.unselectAll();
+                                } else {
+                                this.onPlayerHandSelectionChanged();
+                                }
+                            }, 250);
                         }
                     }
                     
@@ -567,7 +574,11 @@ function (dojo, declare) {
             this.allowedCardsIds = allowedCardsIds;
             this.playerHand.items.map(item => Number(item.id)).forEach(id => {
                 try {
-                    dojo[allowedCardsIds.indexOf(id) === -1 ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                    var disallowed = allowedCardsIds.indexOf(id) === -1;
+                    dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                    if (disallowed) {
+                        this.playerHand.unselectItem(''+id);
+                    }
                 } catch(e) {}
             })
             

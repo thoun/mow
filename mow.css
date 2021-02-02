@@ -54,13 +54,12 @@
 }
 
 #direction-play-symbol {
-    transform: rotate(180deg);
     display: inline-block;
     transition: transform 500ms ease-in-out;
 }
 
 #direction-play-symbol.direction-anticlockwise {
-    transform: rotate(180deg) scaleX(-1);
+    transform: scaleX(-1);
 }
 
 .players-row {
@@ -265,7 +264,6 @@
 }
 
 #direction-animation-symbol {
-    transform: rotate(180deg);
     font-size: 1200%;
     opacity: 0;
     text-shadow: 0px 0px 10px white, 0px 0px 5px white, 0px 0px 2px white;
@@ -280,19 +278,19 @@
 @keyframes clockwiseToAnticlockwise {
     0% {
         opacity: 0;
-        transform: rotate(180deg) scale3d(0.3, 0.3, 0.3);
+        transform: scale3d(0.3, 0.3, 0.3);
     }
     30% {
         opacity: 1;
-        transform: rotate(180deg) scale3d(1, 1, 1);
+        transform: scale3d(1, 1, 1);
     }
     70% {
         opacity: 1;
-        transform: rotate(180deg) scale3d(-1, 1, 1);
+        transform: scale3d(-1, 1, 1);
     }
     100% {
         opacity: 0;
-        transform: rotate(180deg) scale3d(-0.3, 0.3, 0.3);
+        transform: scale3d(-0.3, 0.3, 0.3);
     }
 } 
 
@@ -305,18 +303,18 @@
 @keyframes anticlockwiseToClockwise {
     0% {
         opacity: 0;
-        transform: rotate(180deg) scale3d(-0.3, 0.3, 0.3);
+        transform: scale3d(-0.3, 0.3, 0.3);
     }
     30% {
         opacity: 1;
-        transform: rotate(180deg) scale3d(-1, 1, 1);
+        transform: scale3d(-1, 1, 1);
     }
     70% {
         opacity: 1;
-        transform: rotate(180deg) scale3d(1, 1, 1);
+        transform: scale3d(1, 1, 1);
     }
     100% {
         opacity: 0;
-        transform: rotate(180deg) scale3d(0.3, 0.3, 0.3);
+        transform: scale3d(0.3, 0.3, 0.3);
     }
 } 
