@@ -38,6 +38,15 @@ function (dojo, declare) {
                 null,
                 'teal'
             ];
+
+            this.remainingCardsColors = [
+                '#FF0000',
+                '#FF3300',
+                '#ff6600',
+                '#ff9900',
+                '#FFCC00',
+                '#FFFF00'
+            ]
         },
         
         /*
@@ -539,12 +548,18 @@ function (dojo, declare) {
         },
 
         setRemainingCards(remainingCards) {
-            $('remainingCards').innerHTML = remainingCards;
-            if (remainingCards > 0) {
+            $remainingCards = $('remainingCards');
+            $remainingCards.innerHTML = remainingCards;
+            /*if (remainingCards > 0) {
                 dojo.removeClass('remainingCards', 'remainingCardsEmpty');
             } else {
                 dojo.addClass('remainingCards', 'remainingCardsEmpty');
-            }
+            }*/
+            if (remainingCards > 5) {
+                dojo.style($remainingCards, "color", null);
+            } else {
+                dojo.style($remainingCards, "color", this.remainingCardsColors[remainingCards]);
+            }            
         },
 
         enableAllowedCards(allowedCardsIds) {
