@@ -238,8 +238,8 @@ function (dojo, declare) {
 
                 case 'chooseDirection':    
                     if (this.isCurrentPlayerActive()) {
-                        dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('keepDirectionCard', 'direction-clockwise');
-                        dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('changeDirectionCard', 'direction-clockwise');
+                        dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+                        dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
 
                         dojo.style( 'direction_popin', 'display', 'flex' );
                         dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');

@@ -17,12 +17,12 @@ Cards images are not definitive, waiting for official images
         <div class="centered whiteblock">
             <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
                 {KEEP_DIRECTION}
-                <div id="keepDirectionCard" class="direction-card"></div>
+                <div id="keepDirectionSymbol" class="direction-symbol">↻</div>
             </div>
 
             <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
                 {CHANGE_DIRECTION}
-                <div id="changeDirectionCard" class="direction-card"></div>
+                <div id="changeDirectionSymbol" class="direction-symbol">↻</div>
             </div>
         </div>
     </div>

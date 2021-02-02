@@ -122,14 +122,14 @@
 #myhand_wrap {
     flex: 1;
 }
-.direction-card {
-    width: 120px;
-    height: 78px;
-    background-image: url('img/card-direction.jpg'); 
+
+.direction-symbol {
+    font-size: 400%;
+    text-shadow: rgb(0 0 0 / 40%) 0 3px 0;
 }
 
-.direction-clockwise {
-    transform: rotate(180deg);
+.direction-anticlockwise {
+    transform: scaleX(-1);
 }
 
 #deck_wrap {
@@ -211,11 +211,6 @@
     flex-direction: column;
     align-items: center;
     margin: 30px;
-}
-
-#direction_popin .direction-button .direction-card {
-    margin-top: 10px;
-    border-radius: 5px;
 }
 
 #direction_popin .centered {
