@@ -87,15 +87,14 @@ function (dojo, declare) {
                 dojo.place(this.format_block( 'jstpl_playertable', {
                     player_id: player_id,
                     player_color: player['color'],
-                    player_name: (player['name'].length > 10? (player['name'].substr(0,10) + "...") : player['name']),
-                    direction: player['id'] === player_id ? '<div id="direction" class="direction-card"></div>' : ''
+                    player_name: (player['name'].length > 10? (player['name'].substr(0,10) + "...") : player['name'])
                 } ), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
 
                 player_id = gamedatas.next_players_id[player_id];
             }
             
             if (Object.keys(gamedatas.players).length == 2) {
-                dojo.style( 'direction', 'display', 'none' );
+                dojo.style( 'direction-text', 'display', 'none' );
             }
             
             // TODO: Set up your game interface here, according to "gamedatas"
@@ -146,6 +145,8 @@ function (dojo, declare) {
             this.enableAllowedCards(this.gamedatas.allowedCardsIds);
             if (this.gamedatas.direction_clockwise) {
                 dojo.addClass('direction', 'direction-clockwise');
+            } else {
+                dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
             }
 
             dojo.connect( $('keepDirectionButton'), 'onclick', this, 'onKeepDirection' );
@@ -471,7 +472,7 @@ function (dojo, declare) {
         {
             //console.log( 'notif_directionChanged', notif );
 
-            dojo[notif.args.direction_clockwise ? 'addClass' : 'removeClass']('direction', 'direction-clockwise');
+            dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
         },
 		
         notif_herdCollected: function( notif )

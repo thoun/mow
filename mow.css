@@ -48,6 +48,21 @@
 
 /* Main common table */
 
+#direction-text {
+    text-align: right;
+    font-weight: bold;
+}
+
+#direction-play-symbol {
+    transform: rotate(180deg);
+    display: inline-block;
+    transition: transform 500ms ease-in-out;
+}
+
+#direction-play-symbol.direction-anticlockwise {
+    transform: rotate(180deg) scaleX(-1);
+}
+
 .players-row {
     display: flex;
     justify-content: space-evenly;
@@ -108,27 +123,10 @@
 #myhand_wrap {
     flex: 1;
 }
-
-#direction {
-    transition: transform 500ms ease-in-out;
-}
 .direction-card {
     width: 120px;
     height: 78px;
     background-image: url('img/card-direction.jpg'); 
-}
-
-#playertables #direction {
-    position: absolute;
-    top: -6px;
-    left: -6px;
-    width: 58px;
-    height: 38px;
-    transform: translateX(120px);
-    background-size: 100%;
-}
-#playertables #direction.direction-clockwise {
-    transform: rotate(180deg) translateX(60px);
 }
 
 .direction-clockwise {

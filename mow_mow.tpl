@@ -1,6 +1,9 @@
 {OVERALL_GAME_HEADER}
 
 Cards images are not definitive, waiting for official images
+<div id="direction-text">
+    Direction of play : <span id="direction-play-symbol">↻</span>
+</div>
 <div id="gamezone">
     <div id="playertables">
         <div id="toprowplayers" class="players-row"></div>
@@ -29,7 +32,6 @@ Cards images are not definitive, waiting for official images
 var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable">
   <div class="playertablename" style="color:#\${player_color}">
     \${player_name}
-    \${direction}
   </div>
 </div>`;
 
