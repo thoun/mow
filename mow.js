@@ -152,9 +152,7 @@ function (dojo, declare) {
 
             this.setRemainingCards(this.gamedatas.remainingCards);
             this.enableAllowedCards(this.gamedatas.allowedCardsIds);
-            if (this.gamedatas.direction_clockwise) {
-                dojo.addClass('direction', 'direction-clockwise');
-            } else {
+            if (!this.gamedatas.direction_clockwise) {
                 dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
             }
 
@@ -482,6 +480,9 @@ function (dojo, declare) {
             //console.log( 'notif_directionChanged', notif );
 
             dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
+
+            dojo.removeClass("direction-animation-symbol");
+            dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
         },
 		
         notif_herdCollected: function( notif )
@@ -564,10 +565,12 @@ function (dojo, declare) {
 
         enableAllowedCards(allowedCardsIds) {
             this.allowedCardsIds = allowedCardsIds;
-            try {
-                dojo.query("#myhand .stockitem").addClass("disabled");
-                allowedCardsIds.forEach(id => dojo.removeClass('myhand_item_' + id, "disabled"));
-            } catch(e) {}
+            this.playerHand.items.map(item => Number(item.id)).forEach(id => {
+                try {
+                    dojo[allowedCardsIds.indexOf(id) === -1 ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                } catch(e) {}
+            })
+            
         },
         
         /* This enable to inject translatable styled things to logs or action bar */
@@ -620,8 +623,6 @@ function (dojo, declare) {
             var itemHeight = this.item_height * scale;
             var itemMargin = this.item_margin * scale;
             var acrobaticOverlap = this.acrobatic_overlap * scale;
-
-            console.log('scale : ', scale);
 
             var controlWidth = 0;
             var topDestinations = [];

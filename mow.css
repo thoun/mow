@@ -251,3 +251,72 @@
 .rotate270:before {
     transform: rotate(270deg);
 }
+
+#direction_animation {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+#direction-animation-symbol {
+    transform: rotate(180deg);
+    font-size: 1200%;
+    opacity: 0;
+    text-shadow: 0px 0px 10px white, 0px 0px 5px white, 0px 0px 2px white;
+}
+
+.clockwiseToAnticlockwise {
+    animation-name: clockwiseToAnticlockwise;
+    animation-duration: 3s;
+    animation-fill-mode: both;
+}
+
+@keyframes clockwiseToAnticlockwise {
+    0% {
+        opacity: 0;
+        transform: rotate(180deg) scale3d(0.3, 0.3, 0.3);
+    }
+    30% {
+        opacity: 1;
+        transform: rotate(180deg) scale3d(1, 1, 1);
+    }
+    70% {
+        opacity: 1;
+        transform: rotate(180deg) scale3d(-1, 1, 1);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(180deg) scale3d(-0.3, 0.3, 0.3);
+    }
+} 
+
+.anticlockwiseToClockwise {
+    animation-name: anticlockwiseToClockwise;
+    animation-duration: 3s;
+    animation-fill-mode: both;
+}
+
+@keyframes anticlockwiseToClockwise {
+    0% {
+        opacity: 0;
+        transform: rotate(180deg) scale3d(-0.3, 0.3, 0.3);
+    }
+    30% {
+        opacity: 1;
+        transform: rotate(180deg) scale3d(-1, 1, 1);
+    }
+    70% {
+        opacity: 1;
+        transform: rotate(180deg) scale3d(1, 1, 1);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(180deg) scale3d(0.3, 0.3, 0.3);
+    }
+} 

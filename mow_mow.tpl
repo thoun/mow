@@ -26,6 +26,9 @@ Cards images are not definitive, waiting for official images
             </div>
         </div>
     </div>
+    <div id="direction_animation">
+        <span id="direction-animation-symbol" class="">↻</span>
+    </div>
 </div>
 
 <script type="text/javascript">

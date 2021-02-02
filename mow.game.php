@@ -34,7 +34,7 @@ class mow extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();self::initGameStateLabels( array( 
-                "reverse_direction" => 10
+                "direction_clockwise" => 10
         ) );
 		
         $this->cards = self::getNew( "module.common.deck" );
@@ -80,7 +80,7 @@ class mow extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue( 'reverse_direction', 1 );
+        self::setGameStateInitialValue( 'direction_clockwise', 1 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -123,8 +123,8 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
                
-        //$this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );
-        $this->cards->createCards( $cards, 'deck' );
+        $this->cards->createCards( array_slice($cards, count($cards) - 20, 20), 'deck' );
+        //$this->cards->createCards( $cards, 'deck' );
 	   
 
         // Activate first player (which is in general a good idea :) )
@@ -176,7 +176,7 @@ class mow extends Table
 
         $result['allowedCardsIds'] = $this->getAllowedCardsIds($current_player_id);
 
-        $result['reverse_direction'] = intval(self::getGameStateValue( 'reverse_direction' )) == 1;
+        $result['direction_clockwise'] = intval(self::getGameStateValue( 'direction_clockwise' )) == 1;
   
         return $result;
     }
@@ -430,12 +430,12 @@ class mow extends Table
     function setDirection($change) {
 
         if ($change) {
-            $reverse_direction = intval(self::getGameStateValue( 'reverse_direction' )) == 1 ? 0 : 1;
-            self::setGameStateValue('reverse_direction', $reverse_direction);
+            $direction_clockwise = intval(self::getGameStateValue( 'direction_clockwise' )) == 1 ? 0 : 1;
+            self::setGameStateValue('direction_clockwise', $direction_clockwise);
 
             self::notifyAllPlayers('directionChanged', clienttranslate('${player_name} changes direction !'), array(
                 'player_name' => self::getActivePlayerName(),
-                'reverse_direction' => $reverse_direction == 1
+                'direction_clockwise' => $direction_clockwise == 1
             ));
 
             self::incStat( 1, "changeDirectionNumber" );
@@ -549,7 +549,7 @@ class mow extends Table
 
     function argChooseDirection() {
         return [
-            'reverse_direction' => intval(self::getGameStateValue( 'reverse_direction' )) == 1
+            'direction_clockwise' => intval(self::getGameStateValue( 'direction_clockwise' )) == 1
         ];  
     }
 
@@ -597,7 +597,7 @@ function stNextPlayer()
 	$players = self::loadPlayersBasicInfos();
 	$nbr_players = self::getPlayersNumber();
 
-    if (intval(self::getGameStateValue( 'reverse_direction' )) == 1) {
+    if (intval(self::getGameStateValue( 'direction_clockwise' )) == 1) {
         $player_id = self::activePrevPlayer();
     } else {
         $player_id = self::activeNextPlayer();
