@@ -591,7 +591,6 @@ function (dojo, declare) {
                 return;
             }
             var controlMarginBox = dojo.marginBox(this.control_name);
-            var itemWidth = this.item_width;
             var pageContentMarginWidth = controlMarginBox.w;
             if (this.autowidth) {
                 var pageContentMarginBox = dojo.marginBox($("page-content"));
@@ -599,7 +598,16 @@ function (dojo, declare) {
             }
             var topDestination = 0;
             var leftDestination = 0;
-            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth) / (itemWidth + this.item_margin)));
+            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth) / (this.item_width + this.item_margin)));
+
+            var scale = Math.min(1, itemsByRow / this.items.length);
+            var itemWidth = this.item_width * scale;
+            var itemHeight = this.item_height * scale;
+            var itemMargin = this.item_margin * scale;
+            var acrobaticOverlap = this.acrobatic_overlap * scale;
+
+            console.log('scale : ', scale);
+
             var controlWidth = 0;
             var topDestinations = [];
             var leftDestinations = [];
@@ -622,7 +630,7 @@ function (dojo, declare) {
                         if (!rows[rowIndex]) {
                             rows[rowIndex] = [Number(i)];
                         } else {
-                            if (rows[rowIndex].length >= itemsByRow) {
+                            if (rows[rowIndex].length*scale >= itemsByRow) {
                                 rows.push([Number(i)]);
                             } else {
                                 rows[rowIndex].push(Number(i));
@@ -649,12 +657,12 @@ function (dojo, declare) {
                             var acrobaticRowsNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) !== -1).length;
                             var classicRowNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) === -1).length;
 
-                            topDestination = classicRowNumber * (this.item_height + this.item_margin) + acrobaticRowsNumber * this.acrobatic_overlap;
-                            leftDestination = iIndex * (itemWidth + this.item_margin);
+                            topDestination = classicRowNumber * (itemHeight + itemMargin) + acrobaticRowsNumber * acrobaticOverlap;
+                            leftDestination = iIndex * (itemWidth + itemMargin);
                             controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
                             if (this.centerItems) {
                                 var itemsInCurrentRow = row.length;
-                                leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + this.item_margin)) / 2;
+                                leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + itemMargin)) / 2;
                             }
 
                             topDestinations[i] = topDestination;
@@ -675,7 +683,7 @@ function (dojo, declare) {
                         //console.log('i: ',i, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
                         var item = this.items[i];
                         if (typeof item.loc == "undefined") {
-                            topDestination = iRow * (this.item_height + this.item_margin);
+                            topDestination = iRow * (itemHeight + itemMargin);
 
                             topDestinations[i] = topDestination;
                             leftDestinations[i] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
@@ -705,6 +713,10 @@ function (dojo, declare) {
                     } else {
                         this.page.slideToObject($itemDiv, item.loc, 1000).play();
                     }
+
+                    dojo.style($itemDiv, "width", itemWidth + "px");
+                    dojo.style($itemDiv, "height", itemHeight + "px");
+                    dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
                 } else {
                     var type = this.item_type[item.type];
                     if (!type) {
@@ -724,8 +736,8 @@ function (dojo, declare) {
                     }
                     var jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
                         id: itemDivId,
-                        width: this.item_width,
-                        height: this.item_height,
+                        width: itemWidth,
+                        height: itemHeight,
                         top: topDestination,
                         left: leftDestination,
                         image: type.image,
@@ -759,6 +771,7 @@ function (dojo, declare) {
                             backgroundPositionWidth = type.image_position * 100;
                             dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
                         }
+                        dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
                     }
                     if (this.onItemCreate) {
                         this.onItemCreate($itemDiv, item.type, itemDivId);
@@ -786,7 +799,7 @@ function (dojo, declare) {
                     }
                 }
             }
-            var controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (this.item_height + this.item_margin) + acrobaticRowsIndexes.length * this.acrobatic_overlap;
+            var controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (itemHeight + itemMargin) + acrobaticRowsIndexes.length * acrobaticOverlap;
             dojo.style(this.control_name, "height", controlHeight + "px");
             if (this.autowidth) {
                 if (controlWidth > 0) {
@@ -794,6 +807,8 @@ function (dojo, declare) {
                 }
                 dojo.style(this.control_name, "width", controlWidth + "px");
             }
+
+            dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
         },
 
         setupNewCard: function( card_div, card_type_id, card_id )
