@@ -123,8 +123,8 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
                
-        $this->cards->createCards( array_slice($cards, count($cards) - 20, 20), 'deck' );
-        //$this->cards->createCards( $cards, 'deck' );
+        //$this->cards->createCards( array_slice($cards, count($cards) - 20, 20), 'deck' );
+        $this->cards->createCards( $cards, 'deck' );
 	   
 
         // Activate first player (which is in general a good idea :) )
