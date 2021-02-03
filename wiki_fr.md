@@ -22,19 +22,19 @@ Le fermier qui a cumulé le plus grand nombre de mouches commence la manche (le 
 
 Il place la flèche MOW devant lui en la pointant vers son voisin de gauche (cette flèche indique le sens du tour de jeu).
 
-== Player actions ==
-In hist turn, a player must :
-# Add a cow to the herd
-# Draw a card
+== Principe général ==
+Lors de son tour, un joueur doit :
+# Ajouter une vache au troupeau
+# Piocher une carte
 
-=== 1. Add a cow to the herd ===
-During his turn, each farmer MUST add a cow to the herd at either end of the line.
+=== 1. Ajouter une vache au troupeau ===
+Chaque fermier, lors de son tour, DOIT ajouter une nouvelle vache au troupeau en cours, à la queue-leu-leu.
 
-The farmer who places the first cow can choose any number. Subsequent cows must be numbered higher or lower than all the cows already in the herd.
+Le fermier qui pose la 1ère vache peut choisir n'importe quel numéro, mais ensuite, tout vache regroupant le troupeau doit, soit avoir le plus petit numéro, soir avoir un plus grand numéro que toutes les vaches déjà présentes dans le troupeau.
 
-Example :
+Exemple :
 
-If the card on the table are 3, 9 and 11, you can add a cow whose number is less than 3 (0, 1 or 2) or greater than 11 (12, 13, 14, 15 or 16).
+Si les cartes sur la table sont 3, 9 et 11, il est possible d'ajouter une vache numérotée moins de 3 (0, 1 or 2) ou plus de 11 (12, 13, 14, 15 or 16).
 
 ==== Special cows ====
 * Blocker: Play this cow to close off one end of the line.
