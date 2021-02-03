@@ -6,21 +6,21 @@ Avoir le moins de mouches dans son étable lorsque la partie prend fin.
 
 == Matériel ==
 49 cartes réparties de la façon suivante :
-* 15 cows, numbered from 1 to 15, without any flies
-* 13 cows, numbered from 2 to 14, with 1 fly
-* 11 cows, numbered from 3 to 13, with 2 flies
-* 3 cows, numbered 7, 8 and 9, with 3 flies
-* 6 cows, with 5 flies and a superpower
-* 1 MOW card showing the direction of play
+* 15 vaches, numérotées de 1 to 15, sans aucune mouche
+* 13 vaches, nnumérotées de 2 to 14, avec 1 mouche
+* 11 vaches, numérotées de 3 to 13, avec 2 mouches
+* 3 vaches, numérotées  7, 8 and 9, avec 3 mouches
+* 6 vaches, avec 5 mouches et un super pouvoir !
+* 1 carte MOW indiquant le sens de rotation du tour de jeu
 
-== Game Play ==
-A game is played over several rounds
+== Déroulement du jeu ==
+Une partie se joue en plusieurs manches.
 
-At the beginiing of each round, shuffle the 48 cow cards and deal five to each farmer.
+Au début de chaque manche, mélangez les 48 cartes vaches et distribuez-en cinq à chaque fermier.
 
-The farmer with the most flies starts the round (in the first round, the youngest player starts).
+Le fermier qui a cumulé le plus grand nombre de mouches commence la manche (le plus jeune lors de la 1ère manche).
 
-He puts the MOW card arrow in front of him, pointing to the player on his left (the arrow shows the direction of play).
+Il place la flèche MOW devant lui en la pointant vers son voisin de gauche (cette flèche indique le sens du tour de jeu).
 
 == Player actions ==
 In hist turn, a player must :
