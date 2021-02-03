@@ -7,7 +7,7 @@ Avoir le moins de mouches dans son étable lorsque la partie prend fin.
 == Matériel ==
 49 cartes réparties de la façon suivante :
 * 15 vaches, numérotées de 1 to 15, sans aucune mouche
-* 13 vaches, nnumérotées de 2 to 14, avec 1 mouche
+* 13 vaches, numérotées de 2 to 14, avec 1 mouche
 * 11 vaches, numérotées de 3 to 13, avec 2 mouches
 * 3 vaches, numérotées  7, 8 and 9, avec 3 mouches
 * 6 vaches, avec 5 mouches et un super pouvoir !
@@ -36,18 +36,18 @@ Exemple :
 
 Si les cartes sur la table sont 3, 9 et 11, il est possible d'ajouter une vache numérotée moins de 3 (0, 1 or 2) ou plus de 11 (12, 13, 14, 15 or 16).
 
-==== Special cows ====
-* Blocker: Play this cow to close off one end of the line.
-* Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).
-* Slowpoke: Insert this cow into the line in place of a missing number (for example the 6 can be played between the 5 and the 7) (this card cannot be placed if there are no gaps in the line numbering).
+==== Cas particulier, les vaches spéciales ====
+* Serre file : Jouez cette vache pour bloquer une extrémité du troupeau.
+* Vache acrobate : Placez cette vache sur une vache de même numéro que celui indiqué, quel que soit sa position dans le jeu (cette carte ne peut pas être jouée seule... Elle nécessite qu'une vache portant le numéro correspondant soit déjà présente dans le troupeau).
+* Retardataire: Insérez cette vache dans le troupeau à la place d'un numéro manquant, entre deux autres numéros (par exemple entre 5 et 7 elle prend la place du 6) (cette carte ne peut pas être jouée si aucun numéro ne manque dans le troupeau).
 
-==== Note! ====
-A farmer who plays a special cow with 5 flies can, if he wishes, change the direction of play!!! In this case, he takes the MOW card, pointing it left or right as he prefers. The game continues in the direction shown by the arrow.
+==== Attention ! ====
+Un fermier qui pose une vache spéciale à 5 mouches peut, s'il le souhaite, changer le sens du tour de jeu !!! Il prend alors la carte MOW et la place devant lui dans le sens de son choix. Le jeu continue dans le sens indiqué par la flèche.
 
-==== New herd ====
-A farmer who CANNOT or DOES NOT WANT to add a cow to the like, takes all the cards in the herd and places them face down in his stable... Then, he starts a new herd by playing a card from his hand to the middle of the table.
+==== Nouveau troupeau ====
+Un fermier qui ne PEUT PAS ou ne VEUT PAS ajouter une vache au troupeau en cours, ramasse toutes les cartes de ce troupeau et les pose faces cachées dans son étable devant lui... Puis il démarre un nouveau troupeau en posant une carte de son choix au milieu de la table.
 
-Each fly in a stable produces 1 embarrassment point at the end of the game.
+Chaque mouche présente sur les cartes ramassées rapportera 1 point de honte en fin de manche.
 
 === 2. Draw a card ===
 After a farmer has added a card to the herd, he draws a new card from the deck and adds it to his hand.
