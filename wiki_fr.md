@@ -34,7 +34,7 @@ Le fermier qui pose la 1ère vache peut choisir n'importe quel numéro, mais ens
 
 Exemple :
 
-Si les cartes sur la table sont 3, 9 et 11, il est possible d'ajouter une vache numérotée moins de 3 (0, 1 or 2) ou plus de 11 (12, 13, 14, 15 or 16).
+Si les cartes sur la table sont 3, 9 et 11, il est possible d'ajouter une vache numérotée moins de 3 (0, 1 ou 2) ou plus de 11 (12, 13, 14, 15 ou 16).
 
 ==== Cas particulier, les vaches spéciales ====
 * Serre file : Jouez cette vache pour bloquer une extrémité du troupeau.
@@ -49,17 +49,17 @@ Un fermier qui ne PEUT PAS ou ne VEUT PAS ajouter une vache au troupeau en cours
 
 Chaque mouche présente sur les cartes ramassées rapportera 1 point de honte en fin de manche.
 
-=== 2. Draw a card ===
-After a farmer has added a card to the herd, he draws a new card from the deck and adds it to his hand.
+=== 2. Piocher une carte ===
+Après que le fermier ait ajouté une carte au troupeau il pioche une nouvelle carte et l'ajoute à sa main.
 
-==== End of a round ====
-When a farmer rakes the last card from the deck, the current round is played out until the herd is added to one of the farmers' stables.
+==== Fin de manche ====
+Lorsque l'un des fermiers pernd la dernière carte de la pioche, la manche se poursuit jusqu'à ce que le troupeau en cours rejoigne l'étable de l'un des fermiers.
 
-'''Then, any cards remaining in a farmer's hand are added to his stable.'''
+'''Puis, chaque fermier reçoit dans son étable toutes les cartes lui restant en main.'''
 
-All the flies in a farmer's stable are added to any scored in previous rounds.
+Chacun fait alors le compte des mouches présentes sur l'ensemble des cartes de son étable et cumule le résultat obtenu avec celui des manches précédentes.
 
-==== End of the game ====
-The game ends when a farmer has ammassed more than 100 flies at the end of a round.
+==== Fin de la partie ====
+Dès qu'un fermier atteint ou dépasse un total de 100 mouches dans son étable à la fin d'une manche, la partie prend fin.
 
-The farmer with the fewest flies wins.
+Le fermier avec le plus petit nombre de mouches remporte la partie.
