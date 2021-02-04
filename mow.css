@@ -124,6 +124,25 @@
     flex: 1;
 }
 
+#myhand.bounce {
+    animation-name: handBounce;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+
+}
+
+@keyframes handBounce {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.5);
+    }
+    100% {
+        transform: scale(1);
+    }
+} 
+
 .direction-symbol {
     font-size: 400%;
     text-shadow: rgb(0 0 0 / 40%) 0 3px 0;

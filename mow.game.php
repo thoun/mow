@@ -123,8 +123,8 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
                
-        //$this->cards->createCards( array_slice($cards, count($cards) - 20, 20), 'deck' );
-        $this->cards->createCards( $cards, 'deck' );
+        $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        //$this->cards->createCards( $cards, 'deck' );
 	   
 
         // Activate first player (which is in general a good idea :) )
@@ -502,27 +502,6 @@ class mow extends Table
         if (count($this->cards->getCardsInLocation( "deck" )) > 0) {
             $this->gamestate->nextState('collectHerd');
         } else {
-            $players = self::loadPlayersBasicInfos();
-            foreach( $players as $player_id => $player )
-            {
-                $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
-                $cardsValue = $this->getCardsValues($player_hand);
-                $this->collectedCardsStats($player_hand, $player_id);
-
-                if ($cardsValue > 0) {
-                    $sql = "UPDATE player SET player_score=player_score-$cardsValue, hand_points=hand_points-$cardsValue WHERE player_id='$player_id'";
-                    self::DbQuery($sql);
-                        
-                    // And notify
-                    self::notifyAllPlayers('handCollected', clienttranslate('${player_name} collects points in his hand'), array(
-                        'player_id' => $player_id,
-                        'player_name' => $player['player_name'],
-                        'points' => $cardsValue
-                    ));
-                }
-            }
-
-            // TODO
 
             $this->gamestate->nextState('collectLastHerd');
         }
@@ -604,6 +583,40 @@ function stNextPlayer()
     }
 	self::giveExtraTime($player_id);
 	$this->gamestate->nextState( 'nextPlayer' );
+}
+
+function stCollectHand()
+{
+
+    $players = self::loadPlayersBasicInfos();
+    foreach( $players as $player_id => $player )
+    {
+        $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
+        $cardsValue = $this->getCardsValues($player_hand);
+        $this->collectedCardsStats($player_hand, $player_id);
+
+        if ($cardsValue > 0) {
+            $sql = "UPDATE player SET player_score=player_score-$cardsValue, hand_points=hand_points-$cardsValue WHERE player_id='$player_id'";
+            self::DbQuery($sql);
+                
+            // And notify
+            self::notifyAllPlayers('handCollected', clienttranslate('${player_name} collects points in his hand'), array(
+                'player_id' => $player_id,
+                'player_name' => $player['player_name'],
+                'points' => $cardsValue
+            ));
+        }
+    }/*
+
+
+	self::notifyAllPlayers( 'throwDice', clienttranslate('The dice value is ${dice_name} ${dice_symbole}'), [
+		'i18n' => ['dice_symbole'],
+		'dice_value' => $dice_value,
+		'dice_name' => $this->dice_colors[$dice_value]['name'],
+		'dice_symbole' => $this->dice_colors[$dice_value]['symbole'],
+	]);
+	$this->gamestate->changeActivePlayer(self::getGameStateValue('dealer_id'));*/
+	$this->gamestate->nextState( "endHand" );
 }
 
 function stEndHand()

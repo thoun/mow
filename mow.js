@@ -433,6 +433,9 @@ function (dojo, declare) {
             dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
             dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
             dojo.subscribe( 'handCollected', this, "notif_handCollected" );
+
+            this.notifqueue.setSynchronous( 'herdCollected', 2000 );
+            this.notifqueue.setSynchronous( 'handCollected', 1500 );
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
@@ -516,11 +519,13 @@ function (dojo, declare) {
 		
         notif_handCollected: function( notif )
         {
-            //console.log( 'notif_handCollected', notif );
+           // console.log( 'notif_handCollected', notif );
             
             // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
+            this.displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             if (this.player_id == notif.args.player_id) {
-                this.displayScoring( 'myhand_wrap', this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+                dojo.query("#myhand").removeClass("bounce");
+                dojo.query("#myhand").addClass("bounce");
             }
             
             this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);

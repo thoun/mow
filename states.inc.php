@@ -82,7 +82,7 @@ $machinestates = array(
             "playCard" => ST_NEXT_PLAYER, 
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAYER_TURN, 
-            "collectLastHerd" => ST_END_HAND
+            "collectLastHerd" => ST_COLLECT_HAND
         )
     ),
 
@@ -113,6 +113,16 @@ $machinestates = array(
         "transitions" => array( "nextPlayer" => ST_PLAYER_TURN/*, "endGame" => ST_END_HAND*/ )
     ), 
 
+
+    ST_COLLECT_HAND => [
+        "name" => "collectHand",
+        "description" => clienttranslate("Collect points in each player's hand"),
+        "type" => "game",
+        "action" => "stCollectHand",
+        "transitions" => [
+          "endHand" => ST_END_HAND
+        ]
+      ],
 
     // End of the hand (scoring, etc...)
     ST_END_HAND => array(
