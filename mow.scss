@@ -1,0 +1,303 @@
+@import url(../../../css/csslayer.css); /* Note: you must not use any @import directive other than this one */
+
+/********* You can start writing your CSS below this line: **********/
+
+#direction-text {
+    text-align: right;
+    font-size: 110%;
+    margin-right: 10px;
+
+    #direction-play-symbol {
+        display: inline-block;
+        transition: transform 500ms ease-in-out;
+    
+        &.direction-anticlockwise {
+            transform: scaleX(-1);
+        }
+    }
+}
+
+#gamezone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    /** Table layout **/
+
+    #playertables {
+        position: relative;
+        background-color: #35714a;
+        border-radius: 30px;
+        box-shadow: 2px 2px 5px black;
+        border: 1px solid #193b27;
+        padding: 0 20px;
+        width: 100%;
+
+        .players-row {
+            display: flex;
+            justify-content: space-evenly;
+            padding: 15px;
+        }
+        
+        #toprowplayers {
+            flex-direction: row-reverse;
+        }
+
+        .playertable {
+            position: relative;
+            text-align: center;
+            border-radius:10px;
+            border:1px solid black;
+            box-sizing: border-box;
+            background-color:rgba(255,255,255,0.7);
+            padding:10px;
+            min-width: 120px;
+    
+            &.active {
+                border:2px solid orange;
+            }
+    
+            .playertablename {
+                font-weight: bold;
+            }
+        }
+
+        #theherd {
+            min-height: 183px;
+        }
+    }
+
+    /* direction popins */
+
+    .direction-symbol {
+        font-size: 400%;
+        text-shadow: rgb(0 0 0 / 40%) 0 3px 0;
+    }
+    
+    #direction_popin {
+        display: none;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        /*display: flex;*/
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+
+        .direction-button {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px;
+
+            .next-player {
+                font-weight: bold;
+            }
+        }
+
+        .centered {
+            background: white;
+            border-radius:10px;
+            display: flex;
+        }
+
+        &.swap .centered {
+            flex-direction: row-reverse;
+        }
+    }
+
+    #direction_animation {
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+    }
+
+    #direction-animation-symbol {
+        font-size: 1200%;
+        opacity: 0;
+        text-shadow: 0px 0px 10px white, 0px 0px 5px white, 0px 0px 2px white;
+    }
+
+    .clockwiseToAnticlockwise {
+        animation-name: clockwiseToAnticlockwise;
+        animation-duration: 3s;
+        animation-fill-mode: both;
+    }
+
+    @keyframes clockwiseToAnticlockwise {
+        0% {
+            opacity: 0;
+            transform: scale3d(0.3, 0.3, 0.3);
+        }
+        30% {
+            opacity: 1;
+            transform: scale3d(1, 1, 1);
+        }
+        70% {
+            opacity: 1;
+            transform: scale3d(-1, 1, 1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale3d(-0.3, 0.3, 0.3);
+        }
+    } 
+
+    .anticlockwiseToClockwise {
+        animation-name: anticlockwiseToClockwise;
+        animation-duration: 3s;
+        animation-fill-mode: both;
+    }
+
+    @keyframes anticlockwiseToClockwise {
+        0% {
+            opacity: 0;
+            transform: scale3d(-0.3, 0.3, 0.3);
+        }
+        30% {
+            opacity: 1;
+            transform: scale3d(-1, 1, 1);
+        }
+        70% {
+            opacity: 1;
+            transform: scale3d(1, 1, 1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale3d(0.3, 0.3, 0.3);
+        }
+    } 
+}
+
+.spectatorMode #myhand_wrap {
+    display: none;
+}
+
+#myhand .stockitem, #theherd .stockitem, #direction, #deck {
+    border-radius:10px;
+    margin:5px;
+    border:1px solid grey;
+}
+ 
+#handdeck {
+    display: flex;
+    flex-wrap: wrap;
+
+    /* hand */
+    #myhand_wrap {
+        flex: 1;
+
+        #myhand {
+            .stockitem_selected {
+                margin:3px;
+                transform:scale(1.02);
+                border:2px solid black !important;
+                box-shadow:1px 1px 5px black, 2px 2px 4px black;
+            }
+
+            .stockitem {
+                &:not(.disabled) {
+                    cursor:pointer;
+                }
+
+                &:hover {
+                    margin:4px;
+                    border:2px solid black !important;
+                }
+
+                &.disabled {
+                    cursor:not-allowed;
+                    opacity:0.5 !important;
+
+                    &:hover {
+                        cursor:not-allowed;
+                        margin:5px;
+                        border:1px solid gray !important;
+                    }
+                }
+            }
+        }
+    }
+
+    #myhand.bounce {
+        animation-name: handBounce;
+        animation-duration: 1s;
+        animation-fill-mode: both;
+
+    }
+
+    @keyframes handBounce {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.5);
+        }
+        100% {
+            transform: scale(1);
+        }
+    } 
+
+    .direction-anticlockwise {
+        transform: scaleX(-1);
+    }
+
+    /* deck */
+
+    #deck_wrap {
+        margin-left: 10px;
+        text-align: center;
+    }
+
+    .card-back {
+        width: 183px;
+        height: 122px;
+        background-image: url('img/card-back.jpg');
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #remainingCards {
+        font-size: 400%;
+        color: white;
+        text-shadow: 0px 0px 10px black, 0px 0px 5px black, 0px 0px 2px black;
+
+        &.remainingCardsEmpty {
+            color: red;
+        }
+    }
+}
+
+/* tooltips */
+.tooltip-fly {
+    display: inline-block;
+    width: 20px;
+    height: 18px;
+    background-image: url('img/fly.png'); 
+}
+
+/* logs */
+
+.log-arrow:before {
+    content: '▲';
+    display: inline-block;
+}
+
+.rotate90:before {
+    transform: rotate(90deg);
+}
+.rotate180:before {
+    transform: rotate(180deg);
+}
+.rotate270:before {
+    transform: rotate(270deg);
+}

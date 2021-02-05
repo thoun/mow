@@ -20,6 +20,9 @@
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once("modules/constants.inc.php");
 
+// will create CSS file from SCSS everytime the PHP file is called, comment or remove when the dev is over !!!
+require_once("modules/scss.php");
+compileScss();
 
 class mow extends Table
 {
