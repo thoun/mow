@@ -5,12 +5,14 @@
       "module": "none",
       "lib": ["dom", "esnext"],  
       "sourceMap": false,
-      "outDir": ".",
+      "outFile": "mow.js",
       "typeRoots": ["./typings"]
     },
     "files": [
         "src/framework.d.ts",
         "src/mow.d.ts",
-        "src/mow.ts"
+        "src/herd-stock-function.ts",
+        "src/mow.ts",
+        "src/define.ts"
     ]
 }

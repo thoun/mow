@@ -235,6 +235,23 @@ function updateDisplay(from) {
     }
     dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
 }
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * mow implementation : © <Your name here> <Your email address here>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * mow.ts
+ *
+ * mow user interface script
+ *
+ * In this file, you are describing the logic of your user interface, in Typescript language.
+ *
+ */
+//declare const dojo;
 var Mow = /** @class */ (function () {
     function Mow() {
         this.playerHand = null;
@@ -715,6 +732,27 @@ var Mow = /** @class */ (function () {
     };
     return Mow;
 }());
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * mow implementation : © <Your name here> <Your email address here>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * mow.ts
+ *
+ * mow user interface script
+ *
+ * In this file, you are describing the logic of your user interface, in Typescript language.
+ *
+ */
+/**
+ * JS const
+ */
+//declare const define;
+//declare const ebg;
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
