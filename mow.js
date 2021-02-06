@@ -79,24 +79,22 @@ define([
             this.createCards();
             //console.log('this.gamedatas', this.gamedatas);
             // Cards in player's hand
-            for (var iHand in this.gamedatas.hand) {
-                var card = this.gamedatas.hand[iHand];
+            Object.values(this.gamedatas.hand).forEach(function (card) {
                 var color = card.type;
                 var value = card.type_arg;
                 //console.log('hand', card, this.getCardUniqueId( color, value ));
-                this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
-            }
+                _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
+            });
             // Cards played on table
-            for (var iHerd in this.gamedatas.herd) {
-                var card = this.gamedatas.herd[iHerd];
+            Object.values(this.gamedatas.herd).forEach(function (card) {
                 var color = card.type;
                 var value = card.type_arg;
                 //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
                 if (card.slowpoke_type_arg) {
-                    this.setSlowpokeWeight(this.getCardUniqueId(color, value), Number(card.slowpoke_type_arg));
+                    _this.setSlowpokeWeight(_this.getCardUniqueId(color, value), Number(card.slowpoke_type_arg));
                 }
-                this.theHerd.addToStockWithId(this.getCardUniqueId(color, value), card.id);
-            }
+                _this.theHerd.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
+            });
             this.setRemainingCards(this.gamedatas.remainingCards);
             this.enableAllowedCards(this.gamedatas.allowedCardsIds);
             if (!this.gamedatas.direction_clockwise) {
@@ -311,14 +309,14 @@ define([
         // TODO: from this point and below, you can write your game notifications handling methods
         notif_newHand: function (notif) {
             //console.log( 'notif_newHand', notif );
+            var _this = this;
             // We received a new full hand of 5 cards.
             this.playerHand.removeAll();
-            for (var i in notif.args.cards) {
-                var card = notif.args.cards[i];
+            notif.args.cards.forEach(function (card) {
                 var color = card.type;
                 var value = card.type_arg;
-                this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
-            }
+                _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
+            });
             this.setRemainingCards(notif.args.remainingCards);
         },
         notif_cardPlayed: function (notif) {
@@ -337,10 +335,9 @@ define([
             var card = notif.args.card;
             var color = card.type;
             var value = card.type_arg;
-            var ctrl = this;
             setTimeout(function () {
                 // timeout so new card appear after played card animation
-                ctrl.playerHand.addToStockWithId(ctrl.getCardUniqueId(color, value), card.id, 'remainingCards');
+                _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id, 'remainingCards');
                 if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
                     dojo.query('#myhand_item_' + card.id).addClass("disabled");
                 }
@@ -377,7 +374,7 @@ define([
         /////    Cards selection    ////
         ////////////////////////////////
         ////////////////////////////////
-        onPlayerHandSelectionChanged: function (control_name, item_id) {
+        onPlayerHandSelectionChanged: function () {
             var items = this.playerHand.getSelectedItems();
             if (items.length == 1) {
                 if (this.checkAction('playCard', true)) {
@@ -399,7 +396,7 @@ define([
         takeAction: function (action, data, callback) {
             data = data || {};
             data.lock = true;
-            callback = callback || function (res) { };
+            callback = callback || function () { };
             this.ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
         },
         setRemainingCards: function (remainingCards) {
@@ -539,8 +536,7 @@ define([
             rows.forEach(function (row, iRow) {
                 var rowIsAcrobatic = row.some(function (id) { return _this.isAcrobatic(id); });
                 if (rowIsAcrobatic) {
-                    for (var iIndex in row) {
-                        var iAcrobatic = row[iIndex];
+                    row.forEach(function (iAcrobatic, iIndex) {
                         var acrobaticDisplayedNumber = (_this.items[iAcrobatic].type / 10) % 10;
                         var matchingItemIndex = _this.items.findIndex(function (item) { return item.type % 10 === acrobaticDisplayedNumber; });
                         //console.log('iAcrobatic: ',iAcrobatic, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
@@ -551,7 +547,7 @@ define([
                             leftDestinations[iAcrobatic] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
                             zIndexes[iAcrobatic] = 0;
                         }
-                    }
+                    });
                 }
             });
             for (var i in this.items) {

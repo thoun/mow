@@ -74,15 +74,15 @@ function (dojo, declare) {
             this.players = gamedatas.players;
             this.player_number = Object.keys(this.players).length;
 
-            var ids: string[] = Object.keys(this.players);
-            var player_id: string = gamedatas.current_player_id;
+            const ids: string[] = Object.keys(this.players);
+            let player_id: string = gamedatas.current_player_id;
             if(!ids.includes(player_id))
                 player_id = ids[0];
 
             const bottomPlayers = this.player_number === 5 ? 2 : 1;
             
-            for(var i = 1; i <= this.player_number; i++) {
-                var player = this.players[player_id];
+            for(let i = 1; i <= this.player_number; i++) {
+                const player = this.players[player_id];
 
                 dojo.place(this.format_block( 'jstpl_playertable', {
                     player_id: player_id,
@@ -117,29 +117,25 @@ function (dojo, declare) {
             //console.log('this.gamedatas', this.gamedatas);
 			
 			// Cards in player's hand
-            for(let iHand in this.gamedatas.hand )
-            {
-                var card = this.gamedatas.hand[iHand];
-                var color = card.type;
-                var value = card.type_arg;
+            Object.values(this.gamedatas.hand).forEach((card: any) => {
+                const color = card.type;
+                const value = card.type_arg;
                 //console.log('hand', card, this.getCardUniqueId( color, value ));
 				
                 this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
-            }
+            });
 			
 			 // Cards played on table
-            for(let iHerd in this.gamedatas.herd )
-            {
-                var card = this.gamedatas.herd[iHerd];
-                var color = card.type;
-                var value = card.type_arg;
+             Object.values(this.gamedatas.herd).forEach((card: any) => {
+                const color = card.type;
+                const value = card.type_arg;
                 //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
                 if (card.slowpoke_type_arg) {
                     this.setSlowpokeWeight(this.getCardUniqueId( color, value ), Number(card.slowpoke_type_arg));
                 }
 				
                 this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
-            }
+            });
 
             this.setRemainingCards(this.gamedatas.remainingCards);
             this.enableAllowedCards(this.gamedatas.allowedCardsIds);
@@ -163,7 +159,7 @@ function (dojo, declare) {
 
             // addItemType( type, weight, image, image_position ):
 
-            var idsByType = [[], [], [], []];
+            const idsByType = [[], [], [], []];
 			
 			// Create cards types:
 			for(let value=1; value<=15; value++ ) {  // 1-15 green
@@ -186,12 +182,12 @@ function (dojo, declare) {
             idsByType[5] = [0, 16, 21, 22, 70, 90];
 
             for (let type in idsByType) {
-                var cardsurl = g_gamethemeurl+'img/cards'+type+'.jpg';
+                const cardsurl = g_gamethemeurl+'img/cards'+type+'.jpg';
 
                 for (let id=0; id<idsByType[type].length; id++) {
-                    var cardId = idsByType[type][id];
-                    var card_type_id = this.getCardUniqueId(type, cardId);
-                    var cardWeight = this.getCardWeight(type, cardId);
+                    const cardId = idsByType[type][id];
+                    const card_type_id = this.getCardUniqueId(type, cardId);
+                    const cardWeight = this.getCardWeight(type, cardId);
                     this.playerHand.addItemType( card_type_id, cardWeight, cardsurl, id );		
                     this.theHerd.addItemType( card_type_id, cardWeight, cardsurl, id );	
                 }
@@ -232,8 +228,8 @@ function (dojo, declare) {
                         dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
                         dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
 
-                        var keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-                        var changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+                        const keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+                        const changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
 
                         $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
                         $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
@@ -312,8 +308,8 @@ function (dojo, declare) {
 		
         getCardWeight: function( color, value )
         {
-            var displayedNumber = Number(value);
-            var iColor = Number(color);
+            let displayedNumber = Number(value);
+            const iColor = Number(color);
             if (displayedNumber === 70 || displayedNumber === 90) {
                 displayedNumber /= 10;
             }
@@ -323,8 +319,8 @@ function (dojo, declare) {
 		
 		setSlowpokeWeight: function(slowpokeId, slowpokeNumber)		
 		{
-            var keys = Object.keys(this.theHerd.item_type).filter(function(key) { return (key as any as number) % 100 == slowpokeNumber});
-            var lastKey = keys[keys.length-1];
+            const keys = Object.keys(this.theHerd.item_type).filter(function(key) { return (key as any as number) % 100 == slowpokeNumber});
+            const lastKey = keys[keys.length-1];
             let lastKeyItemWeight = this.theHerd.item_type[lastKey].weight;
             this.theHerd.item_type[slowpokeId].weight = lastKeyItemWeight + 1;
 		},
@@ -424,13 +420,11 @@ function (dojo, declare) {
             // We received a new full hand of 5 cards.
             this.playerHand.removeAll();
 
-            for( var i in notif.args.cards )
-            {
-                var card = notif.args.cards[i];
-                var color = card.type;
-                var value = card.type_arg;
+            notif.args.cards.forEach(card => {
+                const color = card.type;
+                const value = card.type_arg;
                 this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
-            }  
+            });
 
             this.setRemainingCards(notif.args.remainingCards);         
         },
@@ -456,13 +450,12 @@ function (dojo, declare) {
         {
             //console.log( 'notif_newCard', notif );
 
-            var card = notif.args.card;
-            var color = card.type;
-            var value = card.type_arg;
-            var ctrl = this;
+            const card = notif.args.card;
+            const color = card.type;
+            const value = card.type_arg;
             setTimeout(() => {
                 // timeout so new card appear after played card animation
-                ctrl.playerHand.addToStockWithId( ctrl.getCardUniqueId( color, value ), card.id, 'remainingCards' );
+                this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id, 'remainingCards' );
                 if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
                     dojo.query('#myhand_item_' + card.id).addClass("disabled");
                 }
@@ -513,13 +506,13 @@ function (dojo, declare) {
         /////    Cards selection    ////
         ////////////////////////////////
         ////////////////////////////////
-        onPlayerHandSelectionChanged: function(control_name, item_id)
+        onPlayerHandSelectionChanged: function()
         {            
-            var items = this.playerHand.getSelectedItems();
+            const items = this.playerHand.getSelectedItems();
             if (items.length == 1) {
                 if (this.checkAction('playCard', true)) {
                     // Can play a card
-                    var card_id = items[0].id;//items[0].type
+                    const card_id = items[0].id;//items[0].type
 
                     this.takeAction("playCard", { 
                         'card_id': card_id,
@@ -541,11 +534,11 @@ function (dojo, declare) {
         takeAction: function (action, data, callback) {
           data = data || {};
           data.lock = true;
-          callback = callback || function (res) { };
+          callback = callback || function () {};
           this.ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
         },
 
-        setRemainingCards(remainingCards) {
+        setRemainingCards(remainingCards: number) {
             let $remainingCards = $('remainingCards');
             $remainingCards.innerHTML = remainingCards;
             if (remainingCards > 5) {
@@ -555,11 +548,11 @@ function (dojo, declare) {
             }            
         },
 
-        enableAllowedCards(allowedCardsIds) {
+        enableAllowedCards(allowedCardsIds: number[]) {
             this.allowedCardsIds = allowedCardsIds;
             this.playerHand.items.map(item => Number(item.id)).forEach(id => {
                 try {
-                    var disallowed = allowedCardsIds.indexOf(id) === -1;
+                    const disallowed = allowedCardsIds.indexOf(id) === -1;
                     dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
                     if (disallowed) {
                         this.playerHand.unselectItem(''+id);
@@ -595,7 +588,7 @@ function (dojo, declare) {
         },
 
         isAcrobatic: function(stockItemId) {
-            var item = this.items[stockItemId];
+            const item = this.items[stockItemId];
             return item.type === 570 || item.type === 590;
         },
 
@@ -604,31 +597,31 @@ function (dojo, declare) {
             if (!$(this.control_name)) {
                 return;
             }
-            var controlMarginBox = dojo.marginBox(this.control_name);
-            var pageContentMarginWidth = controlMarginBox.w;
+            const controlMarginBox = dojo.marginBox(this.control_name);
+            let pageContentMarginWidth = controlMarginBox.w;
             if (this.autowidth) {
-                var pageContentMarginBox = dojo.marginBox($("page-content"));
+                const pageContentMarginBox = dojo.marginBox($("page-content"));
                 pageContentMarginWidth = pageContentMarginBox.w;
             }
-            var topDestination = 0;
-            var leftDestination = 0;
-            var itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth) / (this.item_width + this.item_margin)));
+            let topDestination = 0;
+            let leftDestination = 0;
+            const itemsByRow = Math.max(1, Math.floor((pageContentMarginWidth) / (this.item_width + this.item_margin)));
 
-            var scale = Math.min(1, itemsByRow / this.items.length);
-            var itemWidth = this.item_width * scale;
-            var itemHeight = this.item_height * scale;
-            var itemMargin = this.item_margin * scale;
-            var acrobaticOverlap = this.acrobatic_overlap * scale;
+            const scale = Math.min(1, itemsByRow / this.items.length);
+            const itemWidth = this.item_width * scale;
+            const itemHeight = this.item_height * scale;
+            const itemMargin = this.item_margin * scale;
+            const acrobaticOverlap = this.acrobatic_overlap * scale;
 
-            var controlWidth = 0;
-            var topDestinations = [];
-            var leftDestinations = [];
-            var zIndexes = [];
-            var rows = [];
-            var acrobaticRowsIndexes = [];
+            let controlWidth = 0;
+            const topDestinations = [];
+            const leftDestinations = [];
+            const zIndexes = [];
+            const rows = [];
+            const acrobaticRowsIndexes = [];
             this.items.forEach((item, i: number) => {
                 if (typeof item.loc == "undefined") {
-                    var rowIndex = Math.max(0, rows.length - 1);
+                    const rowIndex = Math.max(0, rows.length - 1);
                     //console.log(`item ${i}, rowIndex ${rowIndex}, arobatic ${this.isAcrobatic(i)}`);
                     if (this.isAcrobatic(i)) { 
                         if (rowIndex === 0 || rows[rowIndex-1].some(id => !this.isAcrobatic(id))) { // previous row is not acrobatics
@@ -654,23 +647,23 @@ function (dojo, declare) {
             //console.log('rows', rows);
             //console.log('this.items', this.items);
 
-            var lastRowIndex = rows.length - 1;
+            const lastRowIndex = rows.length - 1;
 
             rows.forEach((row, iRow: number) => {
-                var rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
+                const rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
                 if (!rowIsAcrobatic) {
                     row.forEach((iNotAcrobatic, iIndex: number) => {
                         //console.log('iNotAcrobatic: ',iNotAcrobatic, 'items', this.items);
-                        var item = this.items[iNotAcrobatic];
+                        const item = this.items[iNotAcrobatic];
                         if (typeof item.loc == "undefined") {
-                            var acrobaticRowsNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) !== -1).length;
-                            var classicRowNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) === -1).length;
+                            const acrobaticRowsNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) !== -1).length;
+                            const classicRowNumber = rows.slice(0, iRow).filter((_, rowIndex) => acrobaticRowsIndexes.indexOf(rowIndex) === -1).length;
 
                             topDestination = classicRowNumber * (itemHeight + itemMargin) + acrobaticRowsNumber * acrobaticOverlap;
                             leftDestination = iIndex * (itemWidth + itemMargin);
                             controlWidth = Math.max(controlWidth, leftDestination + itemWidth);
                             if (this.centerItems) {
-                                var itemsInCurrentRow = row.length;
+                                const itemsInCurrentRow = row.length;
                                 leftDestination += (pageContentMarginWidth - itemsInCurrentRow * (itemWidth + itemMargin)) / 2;
                             }
 
@@ -683,14 +676,13 @@ function (dojo, declare) {
             });
 
             rows.forEach((row, iRow: number) => {
-                var rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
+                const rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
                 if (rowIsAcrobatic) {
-                    for (var iIndex in row) {
-                        var iAcrobatic = row[iIndex];
-                        var acrobaticDisplayedNumber = (this.items[iAcrobatic].type / 10) % 10;
-                        var matchingItemIndex = this.items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
+                    row.forEach((iAcrobatic, iIndex: number) => {
+                        const acrobaticDisplayedNumber = (this.items[iAcrobatic].type / 10) % 10;
+                        const matchingItemIndex = this.items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
                         //console.log('iAcrobatic: ',iAcrobatic, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
-                        var item = this.items[iAcrobatic];
+                        const item = this.items[iAcrobatic];
                         if (typeof item.loc == "undefined") {
                             topDestination = iRow * (itemHeight + itemMargin);
 
@@ -698,18 +690,18 @@ function (dojo, declare) {
                             leftDestinations[iAcrobatic] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
                             zIndexes[iAcrobatic] = 0;
                         }
-                    }
+                    });
                 }
             });
 
-            for (var i in this.items) {
+            for (let i in this.items) {
                 topDestination = topDestinations[i];
                 leftDestination = leftDestinations[i];
 
-                var item = this.items[i];
-                var itemDivId = this.getItemDivId(item.id);
+                const item = this.items[i];
+                const itemDivId = this.getItemDivId(item.id);
 
-                var $itemDiv = $(itemDivId);
+                let $itemDiv = $(itemDivId);
                 if ($itemDiv) {
                     if (typeof item.loc == "undefined") {
                         dojo.fx.slideTo({
@@ -727,7 +719,7 @@ function (dojo, declare) {
                     dojo.style($itemDiv, "height", itemHeight + "px");
                     dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
                 } else {
-                    var type = this.item_type[item.type];
+                    const type = this.item_type[item.type];
                     if (!type) {
                         console.error("Stock control: Unknow type: " + type);
                     }
@@ -743,7 +735,7 @@ function (dojo, declare) {
                     if (this.backgroundSize !== null) {
                         additional_style += "background-size:" + this.backgroundSize;
                     }
-                    var jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
+                    const jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
                         id: itemDivId,
                         width: itemWidth,
                         height: itemHeight,
@@ -764,10 +756,10 @@ function (dojo, declare) {
                     }
                     dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
                     if (Number(type.image_position) !== 0) {
-                        var backgroundPositionWidth = 0;
-                        var backgroundPositionHeight = 0;
+                        let backgroundPositionWidth = 0;
+                        let backgroundPositionHeight = 0;
                         if (this.image_items_per_row) {
-                            var rowNumber = Math.floor(type.image_position / this.image_items_per_row);
+                            const rowNumber = Math.floor(type.image_position / this.image_items_per_row);
                             if (!this.image_in_vertical_row) {
                                 backgroundPositionWidth = (type.image_position - (rowNumber * this.image_items_per_row)) * 100;
                                 backgroundPositionHeight = rowNumber * 100;
@@ -788,7 +780,7 @@ function (dojo, declare) {
                     if (typeof from != "undefined") {
                         this.page.placeOnObject($itemDiv, from);
                         if (typeof item.loc == "undefined") {
-                            var anim = dojo.fx.slideTo({
+                            let anim = dojo.fx.slideTo({
                                 node: $itemDiv,
                                 top: topDestination,
                                 left: leftDestination,
@@ -808,7 +800,7 @@ function (dojo, declare) {
                     }
                 }
             }
-            var controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (itemHeight + itemMargin) + acrobaticRowsIndexes.length * acrobaticOverlap;
+            const controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (itemHeight + itemMargin) + acrobaticRowsIndexes.length * acrobaticOverlap;
             dojo.style(this.control_name, "height", controlHeight + "px");
             if (this.autowidth) {
                 if (controlWidth > 0) {
@@ -822,7 +814,7 @@ function (dojo, declare) {
 
         setupNewCard: function( card_div, card_type_id, card_id )
         {
-            var tooltip = "<span class='tooltip-fly'></span> : " + Math.floor(card_type_id / 100) + "<br/>";
+            let tooltip = "<span class='tooltip-fly'></span> : " + Math.floor(card_type_id / 100) + "<br/>";
             switch( card_type_id ) {
                 case 500:
                 case 516:
@@ -841,17 +833,17 @@ function (dojo, declare) {
         },
 
         getNextPlayer: function() {
-            var activePlayerId = this.getActivePlayerId();
-            var activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
-            var nextPlayerIndex = activePlayerIndex >= this.gamedatas.playerorder.length-1 ? 0 : activePlayerIndex+1;
+            const activePlayerId = this.getActivePlayerId();
+            const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
+            const nextPlayerIndex = activePlayerIndex >= this.gamedatas.playerorder.length-1 ? 0 : activePlayerIndex+1;
             //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[nextPlayerIndex]);
             return this.gamedatas.players[Number(this.gamedatas.playerorder[nextPlayerIndex])];
         },
 
         getPreviousPlayer: function() {
-            var activePlayerId = this.getActivePlayerId();
-            var activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
-            var previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length-1 : activePlayerIndex-1;
+            const activePlayerId = this.getActivePlayerId();
+            const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
+            const previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length-1 : activePlayerIndex-1;
             //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[previousPlayerIndex]);
             return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];
         }
