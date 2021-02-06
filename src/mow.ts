@@ -38,7 +38,7 @@ interface Notif<T> {
     uid: string;
 }
 
-/* TODO precise Function */
+/* TODO repace Function by (..params) => void */
 interface Dojo {
     place: Function;
     style: Function;
@@ -107,15 +107,15 @@ interface MowGamedatas {
     decision: {decision_type: string};
     direction_clockwise: boolean;
     game_result_neutralized: string;
-    gamestate: Gamestate; // TODO
-    gamestates: any; // TODO
-    hand: any; // TODO
-    herd: any; // TODO
+    gamestate: Gamestate;
+    gamestates: { [gamestateId: number]: Gamestate };
+    hand: Card[];
+    herd: Card[];
     neutralized_player_id: string;
-    next_players_id: any; // TODO
+    next_players_id: { [playerId: number]: number };
     notifications: {last_packet_id: string, move_nbr: string}
     playerorder: (string | number)[];
-    players: any; // TODO
+    players: { [playerId: number]: Player };
     remainingCards: number;
     tablespeed: string;
 }
@@ -167,6 +167,7 @@ declare const ebg;
 declare const $;
 declare const g_gamethemeurl;
 declare const _;
+declare const dojo;
 
 function isAcrobatic(stockItemId: number) {
     const item = this.items[stockItemId];
@@ -178,10 +179,10 @@ function updateDisplay(from: string) {
     if (!$(this.control_name)) {
         return;
     }
-    const controlMarginBox = Mow.dojo.marginBox(this.control_name);
+    const controlMarginBox = dojo.marginBox(this.control_name);
     let pageContentMarginWidth = controlMarginBox.w;
     if (this.autowidth) {
-        const pageContentMarginBox = Mow.dojo.marginBox($("page-content"));
+        const pageContentMarginBox = dojo.marginBox($("page-content"));
         pageContentMarginWidth = pageContentMarginBox.w;
     }
     let topDestination = 0;
@@ -259,17 +260,17 @@ function updateDisplay(from: string) {
     rows.forEach((row, iRow: number) => {
         const rowIsAcrobatic = row.some(id => this.isAcrobatic(id));
         if (rowIsAcrobatic) {
-            row.forEach((iAcrobatic, iIndex: number) => {
-                const acrobaticDisplayedNumber = (this.items[iAcrobatic].type / 10) % 10;
+            row.forEach((acrobaticNumber: number) => {
+                const acrobaticDisplayedNumber = (this.items[acrobaticNumber].type / 10) % 10;
                 const matchingItemIndex = this.items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
                 //console.log('iAcrobatic: ',iAcrobatic, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
-                const item = this.items[iAcrobatic];
+                const item = this.items[acrobaticNumber];
                 if (typeof item.loc == "undefined") {
                     topDestination = iRow * (itemHeight + itemMargin);
 
-                    topDestinations[iAcrobatic] = topDestination;
-                    leftDestinations[iAcrobatic] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
-                    zIndexes[iAcrobatic] = 0;
+                    topDestinations[acrobaticNumber] = topDestination;
+                    leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                    zIndexes[acrobaticNumber] = 0;
                 }
             });
         }
@@ -285,7 +286,7 @@ function updateDisplay(from: string) {
         let $itemDiv = $(itemDivId);
         if ($itemDiv) {
             if (typeof item.loc == "undefined") {
-                Mow.dojo.fx.slideTo({
+                dojo.fx.slideTo({
                     node: $itemDiv,
                     top: topDestination,
                     left: leftDestination,
@@ -296,9 +297,9 @@ function updateDisplay(from: string) {
                 this.page.slideToObject($itemDiv, item.loc, 1000).play();
             }
 
-            Mow.dojo.style($itemDiv, "width", itemWidth + "px");
-            Mow.dojo.style($itemDiv, "height", itemHeight + "px");
-            Mow.dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
+            dojo.style($itemDiv, "width", itemWidth + "px");
+            dojo.style($itemDiv, "height", itemHeight + "px");
+            dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
         } else {
             const type = this.item_type[item.type];
             if (!type) {
@@ -316,7 +317,7 @@ function updateDisplay(from: string) {
             if (this.backgroundSize !== null) {
                 additional_style += "background-size:" + this.backgroundSize;
             }
-            const jstpl_stock_item_template = Mow.dojo.trim(Mow.dojo.string.substitute(this.jstpl_stock_item, {
+            const jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
                 id: itemDivId,
                 width: itemWidth,
                 height: itemHeight,
@@ -327,15 +328,15 @@ function updateDisplay(from: string) {
                 extra_classes: this.extraClasses,
                 additional_style: additional_style
             }));
-            Mow.dojo.place(jstpl_stock_item_template, this.control_name);
+            dojo.place(jstpl_stock_item_template, this.control_name);
             $itemDiv = $(itemDivId);
             if (typeof item.loc != "undefined") {
                 this.page.placeOnObject($itemDiv, item.loc);
             }
             if (this.selectable == 0) {
-                Mow.dojo.addClass($itemDiv, "stockitem_unselectable");
+                dojo.addClass($itemDiv, "stockitem_unselectable");
             }
-            Mow.dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
+            dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
             if (Number(type.image_position) !== 0) {
                 let backgroundPositionWidth = 0;
                 let backgroundPositionHeight = 0;
@@ -348,12 +349,12 @@ function updateDisplay(from: string) {
                         backgroundPositionHeight = (type.image_position - (rowNumber * this.image_items_per_row)) * 100;
                         backgroundPositionWidth = rowNumber * 100;
                     }
-                    Mow.dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% -" + backgroundPositionHeight + "%");
+                    dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% -" + backgroundPositionHeight + "%");
                 } else {
                     backgroundPositionWidth = type.image_position * 100;
-                    Mow.dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
+                    dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
                 }
-                Mow.dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
+                dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
             }
             if (this.onItemCreate) {
                 this.onItemCreate($itemDiv, item.type, itemDivId);
@@ -361,7 +362,7 @@ function updateDisplay(from: string) {
             if (typeof from != "undefined") {
                 this.page.placeOnObject($itemDiv, from);
                 if (typeof item.loc == "undefined") {
-                    let anim = Mow.dojo.fx.slideTo({
+                    let anim = dojo.fx.slideTo({
                         node: $itemDiv,
                         top: topDestination,
                         left: leftDestination,
@@ -374,27 +375,26 @@ function updateDisplay(from: string) {
                     this.page.slideToObject($itemDiv, item.loc, 1000).play();
                 }
             } else {
-                Mow.dojo.style($itemDiv, "opacity", 0);
-                Mow.dojo.fadeIn({
+                dojo.style($itemDiv, "opacity", 0);
+                dojo.fadeIn({
                     node: $itemDiv
                 }).play();
             }
         }
     }
     const controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (itemHeight + itemMargin) + acrobaticRowsIndexes.length * acrobaticOverlap;
-    Mow.dojo.style(this.control_name, "height", controlHeight + "px");
+    dojo.style(this.control_name, "height", controlHeight + "px");
     if (this.autowidth) {
         if (controlWidth > 0) {
             controlWidth += (this.item_width - itemWidth);
         }
-        Mow.dojo.style(this.control_name, "width", controlWidth + "px");
+        dojo.style(this.control_name, "width", controlWidth + "px");
     }
 
-    Mow.dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
+    dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
 }
 
 class Mow implements Game {
-    static dojo: Dojo;
 
     gamedatas: MowGamedatas;
     playerHand: Stock = null;
@@ -404,8 +404,8 @@ class Mow implements Game {
 
     cardwidth: number = 121;
     cardheight: number = 178;
-    players: any; // TODO
-    player_number: number;
+    players: { [playerId: number]: Player };
+    playerNumber: number;
     
     colors = [
         'forestgreen',
@@ -425,9 +425,7 @@ class Mow implements Game {
         '#FFFF00'
     ];
 
-    constructor(private dojo: Dojo) {
-        Mow.dojo = dojo ?? Mow.dojo;
-    }
+    constructor() {}
         
     /*
         setup:
@@ -447,30 +445,29 @@ class Mow implements Game {
 
         // Place payer zone
         this.players = gamedatas.players;
-        this.player_number = Object.keys(this.players).length;
+        this.playerNumber = Object.keys(this.players).length;
 
         const ids: string[] = Object.keys(this.players);
-        let player_id: string = gamedatas.current_player_id;
-        if (!ids.includes(player_id)) {
-            player_id = ids[0];
+        let playerId: string = gamedatas.current_player_id;
+        if (!ids.includes(playerId)) {
+            playerId = ids[0];
         }
 
-        const bottomPlayers = this.player_number === 5 ? 2 : 1;
+        const bottomPlayers = this.playerNumber === 5 ? 2 : 1;
         
-        for(let i = 1; i <= this.player_number; i++) {
-            const player: Player = this.players[player_id];
-
-            Mow.dojo.place((this as any).format_block( 'jstpl_playertable', {
-                player_id: player_id,
+        for(let i = 1; i <= this.playerNumber; i++) {
+            const player: Player = this.players[playerId];
+            dojo.place((this as any).format_block( 'jstpl_playertable', {
+                player_id: playerId,
                 player_color: player.color,
-                player_name: (player.name.length > 10? `${player.name.substr(0,10)}...` : player.name)
+                player_name: (player.name.length > 10 ? `${player.name.substr(0,10)}...` : player.name)
             } ), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
 
-            player_id = gamedatas.next_players_id[player_id];
+            playerId = gamedatas.next_players_id[playerId];
         }
         
         if (Object.keys(gamedatas.players).length == 2) {
-            Mow.dojo.style( 'direction-text', 'display', 'none' );
+            dojo.style( 'direction-text', 'display', 'none' );
         }
         
         // TODO: Set up your game interface here, according to "gamedatas"
@@ -479,7 +476,7 @@ class Mow implements Game {
         this.playerHand.setSelectionMode(1);            
         this.playerHand.setSelectionAppearance('class');            
         this.playerHand.centerItems = true;
-        this.playerHand.onItemCreate = Mow.dojo.hitch( this, 'setupNewCard' ); 
+        this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
         this.theHerd = new ebg.stock() as MowHerdStock;
         this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
         this.theHerd.setSelectionMode(0);            
@@ -493,7 +490,7 @@ class Mow implements Game {
         //console.log('this.gamedatas', this.gamedatas);
         
         // Cards in player's hand
-        Object.values(this.gamedatas.hand).forEach((card: Card) => {
+        this.gamedatas.hand.forEach((card: Card) => {
             const color = card.type;
             const value = card.type_arg;
             //console.log('hand', card, this.getCardUniqueId( color, value ));
@@ -501,8 +498,8 @@ class Mow implements Game {
             this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
         });
         
-            // Cards played on table
-            Object.values(this.gamedatas.herd).forEach((card: Card) => {
+        // Cards played on table
+        this.gamedatas.herd.forEach((card: Card) => {
             const color = card.type;
             const value = card.type_arg;
             //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
@@ -516,11 +513,11 @@ class Mow implements Game {
         this.setRemainingCards(this.gamedatas.remainingCards);
         this.enableAllowedCards(this.gamedatas.allowedCardsIds);
         if (!this.gamedatas.direction_clockwise) {
-            Mow.dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
+            dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
         }
 
-        Mow.dojo.connect( $('keepDirectionButton'), 'onclick', this, 'onKeepDirection' );
-        Mow.dojo.connect( $('changeDirectionButton'), 'onclick', this, 'onChangeDirection' );
+        dojo.connect( $('keepDirectionButton'), 'onclick', this, 'onKeepDirection' );
+        dojo.connect( $('changeDirectionButton'), 'onclick', this, 'onChangeDirection' );
 
         // Setup game notifications to handle (see "setupNotifications" method below)
         //console.log('setupNotifications');
@@ -531,7 +528,7 @@ class Mow implements Game {
 
     createCards() {
 
-        Mow.dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
+        dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
         // addItemType( type, weight, image, image_position ):
 
@@ -592,16 +589,16 @@ class Mow implements Game {
     }
 
     onEnteringStatePlayerTurn(args: any) {
-        Mow.dojo.addClass("playertable-" + args.active_player, "active");
-        if( (this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
+        dojo.addClass("playertable-" + args.active_player, "active");
+        if((this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             const selectedCardId = this.playerHand.getSelectedItems()[0].id;
-            if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
+            if (this.allowedCardsIds?.indexOf(Number(selectedCardId)) !== -1) {
 
                 setTimeout(() => {
                     if ((this as any).isInterfaceLocked()) {
                         this.playerHand.unselectAll();
                     } else {
-                    this.onPlayerHandSelectionChanged();
+                        this.onPlayerHandSelectionChanged();
                     }
                 }, 250);
             }
@@ -610,19 +607,19 @@ class Mow implements Game {
 
     onEnteringStateChooseDirection(args: any) {
         if ((this as any).isCurrentPlayerActive()) {
-            Mow.dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-            Mow.dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
 
             const keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
             const changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
 
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
             $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
-            Mow.dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
-            Mow.dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
+            dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
+            dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
 
-            Mow.dojo.style( 'direction_popin', 'display', 'flex' );
-            Mow.dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+            dojo.style( 'direction_popin', 'display', 'flex' );
+            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
             
         }
     }
@@ -637,11 +634,11 @@ class Mow implements Game {
         switch( stateName ) {
         
             case 'playerTurn':  
-                Mow.dojo.query(".playertable").removeClass("active");           
+                dojo.query(".playertable").removeClass("active");           
                 break;
 
             case 'chooseDirection':    
-                Mow.dojo.style( 'direction_popin', 'display', 'none' );
+                dojo.style( 'direction_popin', 'display', 'none' );
                 break;   
         
             case 'dummmy':
@@ -775,13 +772,13 @@ class Mow implements Game {
     {
         //console.log( 'notifications subscriptions setup' );
         
-        Mow.dojo.subscribe( 'newHand', this, "notif_newHand" );
-        Mow.dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
-        Mow.dojo.subscribe( 'newCard', this, "notif_newCard" );
-        Mow.dojo.subscribe( 'allowedCards', this, "notif_allowedCards" );  
-        Mow.dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
-        Mow.dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
-        Mow.dojo.subscribe( 'handCollected', this, "notif_handCollected" );
+        dojo.subscribe( 'newHand', this, "notif_newHand" );
+        dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
+        dojo.subscribe( 'newCard', this, "notif_newCard" );
+        dojo.subscribe( 'allowedCards', this, "notif_allowedCards" );  
+        dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
+        dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
+        dojo.subscribe( 'handCollected', this, "notif_handCollected" );
 
         (this as any).notifqueue.setSynchronous( 'herdCollected', 2000 );
         (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
@@ -833,7 +830,7 @@ class Mow implements Game {
             // timeout so new card appear after played card animation
             this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id, 'remainingCards' );
             if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
-                Mow.dojo.query('#myhand_item_' + card.id).addClass("disabled");
+                dojo.query('#myhand_item_' + card.id).addClass("disabled");
             }
         }, 1000);
         
@@ -843,10 +840,10 @@ class Mow implements Game {
     {
         //console.log( 'notif_directionChanged', notif );
 
-        Mow.dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
+        dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
 
-        Mow.dojo.removeClass("direction-animation-symbol");
-        Mow.dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
+        dojo.removeClass("direction-animation-symbol");
+        dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
     }
     
     notif_herdCollected( notif: Notif<NotifHerdCollectedArgs> )
@@ -858,7 +855,7 @@ class Mow implements Game {
         
         (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         this.theHerd.removeAllTo( 'player_board_'+notif.args.player_id );
-        Mow.dojo.query("#myhand .stockitem").removeClass("disabled");
+        dojo.query("#myhand .stockitem").removeClass("disabled");
         this.allowedCardsIds = null; 
         this.playerHand.unselectAll();
     }
@@ -870,8 +867,8 @@ class Mow implements Game {
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
         if (this.player_id == notif.args.player_id) {
-            Mow.dojo.query("#myhand").removeClass("bounce");
-            Mow.dojo.query("#myhand").addClass("bounce");
+            dojo.query("#myhand").removeClass("bounce");
+            dojo.query("#myhand").addClass("bounce");
         }
         
         (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
@@ -917,7 +914,7 @@ class Mow implements Game {
     setRemainingCards(remainingCards: number) {
         let $remainingCards = $('remainingCards');
         $remainingCards.innerHTML = remainingCards;
-        Mow.dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
+        dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
     }
 
     enableAllowedCards(allowedCardsIds: number[]) {
@@ -925,7 +922,7 @@ class Mow implements Game {
         this.playerHand.items.map(item => Number(item.id)).forEach(id => {
             try {
                 const disallowed = allowedCardsIds.indexOf(id) === -1;
-                Mow.dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
                 if (disallowed) {
                     this.playerHand.unselectItem(''+id);
                 }
@@ -942,7 +939,7 @@ class Mow implements Game {
                 // Representation of the color of a card
                 if (args.displayedColor !== undefined) {
                     args.displayedColor = this.colors[Number(args.displayedColor)];
-                    args.displayedNumber = Mow.dojo.string.substitute("<strong style='color: ${displayedColor}'>${displayedNumber}</strong>", {'displayedColor' : args.displayedColor, 'displayedNumber' : args.displayedNumber});
+                    args.displayedNumber = dojo.string.substitute("<strong style='color: ${displayedColor}'>${displayedNumber}</strong>", {'displayedColor' : args.displayedColor, 'displayedNumber' : args.displayedNumber});
                 }
                 // symbol for special cards
                 if (args.precision && args.precision !== '') {
@@ -1003,6 +1000,5 @@ define([
 	"ebg/stock"
 ],
 function (dojo: Dojo, declare: Function) {
-    console.log('function', dojo, declare);
-    return declare("bgagame.mow", ebg.core.gamegui, new Mow(dojo));             
+    return declare("bgagame.mow", ebg.core.gamegui, new Mow());             
 });

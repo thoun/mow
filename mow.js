@@ -24,10 +24,10 @@ function updateDisplay(from) {
     if (!$(this.control_name)) {
         return;
     }
-    var controlMarginBox = Mow.dojo.marginBox(this.control_name);
+    var controlMarginBox = dojo.marginBox(this.control_name);
     var pageContentMarginWidth = controlMarginBox.w;
     if (this.autowidth) {
-        var pageContentMarginBox = Mow.dojo.marginBox($("page-content"));
+        var pageContentMarginBox = dojo.marginBox($("page-content"));
         pageContentMarginWidth = pageContentMarginBox.w;
     }
     var topDestination = 0;
@@ -101,16 +101,16 @@ function updateDisplay(from) {
     rows.forEach(function (row, iRow) {
         var rowIsAcrobatic = row.some(function (id) { return _this.isAcrobatic(id); });
         if (rowIsAcrobatic) {
-            row.forEach(function (iAcrobatic, iIndex) {
-                var acrobaticDisplayedNumber = (_this.items[iAcrobatic].type / 10) % 10;
+            row.forEach(function (acrobaticNumber) {
+                var acrobaticDisplayedNumber = (_this.items[acrobaticNumber].type / 10) % 10;
                 var matchingItemIndex = _this.items.findIndex(function (item) { return item.type % 10 === acrobaticDisplayedNumber; });
                 //console.log('iAcrobatic: ',iAcrobatic, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
-                var item = _this.items[iAcrobatic];
+                var item = _this.items[acrobaticNumber];
                 if (typeof item.loc == "undefined") {
                     topDestination = iRow * (itemHeight + itemMargin);
-                    topDestinations[iAcrobatic] = topDestination;
-                    leftDestinations[iAcrobatic] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
-                    zIndexes[iAcrobatic] = 0;
+                    topDestinations[acrobaticNumber] = topDestination;
+                    leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                    zIndexes[acrobaticNumber] = 0;
                 }
             });
         }
@@ -123,7 +123,7 @@ function updateDisplay(from) {
         var $itemDiv = $(itemDivId);
         if ($itemDiv) {
             if (typeof item.loc == "undefined") {
-                Mow.dojo.fx.slideTo({
+                dojo.fx.slideTo({
                     node: $itemDiv,
                     top: topDestination,
                     left: leftDestination,
@@ -134,9 +134,9 @@ function updateDisplay(from) {
             else {
                 this.page.slideToObject($itemDiv, item.loc, 1000).play();
             }
-            Mow.dojo.style($itemDiv, "width", itemWidth + "px");
-            Mow.dojo.style($itemDiv, "height", itemHeight + "px");
-            Mow.dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
+            dojo.style($itemDiv, "width", itemWidth + "px");
+            dojo.style($itemDiv, "height", itemHeight + "px");
+            dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
         }
         else {
             var type = this.item_type[item.type];
@@ -156,7 +156,7 @@ function updateDisplay(from) {
             if (this.backgroundSize !== null) {
                 additional_style += "background-size:" + this.backgroundSize;
             }
-            var jstpl_stock_item_template = Mow.dojo.trim(Mow.dojo.string.substitute(this.jstpl_stock_item, {
+            var jstpl_stock_item_template = dojo.trim(dojo.string.substitute(this.jstpl_stock_item, {
                 id: itemDivId,
                 width: itemWidth,
                 height: itemHeight,
@@ -167,15 +167,15 @@ function updateDisplay(from) {
                 extra_classes: this.extraClasses,
                 additional_style: additional_style
             }));
-            Mow.dojo.place(jstpl_stock_item_template, this.control_name);
+            dojo.place(jstpl_stock_item_template, this.control_name);
             $itemDiv = $(itemDivId);
             if (typeof item.loc != "undefined") {
                 this.page.placeOnObject($itemDiv, item.loc);
             }
             if (this.selectable == 0) {
-                Mow.dojo.addClass($itemDiv, "stockitem_unselectable");
+                dojo.addClass($itemDiv, "stockitem_unselectable");
             }
-            Mow.dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
+            dojo.connect($itemDiv, "onclick", this, "onClickOnItem");
             if (Number(type.image_position) !== 0) {
                 var backgroundPositionWidth = 0;
                 var backgroundPositionHeight = 0;
@@ -189,13 +189,13 @@ function updateDisplay(from) {
                         backgroundPositionHeight = (type.image_position - (rowNumber * this.image_items_per_row)) * 100;
                         backgroundPositionWidth = rowNumber * 100;
                     }
-                    Mow.dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% -" + backgroundPositionHeight + "%");
+                    dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% -" + backgroundPositionHeight + "%");
                 }
                 else {
                     backgroundPositionWidth = type.image_position * 100;
-                    Mow.dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
+                    dojo.style($itemDiv, "backgroundPosition", "-" + backgroundPositionWidth + "% 0%");
                 }
-                Mow.dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
+                dojo.style($itemDiv, "backgroundSize", "auto " + itemHeight + "px");
             }
             if (this.onItemCreate) {
                 this.onItemCreate($itemDiv, item.type, itemDivId);
@@ -203,7 +203,7 @@ function updateDisplay(from) {
             if (typeof from != "undefined") {
                 this.page.placeOnObject($itemDiv, from);
                 if (typeof item.loc == "undefined") {
-                    var anim = Mow.dojo.fx.slideTo({
+                    var anim = dojo.fx.slideTo({
                         node: $itemDiv,
                         top: topDestination,
                         left: leftDestination,
@@ -218,26 +218,25 @@ function updateDisplay(from) {
                 }
             }
             else {
-                Mow.dojo.style($itemDiv, "opacity", 0);
-                Mow.dojo.fadeIn({
+                dojo.style($itemDiv, "opacity", 0);
+                dojo.fadeIn({
                     node: $itemDiv
                 }).play();
             }
         }
     }
     var controlHeight = (lastRowIndex + 1 - acrobaticRowsIndexes.length) * (itemHeight + itemMargin) + acrobaticRowsIndexes.length * acrobaticOverlap;
-    Mow.dojo.style(this.control_name, "height", controlHeight + "px");
+    dojo.style(this.control_name, "height", controlHeight + "px");
     if (this.autowidth) {
         if (controlWidth > 0) {
             controlWidth += (this.item_width - itemWidth);
         }
-        Mow.dojo.style(this.control_name, "width", controlWidth + "px");
+        dojo.style(this.control_name, "width", controlWidth + "px");
     }
-    Mow.dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
+    dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
 }
 var Mow = /** @class */ (function () {
-    function Mow(dojo) {
-        this.dojo = dojo;
+    function Mow() {
         this.playerHand = null;
         this.theHerd = null;
         this.cardwidth = 121;
@@ -258,7 +257,6 @@ var Mow = /** @class */ (function () {
             '#FFCC00',
             '#FFFF00'
         ];
-        Mow.dojo = dojo !== null && dojo !== void 0 ? dojo : Mow.dojo;
     }
     /*
         setup:
@@ -277,24 +275,24 @@ var Mow = /** @class */ (function () {
         var _this = this;
         // Place payer zone
         this.players = gamedatas.players;
-        this.player_number = Object.keys(this.players).length;
+        this.playerNumber = Object.keys(this.players).length;
         var ids = Object.keys(this.players);
-        var player_id = gamedatas.current_player_id;
-        if (!ids.includes(player_id)) {
-            player_id = ids[0];
+        var playerId = gamedatas.current_player_id;
+        if (!ids.includes(playerId)) {
+            playerId = ids[0];
         }
-        var bottomPlayers = this.player_number === 5 ? 2 : 1;
-        for (var i = 1; i <= this.player_number; i++) {
-            var player = this.players[player_id];
-            Mow.dojo.place(this.format_block('jstpl_playertable', {
-                player_id: player_id,
+        var bottomPlayers = this.playerNumber === 5 ? 2 : 1;
+        for (var i = 1; i <= this.playerNumber; i++) {
+            var player = this.players[playerId];
+            dojo.place(this.format_block('jstpl_playertable', {
+                player_id: playerId,
                 player_color: player.color,
                 player_name: (player.name.length > 10 ? player.name.substr(0, 10) + "..." : player.name)
             }), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
-            player_id = gamedatas.next_players_id[player_id];
+            playerId = gamedatas.next_players_id[playerId];
         }
         if (Object.keys(gamedatas.players).length == 2) {
-            Mow.dojo.style('direction-text', 'display', 'none');
+            dojo.style('direction-text', 'display', 'none');
         }
         // TODO: Set up your game interface here, according to "gamedatas"
         this.playerHand = new ebg.stock();
@@ -302,7 +300,7 @@ var Mow = /** @class */ (function () {
         this.playerHand.setSelectionMode(1);
         this.playerHand.setSelectionAppearance('class');
         this.playerHand.centerItems = true;
-        this.playerHand.onItemCreate = Mow.dojo.hitch(this, 'setupNewCard');
+        this.playerHand.onItemCreate = dojo.hitch(this, 'setupNewCard');
         this.theHerd = new ebg.stock();
         this.theHerd.create(this, $('theherd'), this.cardwidth, this.cardheight);
         this.theHerd.setSelectionMode(0);
@@ -313,14 +311,14 @@ var Mow = /** @class */ (function () {
         this.createCards();
         //console.log('this.gamedatas', this.gamedatas);
         // Cards in player's hand
-        Object.values(this.gamedatas.hand).forEach(function (card) {
+        this.gamedatas.hand.forEach(function (card) {
             var color = card.type;
             var value = card.type_arg;
             //console.log('hand', card, this.getCardUniqueId( color, value ));
             _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
         });
         // Cards played on table
-        Object.values(this.gamedatas.herd).forEach(function (card) {
+        this.gamedatas.herd.forEach(function (card) {
             var color = card.type;
             var value = card.type_arg;
             //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
@@ -332,17 +330,17 @@ var Mow = /** @class */ (function () {
         this.setRemainingCards(this.gamedatas.remainingCards);
         this.enableAllowedCards(this.gamedatas.allowedCardsIds);
         if (!this.gamedatas.direction_clockwise) {
-            Mow.dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
+            dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
         }
-        Mow.dojo.connect($('keepDirectionButton'), 'onclick', this, 'onKeepDirection');
-        Mow.dojo.connect($('changeDirectionButton'), 'onclick', this, 'onChangeDirection');
+        dojo.connect($('keepDirectionButton'), 'onclick', this, 'onKeepDirection');
+        dojo.connect($('changeDirectionButton'), 'onclick', this, 'onChangeDirection');
         // Setup game notifications to handle (see "setupNotifications" method below)
         //console.log('setupNotifications');
         this.setupNotifications();
         //console.log( "Ending game setup" );
     };
     Mow.prototype.createCards = function () {
-        Mow.dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
+        dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
         // addItemType( type, weight, image, image_position ):
         var idsByType = [[], [], [], []];
         // Create cards types:
@@ -388,10 +386,11 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.onEnteringStatePlayerTurn = function (args) {
         var _this = this;
-        Mow.dojo.addClass("playertable-" + args.active_player, "active");
+        var _a;
+        dojo.addClass("playertable-" + args.active_player, "active");
         if (this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             var selectedCardId = this.playerHand.getSelectedItems()[0].id;
-            if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
+            if (((_a = this.allowedCardsIds) === null || _a === void 0 ? void 0 : _a.indexOf(Number(selectedCardId))) !== -1) {
                 setTimeout(function () {
                     if (_this.isInterfaceLocked()) {
                         _this.playerHand.unselectAll();
@@ -405,16 +404,16 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.onEnteringStateChooseDirection = function (args) {
         if (this.isCurrentPlayerActive()) {
-            Mow.dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-            Mow.dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
             var keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
             var changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
             $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
-            Mow.dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
-            Mow.dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
-            Mow.dojo.style('direction_popin', 'display', 'flex');
-            Mow.dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+            dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
+            dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
+            dojo.style('direction_popin', 'display', 'flex');
+            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -424,10 +423,10 @@ var Mow = /** @class */ (function () {
         //console.log( 'Leaving state: '+stateName );
         switch (stateName) {
             case 'playerTurn':
-                Mow.dojo.query(".playertable").removeClass("active");
+                dojo.query(".playertable").removeClass("active");
                 break;
             case 'chooseDirection':
-                Mow.dojo.style('direction_popin', 'display', 'none');
+                dojo.style('direction_popin', 'display', 'none');
                 break;
             case 'dummmy':
                 break;
@@ -534,13 +533,13 @@ var Mow = /** @class */ (function () {
     */
     Mow.prototype.setupNotifications = function () {
         //console.log( 'notifications subscriptions setup' );
-        Mow.dojo.subscribe('newHand', this, "notif_newHand");
-        Mow.dojo.subscribe('cardPlayed', this, "notif_cardPlayed");
-        Mow.dojo.subscribe('newCard', this, "notif_newCard");
-        Mow.dojo.subscribe('allowedCards', this, "notif_allowedCards");
-        Mow.dojo.subscribe('directionChanged', this, "notif_directionChanged");
-        Mow.dojo.subscribe('herdCollected', this, "notif_herdCollected");
-        Mow.dojo.subscribe('handCollected', this, "notif_handCollected");
+        dojo.subscribe('newHand', this, "notif_newHand");
+        dojo.subscribe('cardPlayed', this, "notif_cardPlayed");
+        dojo.subscribe('newCard', this, "notif_newCard");
+        dojo.subscribe('allowedCards', this, "notif_allowedCards");
+        dojo.subscribe('directionChanged', this, "notif_directionChanged");
+        dojo.subscribe('herdCollected', this, "notif_herdCollected");
+        dojo.subscribe('handCollected', this, "notif_handCollected");
         this.notifqueue.setSynchronous('herdCollected', 2000);
         this.notifqueue.setSynchronous('handCollected', 1500);
     };
@@ -577,15 +576,15 @@ var Mow = /** @class */ (function () {
             // timeout so new card appear after played card animation
             _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id, 'remainingCards');
             if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
-                Mow.dojo.query('#myhand_item_' + card.id).addClass("disabled");
+                dojo.query('#myhand_item_' + card.id).addClass("disabled");
             }
         }, 1000);
     };
     Mow.prototype.notif_directionChanged = function (notif) {
         //console.log( 'notif_directionChanged', notif );
-        Mow.dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
-        Mow.dojo.removeClass("direction-animation-symbol");
-        Mow.dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
+        dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
+        dojo.removeClass("direction-animation-symbol");
+        dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
     };
     Mow.prototype.notif_herdCollected = function (notif) {
         //console.log( 'notif_herdCollected', notif );
@@ -593,7 +592,7 @@ var Mow = /** @class */ (function () {
         this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
         this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         this.theHerd.removeAllTo('player_board_' + notif.args.player_id);
-        Mow.dojo.query("#myhand .stockitem").removeClass("disabled");
+        dojo.query("#myhand .stockitem").removeClass("disabled");
         this.allowedCardsIds = null;
         this.playerHand.unselectAll();
     };
@@ -602,8 +601,8 @@ var Mow = /** @class */ (function () {
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
         if (this.player_id == notif.args.player_id) {
-            Mow.dojo.query("#myhand").removeClass("bounce");
-            Mow.dojo.query("#myhand").addClass("bounce");
+            dojo.query("#myhand").removeClass("bounce");
+            dojo.query("#myhand").addClass("bounce");
         }
         this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
     };
@@ -640,7 +639,7 @@ var Mow = /** @class */ (function () {
     Mow.prototype.setRemainingCards = function (remainingCards) {
         var $remainingCards = $('remainingCards');
         $remainingCards.innerHTML = remainingCards;
-        Mow.dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
+        dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
     };
     Mow.prototype.enableAllowedCards = function (allowedCardsIds) {
         var _this = this;
@@ -648,7 +647,7 @@ var Mow = /** @class */ (function () {
         this.playerHand.items.map(function (item) { return Number(item.id); }).forEach(function (id) {
             try {
                 var disallowed = allowedCardsIds.indexOf(id) === -1;
-                Mow.dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
                 if (disallowed) {
                     _this.playerHand.unselectItem('' + id);
                 }
@@ -664,7 +663,7 @@ var Mow = /** @class */ (function () {
                 // Representation of the color of a card
                 if (args.displayedColor !== undefined) {
                     args.displayedColor = this.colors[Number(args.displayedColor)];
-                    args.displayedNumber = Mow.dojo.string.substitute("<strong style='color: ${displayedColor}'>${displayedNumber}</strong>", { 'displayedColor': args.displayedColor, 'displayedNumber': args.displayedNumber });
+                    args.displayedNumber = dojo.string.substitute("<strong style='color: ${displayedColor}'>${displayedNumber}</strong>", { 'displayedColor': args.displayedColor, 'displayedNumber': args.displayedNumber });
                 }
                 // symbol for special cards
                 if (args.precision && args.precision !== '') {
@@ -722,6 +721,5 @@ define([
     "ebg/counter",
     "ebg/stock"
 ], function (dojo, declare) {
-    console.log('function', dojo, declare);
-    return declare("bgagame.mow", ebg.core.gamegui, new Mow(dojo));
+    return declare("bgagame.mow", ebg.core.gamegui, new Mow());
 });

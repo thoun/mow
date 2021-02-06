@@ -155,10 +155,10 @@ class mow extends Table
         $result['next_players_id'] = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
   
 		// Cards in player hand      
-        $result['hand'] = $this->cards->getCardsInLocation( 'hand', $current_player_id );
+        $result['hand'] = array_values($this->cards->getCardsInLocation( 'hand', $current_player_id ));
         
         // Cards played on the table
-        $result['herd'] = $this->cards->getCardsInLocation( 'herd' );
+        $result['herd'] = array_values($this->cards->getCardsInLocation( 'herd' ));
         
         $sql = "SELECT card_id, card_slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
         $slowpokes = self::getCollectionFromDb( $sql );
