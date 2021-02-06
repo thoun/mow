@@ -2,6 +2,10 @@
 @import url(../../../css/csslayer.css);
 /* Note: you must not use any @import directive other than this one */
 /********* You can start writing your CSS below this line: **********/
+.direction-anticlockwise {
+  transform: scaleX(-1);
+}
+
 #direction-text {
   text-align: right;
   font-size: 110%;
@@ -10,9 +14,6 @@
 #direction-text #direction-play-symbol {
   display: inline-block;
   transition: transform 500ms ease-in-out;
-}
-#direction-text #direction-play-symbol.direction-anticlockwise {
-  transform: scaleX(-1);
 }
 
 #gamezone {
