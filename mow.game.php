@@ -20,10 +20,6 @@
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once("modules/constants.inc.php");
 
-// will create CSS file from SCSS everytime the PHP file is called, comment or remove when the dev is over !!!
-require_once("modules/scss.php");
-compileScss();
-
 class mow extends Table
 {
 	function __construct( )
@@ -126,8 +122,8 @@ class mow extends Table
 			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
         }
                
-        $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
-        //$this->cards->createCards( $cards, 'deck' );
+        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        $this->cards->createCards( $cards, 'deck' );
 	   
 
         // Activate first player (which is in general a good idea :) )

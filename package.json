@@ -1,0 +1,24 @@
+{
+  "name": "mow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mow.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:scss": "sass --no-source-map src/mow.scss mow.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thoun/mow.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thoun/mow/issues"
+  },
+  "homepage": "https://github.com/thoun/mow#readme",
+  "devDependencies": {
+    "sass": "^1.32.6",
+    "typescript": "^4.1.3"
+  }
+}

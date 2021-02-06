@@ -1,0 +1,13 @@
+{
+    "rootDir": ".", 
+    "compilerOptions": {
+      "target": "es5",
+      "module": "none",
+      "lib": ["dom", "esnext"],  
+      "sourceMap": false,
+      "outDir": "."
+    },
+    "files": [
+        "src/mow.ts"
+    ]
+}
