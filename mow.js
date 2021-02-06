@@ -1,3 +1,19 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * mow implementation : © <Your name here> <Your email address here>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * mow.ts
+ *
+ * mow user interface script
+ *
+ * In this file, you are describing the logic of your user interface, in Typescript language.
+ *
+ */
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
@@ -47,15 +63,16 @@ define([
             this.player_number = Object.keys(this.players).length;
             var ids = Object.keys(this.players);
             var player_id = gamedatas.current_player_id;
-            if (!ids.includes(player_id))
+            if (!ids.includes(player_id)) {
                 player_id = ids[0];
+            }
             var bottomPlayers = this.player_number === 5 ? 2 : 1;
             for (var i = 1; i <= this.player_number; i++) {
                 var player = this.players[player_id];
                 dojo.place(this.format_block('jstpl_playertable', {
                     player_id: player_id,
-                    player_color: player['color'],
-                    player_name: (player['name'].length > 10 ? (player['name'].substr(0, 10) + "...") : player['name'])
+                    player_color: player.color,
+                    player_name: (player.name.length > 10 ? (player.name.substr(0, 10) + "...") : player.name)
                 }), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
                 player_id = gamedatas.next_players_id[player_id];
             }
@@ -143,40 +160,44 @@ define([
         //
         onEnteringState: function (stateName, args) {
             //console.log( 'Entering state: '+stateName );
-            var _this = this;
             switch (stateName) {
                 case 'playerTurn':
-                    dojo.addClass("playertable-" + args.active_player, "active");
-                    if (this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
-                        var selectedCardId = this.playerHand.getSelectedItems()[0].id;
-                        if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
-                            setTimeout(function () {
-                                if (_this.isInterfaceLocked()) {
-                                    _this.playerHand.unselectAll();
-                                }
-                                else {
-                                    _this.onPlayerHandSelectionChanged();
-                                }
-                            }, 250);
-                        }
-                    }
+                    this.onEnteringStatePlayerTurn(args);
                     break;
                 case 'chooseDirection':
-                    if (this.isCurrentPlayerActive()) {
-                        dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-                        dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
-                        var keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-                        var changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
-                        $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
-                        $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
-                        dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
-                        dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
-                        dojo.style('direction_popin', 'display', 'flex');
-                        dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
-                    }
+                    this.onEnteringStateChooseDirection(args);
                     break;
-                case 'dummmy':
-                    break;
+            }
+        },
+        onEnteringStatePlayerTurn: function (args) {
+            var _this = this;
+            dojo.addClass("playertable-" + args.active_player, "active");
+            if (this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
+                var selectedCardId = this.playerHand.getSelectedItems()[0].id;
+                if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
+                    setTimeout(function () {
+                        if (_this.isInterfaceLocked()) {
+                            _this.playerHand.unselectAll();
+                        }
+                        else {
+                            _this.onPlayerHandSelectionChanged();
+                        }
+                    }, 250);
+                }
+            }
+        },
+        onEnteringStateChooseDirection: function (args) {
+            if (this.isCurrentPlayerActive()) {
+                dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+                dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+                var keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+                var changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+                $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
+                $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
+                dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
+                dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
+                dojo.style('direction_popin', 'display', 'flex');
+                dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
             }
         },
         // onLeavingState: this method is called each time we are leaving a game state.

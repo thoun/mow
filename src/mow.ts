@@ -7,13 +7,139 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * mow.js
+ * mow.ts
  *
  * mow user interface script
  * 
- * In this file, you are describing the logic of your user interface, in Javascript language.
+ * In this file, you are describing the logic of your user interface, in Typescript language.
  *
  */
+
+/**
+ * Framework interfaces
+ */
+interface Notif<T> {
+    args: T;
+    log: string;
+    move_id: number;
+    table_id: string;
+    time: number;
+    type: string;
+    uid: string;
+}
+
+/* TODO precise Function */
+interface Dojo {
+    place: Function;
+    style: Function;
+    hitch: Function;
+    addClass: Function;
+    removeClass: Function;
+    connect: Function;
+    query: Function;
+    subscribe: Function;
+    string: any;
+    fx: any;
+    marginBox: Function;
+    fadeIn: Function;
+    trim: Function;
+}
+
+type Gamestate = any;
+
+interface Player {
+    beginner: boolean;
+    color: string;
+    color_back: any | null;
+    eliminated: number;
+    id: string;
+    is_ai: string;
+    name: string;
+    score: string;
+    zombie: number;
+}
+
+interface Stock {
+    create: Function;
+    setSelectionMode: (selectionMode: number) => {};            
+    centerItems: boolean;
+    updateDisplay: (from: string) => {};
+}
+
+interface Card {
+    id: string;
+    location: string;
+    location_arg: string;
+    type: string;
+    type_arg: string;
+    slowpoke_type_arg?: string;
+}
+
+/**
+ * Mow interfaces
+ */
+
+interface MowGamedatas {
+    allowedCardsIds: number[];
+    current_player_id: string;
+    decision: {decision_type: string};
+    direction_clockwise: boolean;
+    game_result_neutralized: string;
+    gamestate: Gamestate; // TODO
+    gamestates: any; // TODO
+    hand: any; // TODO
+    herd: any; // TODO
+    neutralized_player_id: string;
+    next_players_id: any; // TODO
+    notifications: {last_packet_id: string, move_nbr: string}
+    playerorder: (string | number)[];
+    players: any; // TODO
+    remainingCards: number;
+    tablespeed: string;
+}
+
+interface MowHerdStock extends Stock {
+    acrobatic_overlap: number;
+    isAcrobatic: (stockItemId: number) => {};
+}
+
+interface NotifNewHandArgs {
+    cards: any[];
+    remainingCards: number;
+}
+
+interface NotifCardPlayedArgs {
+    player_id: string; 
+    color: number; 
+    value: number; 
+    card_id: string; 
+    slowpokeNumber: number;
+    remainingCards: number;
+}
+
+interface NotifAllowedCardsArgs {
+    allowedCardsIds: number[];
+}
+
+interface NotifNewCardArgs {
+    card: Card;
+}
+
+interface DirectionChangedArgs {
+    direction_clockwise: boolean;
+}
+
+interface NotifHerdCollectedArgs {
+    player_id: string;
+    points: number;
+}
+
+type NotifHandCollectedArgs = NotifHerdCollectedArgs;
+
+/**
+ * JS const
+ */
+
 declare const define;
 declare const ebg;
 declare const $;
@@ -26,7 +152,7 @@ define([
     "ebg/counter",
 	"ebg/stock"
 ],
-function (dojo, declare) {
+function (dojo: Dojo, declare: Function) {
     return declare("bgagame.mow", ebg.core.gamegui, {
         constructor: function(){
             //console.log('mow constructor');
@@ -67,7 +193,7 @@ function (dojo, declare) {
             "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
         */
         
-        setup: function( gamedatas ) {
+        setup: function( gamedatas: MowGamedatas) {
             //console.log( "Starting game setup" );
 
             // Place payer zone
@@ -76,18 +202,19 @@ function (dojo, declare) {
 
             const ids: string[] = Object.keys(this.players);
             let player_id: string = gamedatas.current_player_id;
-            if(!ids.includes(player_id))
+            if (!ids.includes(player_id)) {
                 player_id = ids[0];
+            }
 
             const bottomPlayers = this.player_number === 5 ? 2 : 1;
             
             for(let i = 1; i <= this.player_number; i++) {
-                const player = this.players[player_id];
+                const player: Player = this.players[player_id];
 
                 dojo.place(this.format_block( 'jstpl_playertable', {
                     player_id: player_id,
-                    player_color: player['color'],
-                    player_name: (player['name'].length > 10? (player['name'].substr(0,10) + "...") : player['name'])
+                    player_color: player.color,
+                    player_name: (player.name.length > 10? (player.name.substr(0,10) + "...") : player.name)
                 } ), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
 
                 player_id = gamedatas.next_players_id[player_id];
@@ -98,26 +225,26 @@ function (dojo, declare) {
             }
             
             // TODO: Set up your game interface here, according to "gamedatas"
-            this.playerHand = new ebg.stock();
+            this.playerHand = new ebg.stock() as Stock;
             this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
             this.playerHand.setSelectionMode(1);            
             this.playerHand.setSelectionAppearance('class');            
             this.playerHand.centerItems = true;
             this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
-            this.theHerd = new ebg.stock();
+            this.theHerd = new ebg.stock() as MowHerdStock;
             this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
             this.theHerd.setSelectionMode(0);            
             this.theHerd.centerItems = true;
             this.theHerd.acrobatic_overlap = 48;
-            this.theHerd.updateDisplay = (from) => this.updateDisplay.apply(this.theHerd, [from]);
-            this.theHerd.isAcrobatic = (stockItemId) => this.isAcrobatic.apply(this.theHerd, [stockItemId]);
+            this.theHerd.updateDisplay = (from: string) => this.updateDisplay.apply(this.theHerd, [from]);
+            this.theHerd.isAcrobatic = (stockItemId: number) => this.isAcrobatic.apply(this.theHerd, [stockItemId]);
 
             this.createCards();
             
             //console.log('this.gamedatas', this.gamedatas);
 			
 			// Cards in player's hand
-            Object.values(this.gamedatas.hand).forEach((card: any) => {
+            Object.values(this.gamedatas.hand).forEach((card: Card) => {
                 const color = card.type;
                 const value = card.type_arg;
                 //console.log('hand', card, this.getCardUniqueId( color, value ));
@@ -126,7 +253,7 @@ function (dojo, declare) {
             });
 			
 			 // Cards played on table
-             Object.values(this.gamedatas.herd).forEach((card: any) => {
+             Object.values(this.gamedatas.herd).forEach((card: Card) => {
                 const color = card.type;
                 const value = card.type_arg;
                 //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
@@ -159,7 +286,7 @@ function (dojo, declare) {
 
             // addItemType( type, weight, image, image_position ):
 
-            const idsByType = [[], [], [], []];
+            const idsByType: number[][] = [[], [], [], []];
 			
 			// Create cards types:
 			for(let value=1; value<=15; value++ ) {  // 1-15 green
@@ -200,57 +327,61 @@ function (dojo, declare) {
         // onEnteringState: this method is called each time we are entering into a new game state.
         //                  You can use this method to perform some user interface changes at this moment.
         //
-        onEnteringState: function( stateName, args )
+        onEnteringState: function( stateName: string, args: any )
         {
             //console.log( 'Entering state: '+stateName );
             
             switch( stateName ) {            
                 case 'playerTurn':
-                    dojo.addClass("playertable-" + args.active_player, "active");
-                    if( this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
-                        const selectedCardId = this.playerHand.getSelectedItems()[0].id;
-                        if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
-
-                            setTimeout(() => {
-                                if (this.isInterfaceLocked()) {
-                                    this.playerHand.unselectAll();
-                                } else {
-                                this.onPlayerHandSelectionChanged();
-                                }
-                            }, 250);
-                        }
-                    }
-                    
+                    this.onEnteringStatePlayerTurn(args);                    
                     break;
 
                 case 'chooseDirection':    
-                    if (this.isCurrentPlayerActive()) {
-                        dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-                        dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
-
-                        const keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-                        const changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
-
-                        $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
-                        $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
-                        dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
-                        dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
-
-                        dojo.style( 'direction_popin', 'display', 'flex' );
-                        dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
-                        
-                    }
-                    break;            
-            
-                case 'dummmy':
+                    this.onEnteringStateChooseDirection(args);     
                     break;
+            }
+        },
+
+        onEnteringStatePlayerTurn: function(args: any) {
+            dojo.addClass("playertable-" + args.active_player, "active");
+            if( this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
+                const selectedCardId = this.playerHand.getSelectedItems()[0].id;
+                if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(selectedCardId)) !== -1) {
+
+                    setTimeout(() => {
+                        if (this.isInterfaceLocked()) {
+                            this.playerHand.unselectAll();
+                        } else {
+                        this.onPlayerHandSelectionChanged();
+                        }
+                    }, 250);
+                }
+            }
+        },
+
+        onEnteringStateChooseDirection: function(args: any) {
+            if (this.isCurrentPlayerActive()) {
+                dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+                dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+
+                const keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+                const changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+
+                $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
+                $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
+                dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
+                dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
+
+                dojo.style( 'direction_popin', 'display', 'flex' );
+                dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+                
             }
         },
 
         // onLeavingState: this method is called each time we are leaving a game state.
         //                 You can use this method to perform some user interface changes at this moment.
         //
-        onLeavingState: function( stateName )
+        onLeavingState: function( stateName: string )
         {
             //console.log( 'Leaving state: '+stateName );
             
@@ -272,7 +403,7 @@ function (dojo, declare) {
         // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
         //                        action status bar (ie: the HTML links in the status bar).
         //        
-        onUpdateActionButtons: function( stateName, args )
+        onUpdateActionButtons: function( stateName: string, args: { canCollect: boolean } )
         {
             //console.log( 'onUpdateActionButtons: '+stateName );
             this.removeActionButtons();
@@ -301,12 +432,12 @@ function (dojo, declare) {
         
         */
 		
-        getCardUniqueId: function( color, value )
+        getCardUniqueId: function( color: number, value: number )
         {
             return Number(color)*100+Number(value);
         },
 		
-        getCardWeight: function( color, value )
+        getCardWeight: function( color: number, value: number )
         {
             let displayedNumber = Number(value);
             const iColor = Number(color);
@@ -317,15 +448,15 @@ function (dojo, declare) {
             return displayedNumber*100+iColor;
         },
 		
-		setSlowpokeWeight: function(slowpokeId, slowpokeNumber)		
+		setSlowpokeWeight: function(slowpokeId: number, slowpokeNumber: number)		
 		{
-            const keys = Object.keys(this.theHerd.item_type).filter(function(key) { return (key as any as number) % 100 == slowpokeNumber});
+            const keys = Object.keys(this.theHerd.item_type).filter((key) => (key as any as number) % 100 == slowpokeNumber);
             const lastKey = keys[keys.length-1];
             let lastKeyItemWeight = this.theHerd.item_type[lastKey].weight;
             this.theHerd.item_type[slowpokeId].weight = lastKeyItemWeight + 1;
 		},
 
-		playCardOnTable: function( player_id, color, value, card_id, slowpokeNumber )
+		playCardOnTable: function( player_id: number, color: number, value: number, card_id: number, slowpokeNumber: number )
         {
             if (slowpokeNumber != -1) {
                 this.setSlowpokeWeight(this.getCardUniqueId( color, value ), slowpokeNumber);
@@ -413,14 +544,14 @@ function (dojo, declare) {
         
         // TODO: from this point and below, you can write your game notifications handling methods
         
-		 notif_newHand: function( notif )
+		 notif_newHand: function( notif: Notif<NotifNewHandArgs> )
         {
             //console.log( 'notif_newHand', notif );
 
             // We received a new full hand of 5 cards.
             this.playerHand.removeAll();
 
-            notif.args.cards.forEach(card => {
+            notif.args.cards.forEach((card: Card) => {
                 const color = card.type;
                 const value = card.type_arg;
                 this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
@@ -429,7 +560,7 @@ function (dojo, declare) {
             this.setRemainingCards(notif.args.remainingCards);         
         },
 		
-        notif_cardPlayed: function( notif )
+        notif_cardPlayed: function( notif: Notif<NotifCardPlayedArgs> )
         {
             //console.log( 'notif_cardPlayed', notif );
             
@@ -440,13 +571,13 @@ function (dojo, declare) {
             this.setRemainingCards(notif.args.remainingCards);
         },
 		
-        notif_allowedCards: function( notif )
+        notif_allowedCards: function( notif: Notif<NotifAllowedCardsArgs> )
         {
             // console.log( 'notif_allowedCards', notif );            
             this.enableAllowedCards(notif.args.allowedCardsIds);
         },
         
-		 notif_newCard: function( notif )
+		 notif_newCard: function( notif: Notif<NotifNewCardArgs> )
         {
             //console.log( 'notif_newCard', notif );
 
@@ -463,7 +594,7 @@ function (dojo, declare) {
             
         },
 		
-        notif_directionChanged: function( notif )
+        notif_directionChanged: function( notif: Notif<DirectionChangedArgs> )
         {
             //console.log( 'notif_directionChanged', notif );
 
@@ -473,7 +604,7 @@ function (dojo, declare) {
             dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
         },
 		
-        notif_herdCollected: function( notif )
+        notif_herdCollected: function( notif: Notif<NotifHerdCollectedArgs> )
         {
             //console.log( 'notif_herdCollected', notif );
             
@@ -487,7 +618,7 @@ function (dojo, declare) {
             this.playerHand.unselectAll();
         },
 		
-        notif_handCollected: function( notif )
+        notif_handCollected: function( notif: Notif<NotifHandCollectedArgs> )
         {
            // console.log( 'notif_handCollected', notif );
             
@@ -531,7 +662,7 @@ function (dojo, declare) {
         ////////////////////////////////
         ////////////////////////////////
         
-        takeAction: function (action, data, callback) {
+        takeAction: function (action: string, data?: any, callback?: Function) {
           data = data || {};
           data.lock = true;
           callback = callback || function () {};
@@ -564,7 +695,7 @@ function (dojo, declare) {
         
         /* This enable to inject translatable styled things to logs or action bar */
         /* @Override */
-        format_string_recursive : function(log, args) {
+        format_string_recursive : function(log: string, args: any) {
             try {
                 if (log && args && !args.processed) {
                     // Representation of the color of a card
@@ -587,13 +718,13 @@ function (dojo, declare) {
             return this.inherited(arguments);
         },
 
-        isAcrobatic: function(stockItemId) {
+        isAcrobatic: function(stockItemId: number) {
             const item = this.items[stockItemId];
             return item.type === 570 || item.type === 590;
         },
 
         /* stock method override to place acrobatics */
-        updateDisplay: function(from) {
+        updateDisplay: function(from: string) {
             if (!$(this.control_name)) {
                 return;
             }
@@ -812,7 +943,7 @@ function (dojo, declare) {
             dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
         },
 
-        setupNewCard: function( card_div, card_type_id, card_id )
+        setupNewCard: function( card_div: HTMLDivElement, card_type_id: number, card_id: string )
         {
             let tooltip = "<span class='tooltip-fly'></span> : " + Math.floor(card_type_id / 100) + "<br/>";
             switch( card_type_id ) {
