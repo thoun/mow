@@ -5,9 +5,12 @@
       "module": "none",
       "lib": ["dom", "esnext"],  
       "sourceMap": false,
-      "outDir": "."
+      "outDir": ".",
+      "typeRoots": ["./typings"]
     },
     "files": [
+        "src/framework.d.ts",
+        "src/mow.d.ts",
         "src/mow.ts"
     ]
 }
