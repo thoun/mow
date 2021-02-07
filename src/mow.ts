@@ -22,24 +22,22 @@
 declare const define;
 declare const ebg;
 declare const $;
-declare const g_gamethemeurl;
-declare const _;
 //declare const dojo;
 
 class Mow implements Game {
 
-    gamedatas: MowGamedatas;
-    playerHand: Stock = null;
-    theHerd: MowHerdStock = null;
-    allowedCardsIds: number[];
-    player_id: string;
+    private gamedatas: MowGamedatas;
+    private playerHand: Stock = null;
+    private theHerd: MowHerdStock = null;
+    private allowedCardsIds: number[];
+    private player_id: string;
 
-    cardwidth: number = 121;
-    cardheight: number = 178;
-    players: { [playerId: number]: Player };
-    playerNumber: number;
+    private cardwidth: number = 121;
+    private cardheight: number = 178;
+    private players: { [playerId: number]: Player };
+    private playerNumber: number;
     
-    colors = [
+    private colors = [
         'forestgreen',
         'goldenrod',
         'lightsalmon',
@@ -48,7 +46,7 @@ class Mow implements Game {
         'teal'
     ];
 
-    remainingCardsColors = [
+    private remainingCardsColors = [
         '#FF0000',
         '#FF3300',
         '#ff6600',
@@ -56,6 +54,8 @@ class Mow implements Game {
         '#FFCC00',
         '#FFFF00'
     ];
+
+    private mowCards = new MowCards();
 
     constructor() {}
         
@@ -72,7 +72,7 @@ class Mow implements Game {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     
-    setup(gamedatas: MowGamedatas) {
+   public setup(gamedatas: MowGamedatas) {
         //console.log( "Starting game setup" );
 
         // Place payer zone
@@ -109,6 +109,8 @@ class Mow implements Game {
         this.playerHand.setSelectionAppearance('class');            
         this.playerHand.centerItems = true;
         this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
+        dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
+
         this.theHerd = new ebg.stock() as MowHerdStock;
         this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
         this.theHerd.setSelectionMode(0);            
@@ -117,29 +119,20 @@ class Mow implements Game {
         this.theHerd.updateDisplay = (from: string) => updateDisplay.apply(this.theHerd, [from]);
         this.theHerd.isAcrobatic = (stockItemId: number) => isAcrobatic.apply(this.theHerd, [stockItemId]);
 
-        this.createCards();
+        this.mowCards.createCards([this.theHerd, this.playerHand]);
         
         //console.log('this.gamedatas', this.gamedatas);
         
         // Cards in player's hand
-        this.gamedatas.hand.forEach((card: Card) => {
-            const color = card.type;
-            const value = card.type_arg;
-            //console.log('hand', card, this.getCardUniqueId( color, value ));
-            
-            this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
-        });
+        this.gamedatas.hand.forEach((card: Card) => this.addCardToHand(card));
         
         // Cards played on table
         this.gamedatas.herd.forEach((card: Card) => {
-            const color = card.type;
-            const value = card.type_arg;
-            //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
+            const cardUniqueId = this.mowCards.getCardUniqueId( card.type, card.type_arg );
             if (card.slowpoke_type_arg) {
-                this.setSlowpokeWeight(this.getCardUniqueId( color, value ), Number(card.slowpoke_type_arg));
-            }
-            
-            this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
+                this.setSlowpokeWeight(cardUniqueId, Number(card.slowpoke_type_arg));
+            }            
+            this.addCardToHerd(card);
         });
 
         this.setRemainingCards(this.gamedatas.remainingCards);
@@ -158,55 +151,13 @@ class Mow implements Game {
         //console.log( "Ending game setup" );
     }
 
-    createCards() {
-
-        dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
-
-        // addItemType( type, weight, image, image_position ):
-
-        const idsByType: number[][] = [[], [], [], []];
-        
-        // Create cards types:
-        for(let value=1; value<=15; value++ ) {  // 1-15 green
-            idsByType[0].push(value);
-        }
-        
-        for(let value=2; value<=14; value++ ) {  // 2-14 yellow
-            idsByType[1].push(value);
-        }
-        
-        for(let value=3; value<=13; value++ ) {  // 3-13 orange
-            idsByType[2].push(value);
-        }
-        
-        for(let value=7; value<=9; value++ ) {  // 7,8,9 red
-            idsByType[3].push(value);
-        }		
-        
-
-        idsByType[5] = [0, 16, 21, 22, 70, 90];
-
-        for (let type in idsByType) {
-            const cardsurl = g_gamethemeurl+'img/cards'+type+'.jpg';
-
-            for (let id=0; id<idsByType[type].length; id++) {
-                const cardId = idsByType[type][id];
-                const card_type_id = this.getCardUniqueId(type, cardId);
-                const cardWeight = this.getCardWeight(type, cardId);
-                this.playerHand.addItemType( card_type_id, cardWeight, cardsurl, id );		
-                this.theHerd.addItemType( card_type_id, cardWeight, cardsurl, id );	
-            }
-        }
-    }     
-
     ///////////////////////////////////////////////////
     //// Game & client states
     
     // onEnteringState: this method is called each time we are entering into a new game state.
     //                  You can use this method to perform some user interface changes at this moment.
     //
-    onEnteringState( stateName: string, args: any )
-    {
+    public onEnteringState(stateName: string, args: any) {
         //console.log( 'Entering state: '+stateName );
         
         switch( stateName ) {            
@@ -215,12 +166,12 @@ class Mow implements Game {
                 break;
 
             case 'chooseDirection':    
-                this.onEnteringStateChooseDirection(args);     
+                this.onEnteringStateChooseDirection(args.args);     
                 break;
         }
     }
 
-    onEnteringStatePlayerTurn(args: any) {
+    private onEnteringStatePlayerTurn(args: { active_player: string | number }) {
         dojo.addClass("playertable-" + args.active_player, "active");
         if((this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             const selectedCardId = this.playerHand.getSelectedItems()[0].id;
@@ -237,13 +188,13 @@ class Mow implements Game {
         }
     }
 
-    onEnteringStateChooseDirection(args: any) {
+    private onEnteringStateChooseDirection(args: { direction_clockwise: boolean }) {
         if ((this as any).isCurrentPlayerActive()) {
-            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-            dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
 
-            const keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-            const changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+            const keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+            const changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
 
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
             $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
@@ -251,7 +202,7 @@ class Mow implements Game {
             dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
 
             dojo.style( 'direction_popin', 'display', 'flex' );
-            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
             
         }
     }
@@ -259,8 +210,7 @@ class Mow implements Game {
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
-    onLeavingState( stateName: string )
-    {
+    public onLeavingState(stateName: string) {
         //console.log( 'Leaving state: '+stateName );
         
         switch( stateName ) {
@@ -281,8 +231,7 @@ class Mow implements Game {
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //        
-    onUpdateActionButtons( stateName: string, args: { canCollect: boolean } )
-    {
+    public onUpdateActionButtons(stateName: string, args: { canCollect: boolean }) {
         //console.log( 'onUpdateActionButtons: '+stateName );
         (this as any).removeActionButtons();
                     
@@ -310,40 +259,26 @@ class Mow implements Game {
     
     */
     
-    getCardUniqueId( color: number | string, value: number | string ) {
-        return Number(color)*100+Number(value);
-    }
-    
-    getCardWeight( color: number | string, value: number | string ) {
-        let displayedNumber = Number(value);
-        const iColor = Number(color);
-        if (displayedNumber === 70 || displayedNumber === 90) {
-            displayedNumber /= 10;
-        }
-        //return color;
-        return displayedNumber*100+iColor;
-    }
-    
-    setSlowpokeWeight(slowpokeId: number, slowpokeNumber: number) {
+    private setSlowpokeWeight(slowpokeId: number, slowpokeNumber: number) {
         const keys = Object.keys(this.theHerd.item_type).filter((key) => (key as any as number) % 100 == slowpokeNumber);
         const lastKey = keys[keys.length-1];
         let lastKeyItemWeight = this.theHerd.item_type[lastKey].weight;
         this.theHerd.item_type[slowpokeId].weight = lastKeyItemWeight + 1;
     }
 
-    playCardOnTable( player_id: string, color: number, value: number, card_id: string, slowpokeNumber: number ) {
+    private playCardOnTable(playerId: string, card: Partial<Card>, slowpokeNumber: number) {
         if (slowpokeNumber != -1) {
-            this.setSlowpokeWeight(this.getCardUniqueId( color, value ), slowpokeNumber);
+            this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.type_arg), slowpokeNumber);
         }
             
-        if( player_id != this.player_id ) {
+        if( playerId != this.player_id ) {
             // Some opponent played a card
             // Move card from player panel
-            this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'playertable-'+player_id );
+            this.addCardToHerd(card, 'playertable-'+playerId);
         } else {
             // You played a card. Move card from the hand and remove corresponding item
-            this.theHerd.addToStockWithId( this.getCardUniqueId( color, value ), card_id, 'myhand_item_'+card_id );
-            this.playerHand.removeFromStockById( card_id );
+            this.addCardToHerd(card, 'myhand_item_'+card.id);
+            this.playerHand.removeFromStockById(card.id);
         }
 
     }
@@ -363,14 +298,14 @@ class Mow implements Game {
     */
     
 
-    onCollectHerd(){
+   public onCollectHerd() {
         if(!(this as any).checkAction('collectHerd'))
         return;
     
         this.takeAction("collectHerd");
     }
 
-    onKeepDirection(){
+    public onKeepDirection() {
         if(!(this as any).checkAction('setDirection'))
         return;
         this.takeAction("setDirection", {
@@ -378,15 +313,13 @@ class Mow implements Game {
         });
     }
 
-    onChangeDirection(){
+    public onChangeDirection() {
         if(!(this as any).checkAction('setDirection'))
         return;
         this.takeAction("setDirection", {
             change: true
         });
     }
-            
-    
     
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -400,8 +333,7 @@ class Mow implements Game {
                 your mow.game.php file.
     
     */
-    setupNotifications()
-    {
+   public setupNotifications() {
         //console.log( 'notifications subscriptions setup' );
         
         dojo.subscribe( 'newHand', this, "notif_newHand" );
@@ -418,49 +350,43 @@ class Mow implements Game {
     
     // TODO: from this point and below, you can write your game notifications handling methods
     
-    notif_newHand( notif: Notif<NotifNewHandArgs> )
-    {
+    public notif_newHand( notif: Notif<NotifNewHandArgs> ) {
         //console.log( 'notif_newHand', notif );
 
         // We received a new full hand of 5 cards.
         this.playerHand.removeAll();
 
-        notif.args.cards.forEach((card: Card) => {
-            const color = card.type;
-            const value = card.type_arg;
-            this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id );
-        });
+        notif.args.cards.forEach((card: Card) => this.addCardToHand(card));
 
         this.setRemainingCards(notif.args.remainingCards);         
     }
     
-    notif_cardPlayed( notif: Notif<NotifCardPlayedArgs> )
-    {
+    public notif_cardPlayed( notif: Notif<NotifCardPlayedArgs> ) {
         //console.log( 'notif_cardPlayed', notif );
         
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         
-        this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, notif.args.slowpokeNumber);
+        this.playCardOnTable(notif.args.player_id, {
+            id: notif.args.card_id,
+            type: ''+notif.args.color,
+            type_arg: ''+notif.args.value
+        }, notif.args.slowpokeNumber);
 
         this.setRemainingCards(notif.args.remainingCards);
     }
     
-    notif_allowedCards( notif: Notif<NotifAllowedCardsArgs> )
-    {
+    public notif_allowedCards( notif: Notif<NotifAllowedCardsArgs> ) {
         // console.log( 'notif_allowedCards', notif );            
         this.enableAllowedCards(notif.args.allowedCardsIds);
     }
     
-    notif_newCard( notif: Notif<NotifNewCardArgs> )
-    {
+    public notif_newCard( notif: Notif<NotifNewCardArgs> ) {
         //console.log( 'notif_newCard', notif );
 
         const card = notif.args.card;
-        const color = card.type;
-        const value = card.type_arg;
         setTimeout(() => {
             // timeout so new card appear after played card animation
-            this.playerHand.addToStockWithId( this.getCardUniqueId( color, value ), card.id, 'remainingCards' );
+            this.addCardToHand(card, 'remainingCards');
             if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
                 dojo.query('#myhand_item_' + card.id).addClass("disabled");
             }
@@ -468,8 +394,7 @@ class Mow implements Game {
         
     }
     
-    notif_directionChanged( notif: Notif<DirectionChangedArgs> )
-    {
+    public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
         //console.log( 'notif_directionChanged', notif );
 
         dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
@@ -478,8 +403,7 @@ class Mow implements Game {
         dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
     }
     
-    notif_herdCollected( notif: Notif<NotifHerdCollectedArgs> )
-    {
+    public notif_herdCollected( notif: Notif<NotifHerdCollectedArgs> ) {
         //console.log( 'notif_herdCollected', notif );
         
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
@@ -492,8 +416,7 @@ class Mow implements Game {
         this.playerHand.unselectAll();
     }
     
-    notif_handCollected( notif: Notif<NotifHandCollectedArgs> )
-    {
+    public notif_handCollected( notif: Notif<NotifHandCollectedArgs> ) {
         // console.log( 'notif_handCollected', notif );
         
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
@@ -511,8 +434,7 @@ class Mow implements Game {
     /////    Cards selection    ////
     ////////////////////////////////
     ////////////////////////////////
-    onPlayerHandSelectionChanged()
-    {            
+    public onPlayerHandSelectionChanged() {            
         const items = this.playerHand.getSelectedItems();
         if (items.length == 1) {
             if ((this as any).checkAction('playCard', true)) {
@@ -536,22 +458,22 @@ class Mow implements Game {
     ////////////////////////////////
     ////////////////////////////////
     
-    takeAction(action: string, data?: any, callback?: Function) {
+    private takeAction(action: string, data?: any, callback?: Function) {
         data = data || {};
         data.lock = true;
         callback = callback || function () {};
         (this as any).ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
     }
 
-    setRemainingCards(remainingCards: number) {
+    private setRemainingCards(remainingCards: number) {
         let $remainingCards = $('remainingCards');
         $remainingCards.innerHTML = remainingCards;
         dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
     }
 
-    enableAllowedCards(allowedCardsIds: number[]) {
+    private enableAllowedCards(allowedCardsIds: number[]) {
         this.allowedCardsIds = allowedCardsIds;
-        this.playerHand.items.map(item => Number(item.id)).forEach(id => {
+        this.playerHand.items.map(item => Number(item.id)).forEach((id: number) => {
             try {
                 const disallowed = allowedCardsIds.indexOf(id) === -1;
                 dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
@@ -565,7 +487,7 @@ class Mow implements Game {
     
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
-    format_string_recursive(log: string, args: any) {
+    public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
                 // Representation of the color of a card
@@ -588,27 +510,11 @@ class Mow implements Game {
         return (this as any).inherited(arguments);
     }
 
-    setupNewCard( card_div: HTMLDivElement, card_type_id: number, card_id: string )
-    {
-        let tooltip = "<span class='tooltip-fly'></span> : " + Math.floor(card_type_id / 100) + "<br/>";
-        switch( card_type_id ) {
-            case 500:
-            case 516:
-                tooltip += _("Blocker: Play this cow to close off one end of the line.");
-                break;    
-            case 570:
-            case 590:
-                tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
-                break;            
-            case 521:
-            case 522:
-                tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
-                break;
-        }
-        (this as any).addTooltip( card_div.id, tooltip, '' );
+    public setupNewCard( card_div: HTMLDivElement, card_type_id: number, card_id: string ) {
+        (this as any).addTooltip( card_div.id, this.mowCards.getTooltip(card_type_id), '' );
     }
 
-    getNextPlayer() {
+    private getNextPlayer() {
         const activePlayerId = (this as any).getActivePlayerId();
         const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
         const nextPlayerIndex = activePlayerIndex >= this.gamedatas.playerorder.length-1 ? 0 : activePlayerIndex+1;
@@ -616,11 +522,23 @@ class Mow implements Game {
         return this.gamedatas.players[Number(this.gamedatas.playerorder[nextPlayerIndex])];
     }
 
-    getPreviousPlayer() {
+    private getPreviousPlayer() {
         const activePlayerId = (this as any).getActivePlayerId();
         const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
         const previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length-1 : activePlayerIndex-1;
         //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[previousPlayerIndex]);
         return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];
+    }
+
+    private addCardToStock(stock: Stock, card: Partial<Card>, from?: string) {
+        stock.addToStockWithId(this.mowCards.getCardUniqueId(card.type, card.type_arg), card.id, from);
+    }
+
+    private addCardToHand(card: Partial<Card>, from?: string) {
+        this.addCardToStock(this.playerHand, card, from);
+    }
+
+    private addCardToHerd(card: Partial<Card>, from?: string) {
+        this.addCardToStock(this.theHerd, card, from);
     }
 }

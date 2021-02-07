@@ -235,6 +235,74 @@ function updateDisplay(from) {
     }
     dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
 }
+var MowCards = /** @class */ (function () {
+    function MowCards() {
+    }
+    MowCards.prototype.createCards = function (stocks) {
+        var idsByType = [[], [], [], []];
+        // Create cards types:
+        for (var value = 1; value <= 15; value++) { // 1-15 green
+            idsByType[0].push(value);
+        }
+        for (var value = 2; value <= 14; value++) { // 2-14 yellow
+            idsByType[1].push(value);
+        }
+        for (var value = 3; value <= 13; value++) { // 3-13 orange
+            idsByType[2].push(value);
+        }
+        for (var value = 7; value <= 9; value++) { // 7,8,9 red
+            idsByType[3].push(value);
+        }
+        idsByType[5] = [0, 16, 21, 22, 70, 90];
+        var _loop_1 = function (type) {
+            var cardsurl = g_gamethemeurl + 'img/cards' + type + '.jpg';
+            var _loop_2 = function (id) {
+                var cardId = idsByType[type][id];
+                var card_type_id = this_1.getCardUniqueId(type, cardId);
+                var cardWeight = this_1.getCardWeight(type, cardId);
+                stocks.forEach(function (stock) { return stock.addItemType(card_type_id, cardWeight, cardsurl, id); });
+            };
+            for (var id = 0; id < idsByType[type].length; id++) {
+                _loop_2(id);
+            }
+        };
+        var this_1 = this;
+        for (var type in idsByType) {
+            _loop_1(type);
+        }
+    };
+    MowCards.prototype.getCardUniqueId = function (color, value) {
+        return Number(color) * 100 + Number(value);
+    };
+    MowCards.prototype.getCardWeight = function (color, value) {
+        var displayedNumber = Number(value);
+        var iColor = Number(color);
+        if (displayedNumber === 70 || displayedNumber === 90) {
+            displayedNumber /= 10;
+        }
+        //return color;
+        return displayedNumber * 100 + iColor;
+    };
+    MowCards.prototype.getTooltip = function (card_type_id) {
+        var tooltip = "<div class=\"tooltip-fly\"><span class=\"tooltip-fly-img\"></span> : " + Math.floor(card_type_id / 100) + "</div>";
+        switch (card_type_id) {
+            case 500:
+            case 516:
+                tooltip += _("Blocker: Play this cow to close off one end of the line.");
+                break;
+            case 570:
+            case 590:
+                tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
+                break;
+            case 521:
+            case 522:
+                tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
+                break;
+        }
+        return tooltip;
+    };
+    return MowCards;
+}());
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -274,6 +342,7 @@ var Mow = /** @class */ (function () {
             '#FFCC00',
             '#FFFF00'
         ];
+        this.mowCards = new MowCards();
     }
     /*
         setup:
@@ -318,6 +387,7 @@ var Mow = /** @class */ (function () {
         this.playerHand.setSelectionAppearance('class');
         this.playerHand.centerItems = true;
         this.playerHand.onItemCreate = dojo.hitch(this, 'setupNewCard');
+        dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
         this.theHerd = new ebg.stock();
         this.theHerd.create(this, $('theherd'), this.cardwidth, this.cardheight);
         this.theHerd.setSelectionMode(0);
@@ -325,24 +395,17 @@ var Mow = /** @class */ (function () {
         this.theHerd.acrobatic_overlap = 48;
         this.theHerd.updateDisplay = function (from) { return updateDisplay.apply(_this.theHerd, [from]); };
         this.theHerd.isAcrobatic = function (stockItemId) { return isAcrobatic.apply(_this.theHerd, [stockItemId]); };
-        this.createCards();
+        this.mowCards.createCards([this.theHerd, this.playerHand]);
         //console.log('this.gamedatas', this.gamedatas);
         // Cards in player's hand
-        this.gamedatas.hand.forEach(function (card) {
-            var color = card.type;
-            var value = card.type_arg;
-            //console.log('hand', card, this.getCardUniqueId( color, value ));
-            _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
-        });
+        this.gamedatas.hand.forEach(function (card) { return _this.addCardToHand(card); });
         // Cards played on table
         this.gamedatas.herd.forEach(function (card) {
-            var color = card.type;
-            var value = card.type_arg;
-            //console.log('herd', card, card.id, this.getCardUniqueId( color, value ));
+            var cardUniqueId = _this.mowCards.getCardUniqueId(card.type, card.type_arg);
             if (card.slowpoke_type_arg) {
-                _this.setSlowpokeWeight(_this.getCardUniqueId(color, value), Number(card.slowpoke_type_arg));
+                _this.setSlowpokeWeight(cardUniqueId, Number(card.slowpoke_type_arg));
             }
-            _this.theHerd.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
+            _this.addCardToHerd(card);
         });
         this.setRemainingCards(this.gamedatas.remainingCards);
         this.enableAllowedCards(this.gamedatas.allowedCardsIds);
@@ -356,35 +419,6 @@ var Mow = /** @class */ (function () {
         this.setupNotifications();
         //console.log( "Ending game setup" );
     };
-    Mow.prototype.createCards = function () {
-        dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
-        // addItemType( type, weight, image, image_position ):
-        var idsByType = [[], [], [], []];
-        // Create cards types:
-        for (var value = 1; value <= 15; value++) { // 1-15 green
-            idsByType[0].push(value);
-        }
-        for (var value = 2; value <= 14; value++) { // 2-14 yellow
-            idsByType[1].push(value);
-        }
-        for (var value = 3; value <= 13; value++) { // 3-13 orange
-            idsByType[2].push(value);
-        }
-        for (var value = 7; value <= 9; value++) { // 7,8,9 red
-            idsByType[3].push(value);
-        }
-        idsByType[5] = [0, 16, 21, 22, 70, 90];
-        for (var type in idsByType) {
-            var cardsurl = g_gamethemeurl + 'img/cards' + type + '.jpg';
-            for (var id = 0; id < idsByType[type].length; id++) {
-                var cardId = idsByType[type][id];
-                var card_type_id = this.getCardUniqueId(type, cardId);
-                var cardWeight = this.getCardWeight(type, cardId);
-                this.playerHand.addItemType(card_type_id, cardWeight, cardsurl, id);
-                this.theHerd.addItemType(card_type_id, cardWeight, cardsurl, id);
-            }
-        }
-    };
     ///////////////////////////////////////////////////
     //// Game & client states
     // onEnteringState: this method is called each time we are entering into a new game state.
@@ -397,7 +431,7 @@ var Mow = /** @class */ (function () {
                 this.onEnteringStatePlayerTurn(args);
                 break;
             case 'chooseDirection':
-                this.onEnteringStateChooseDirection(args);
+                this.onEnteringStateChooseDirection(args.args);
                 break;
         }
     };
@@ -421,16 +455,16 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.onEnteringStateChooseDirection = function (args) {
         if (this.isCurrentPlayerActive()) {
-            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-            dojo[args.args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
-            var keepDirectionNextPlayer = args.args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-            var changeDirectionNextPlayer = args.args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
+            dojo[args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+            var keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+            var changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
             $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
             dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
             dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
             dojo.style('direction_popin', 'display', 'flex');
-            dojo[args.args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -473,37 +507,25 @@ var Mow = /** @class */ (function () {
         script.
     
     */
-    Mow.prototype.getCardUniqueId = function (color, value) {
-        return Number(color) * 100 + Number(value);
-    };
-    Mow.prototype.getCardWeight = function (color, value) {
-        var displayedNumber = Number(value);
-        var iColor = Number(color);
-        if (displayedNumber === 70 || displayedNumber === 90) {
-            displayedNumber /= 10;
-        }
-        //return color;
-        return displayedNumber * 100 + iColor;
-    };
     Mow.prototype.setSlowpokeWeight = function (slowpokeId, slowpokeNumber) {
         var keys = Object.keys(this.theHerd.item_type).filter(function (key) { return key % 100 == slowpokeNumber; });
         var lastKey = keys[keys.length - 1];
         var lastKeyItemWeight = this.theHerd.item_type[lastKey].weight;
         this.theHerd.item_type[slowpokeId].weight = lastKeyItemWeight + 1;
     };
-    Mow.prototype.playCardOnTable = function (player_id, color, value, card_id, slowpokeNumber) {
+    Mow.prototype.playCardOnTable = function (playerId, card, slowpokeNumber) {
         if (slowpokeNumber != -1) {
-            this.setSlowpokeWeight(this.getCardUniqueId(color, value), slowpokeNumber);
+            this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.type_arg), slowpokeNumber);
         }
-        if (player_id != this.player_id) {
+        if (playerId != this.player_id) {
             // Some opponent played a card
             // Move card from player panel
-            this.theHerd.addToStockWithId(this.getCardUniqueId(color, value), card_id, 'playertable-' + player_id);
+            this.addCardToHerd(card, 'playertable-' + playerId);
         }
         else {
             // You played a card. Move card from the hand and remove corresponding item
-            this.theHerd.addToStockWithId(this.getCardUniqueId(color, value), card_id, 'myhand_item_' + card_id);
-            this.playerHand.removeFromStockById(card_id);
+            this.addCardToHerd(card, 'myhand_item_' + card.id);
+            this.playerHand.removeFromStockById(card.id);
         }
     };
     ///////////////////////////////////////////////////
@@ -566,17 +588,17 @@ var Mow = /** @class */ (function () {
         var _this = this;
         // We received a new full hand of 5 cards.
         this.playerHand.removeAll();
-        notif.args.cards.forEach(function (card) {
-            var color = card.type;
-            var value = card.type_arg;
-            _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id);
-        });
+        notif.args.cards.forEach(function (card) { return _this.addCardToHand(card); });
         this.setRemainingCards(notif.args.remainingCards);
     };
     Mow.prototype.notif_cardPlayed = function (notif) {
         //console.log( 'notif_cardPlayed', notif );
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-        this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id, notif.args.slowpokeNumber);
+        this.playCardOnTable(notif.args.player_id, {
+            id: notif.args.card_id,
+            type: '' + notif.args.color,
+            type_arg: '' + notif.args.value
+        }, notif.args.slowpokeNumber);
         this.setRemainingCards(notif.args.remainingCards);
     };
     Mow.prototype.notif_allowedCards = function (notif) {
@@ -587,11 +609,9 @@ var Mow = /** @class */ (function () {
         //console.log( 'notif_newCard', notif );
         var _this = this;
         var card = notif.args.card;
-        var color = card.type;
-        var value = card.type_arg;
         setTimeout(function () {
             // timeout so new card appear after played card animation
-            _this.playerHand.addToStockWithId(_this.getCardUniqueId(color, value), card.id, 'remainingCards');
+            _this.addCardToHand(card, 'remainingCards');
             if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
                 dojo.query('#myhand_item_' + card.id).addClass("disabled");
             }
@@ -699,22 +719,7 @@ var Mow = /** @class */ (function () {
         return this.inherited(arguments);
     };
     Mow.prototype.setupNewCard = function (card_div, card_type_id, card_id) {
-        var tooltip = "<span class='tooltip-fly'></span> : " + Math.floor(card_type_id / 100) + "<br/>";
-        switch (card_type_id) {
-            case 500:
-            case 516:
-                tooltip += _("Blocker: Play this cow to close off one end of the line.");
-                break;
-            case 570:
-            case 590:
-                tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
-                break;
-            case 521:
-            case 522:
-                tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
-                break;
-        }
-        this.addTooltip(card_div.id, tooltip, '');
+        this.addTooltip(card_div.id, this.mowCards.getTooltip(card_type_id), '');
     };
     Mow.prototype.getNextPlayer = function () {
         var activePlayerId = this.getActivePlayerId();
@@ -729,6 +734,15 @@ var Mow = /** @class */ (function () {
         var previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length - 1 : activePlayerIndex - 1;
         //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[previousPlayerIndex]);
         return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];
+    };
+    Mow.prototype.addCardToStock = function (stock, card, from) {
+        stock.addToStockWithId(this.mowCards.getCardUniqueId(card.type, card.type_arg), card.id, from);
+    };
+    Mow.prototype.addCardToHand = function (card, from) {
+        this.addCardToStock(this.playerHand, card, from);
+    };
+    Mow.prototype.addCardToHerd = function (card, from) {
+        this.addCardToStock(this.theHerd, card, from);
     };
     return Mow;
 }());

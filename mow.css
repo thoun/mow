@@ -237,15 +237,17 @@
   color: red;
 }
 
-/* tooltips */
 .tooltip-fly {
+  white-space: nowrap;
+  min-width: 40px;
+}
+.tooltip-fly .tooltip-fly-img {
   display: inline-block;
   width: 20px;
   height: 18px;
   background-image: url("img/fly.png");
 }
 
-/* logs */
 .log-arrow:before {
   content: "▲";
   display: inline-block;

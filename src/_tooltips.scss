@@ -1,0 +1,11 @@
+.tooltip-fly {
+    white-space: nowrap;
+    min-width: 40px;
+
+    .tooltip-fly-img {
+        display: inline-block;
+        width: 20px;
+        height: 18px;
+        background-image: url('img/fly.png'); 
+    }
+}

@@ -1,0 +1,98 @@
+.spectatorMode #myhand_wrap {
+    display: none;
+}
+
+#myhand .stockitem, #theherd .stockitem, #direction, #deck {
+    border-radius:10px;
+    margin:5px;
+    border:1px solid grey;
+}
+ 
+#handdeck {
+    display: flex;
+    flex-wrap: wrap;
+
+    /* hand */
+    #myhand_wrap {
+        flex: 1;
+
+        #myhand {
+            .stockitem_selected {
+                margin:3px;
+                transform:scale(1.02);
+                border:2px solid black !important;
+                box-shadow:1px 1px 5px black, 2px 2px 4px black;
+            }
+
+            .stockitem {
+                &:not(.disabled) {
+                    cursor:pointer;
+                }
+
+                &:hover {
+                    margin:4px;
+                    border:2px solid black !important;
+                }
+
+                &.disabled {
+                    cursor:not-allowed;
+                    opacity:0.5 !important;
+
+                    &:hover {
+                        cursor:not-allowed;
+                        margin:5px;
+                        border:1px solid gray !important;
+                    }
+                }
+            }
+        }
+    }
+
+    #myhand.bounce {
+        animation-name: handBounce;
+        animation-duration: 1s;
+        animation-fill-mode: both;
+
+    }
+
+    @keyframes handBounce {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.5);
+        }
+        100% {
+            transform: scale(1);
+        }
+    } 
+
+    .direction-anticlockwise {
+        transform: scaleX(-1);
+    }
+
+    /* deck */
+
+    #deck_wrap {
+        margin-left: 10px;
+        text-align: center;
+    }
+
+    .card-back {
+        width: 183px;
+        height: 122px;
+        background-image: url('img/card-back.jpg');
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #remainingCards {
+        font-size: 400%;
+        color: white;
+        text-shadow: 0px 0px 10px black, 0px 0px 5px black, 0px 0px 2px black;
+
+        &.remainingCardsEmpty {
+            color: red;
+        }
+    }
+}
