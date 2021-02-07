@@ -6,54 +6,56 @@ class MowCards {
         const idsByType: number[][] = [[], [], [], []];
         
         // Create cards types:
-        for(let value=1; value<=15; value++ ) {  // 1-15 green
-            idsByType[0].push(value);
+        for(let number=1; number<=15; number++) {  // 1-15 green
+            idsByType[0].push(number);
         }
         
-        for(let value=2; value<=14; value++ ) {  // 2-14 yellow
-            idsByType[1].push(value);
+        for(let number=2; number<=14; number++) {  // 2-14 yellow
+            idsByType[1].push(number);
         }
         
-        for(let value=3; value<=13; value++ ) {  // 3-13 orange
-            idsByType[2].push(value);
+        for(let number=3; number<=13; number++) {  // 3-13 orange
+            idsByType[2].push(number);
         }
         
-        for(let value=7; value<=9; value++ ) {  // 7,8,9 red
-            idsByType[3].push(value);
+        for(let number=7; number<=9; number++) {  // 7,8,9 red
+            idsByType[3].push(number);
         }
 
         idsByType[5] = [0, 16, 21, 22, 70, 90];
 
-        for (let type in idsByType) {
-            const cardsurl = g_gamethemeurl+'img/cards'+type+'.jpg';
+        idsByType.forEach((idByType, type) => {
+            const cardsurl = `${g_gamethemeurl}img/cards${type}.jpg`;
 
-            for (let id=0; id<idsByType[type].length; id++) {
-                const cardId = idsByType[type][id];
-                const card_type_id = this.getCardUniqueId(type, cardId);
-                const cardWeight = this.getCardWeight(type, cardId);
-                stocks.forEach(stock => stock.addItemType(card_type_id, cardWeight, cardsurl, id));	
-            }
-        }
+            idByType.forEach((cardId, id) =>
+                stocks.forEach(stock => 
+                    stock.addItemType(
+                        this.getCardUniqueId(type, cardId), 
+                        this.getCardWeight(type, cardId), 
+                        cardsurl, 
+                        id
+                    )
+                )
+            );
+        });
     }     
     
-    public getCardUniqueId( color: number | string, value: number | string ) {
-        return Number(color)*100+Number(value);
+    public getCardUniqueId(color: number, value: number) {
+        return color * 100 + value;
     }
     
-    public getCardWeight( color: number | string, value: number | string ) {
-        let displayedNumber = Number(value);
-        const iColor = Number(color);
+    public getCardWeight(color: number, value: number) {
+        let displayedNumber = value;
         if (displayedNumber === 70 || displayedNumber === 90) {
             displayedNumber /= 10;
         }
-        //return color;
-        return displayedNumber*100+iColor;
+        return displayedNumber * 100 + color;
     }
 
-    getTooltip(card_type_id: number)
+    getTooltip(cardTypeId: number)
     {
-        let tooltip = `<div class="tooltip-fly"><span class="tooltip-fly-img"></span> : ${Math.floor(card_type_id / 100)}</div>`;
-        switch( card_type_id ) {
+        let tooltip = `<div class="tooltip-fly"><span class="tooltip-fly-img"></span> : ${Math.floor(cardTypeId / 100)}</div>`;
+        switch( cardTypeId ) {
             case 500:
             case 516:
                 tooltip += _("Blocker: Play this cow to close off one end of the line.");

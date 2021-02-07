@@ -2,6 +2,15 @@
  * Mow interfaces
  */
 
+interface Card {
+    id: number;
+    location: string;
+    location_arg: number;
+    type: number;
+    number: number;
+    slowpokeNumber?: number;
+}
+
 interface MowGamedatas {
     allowedCardsIds: number[];
     current_player_id: string;
@@ -27,15 +36,15 @@ interface MowHerdStock extends Stock {
 }
 
 interface NotifNewHandArgs {
-    cards: any[];
+    cards: Card[];
     remainingCards: number;
 }
 
 interface NotifCardPlayedArgs {
     player_id: string; 
     color: number; 
-    value: number; 
-    card_id: string; 
+    number: number; 
+    card_id: number; 
     slowpokeNumber: number;
     remainingCards: number;
 }

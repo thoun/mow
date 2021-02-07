@@ -239,53 +239,44 @@ var MowCards = /** @class */ (function () {
     function MowCards() {
     }
     MowCards.prototype.createCards = function (stocks) {
+        var _this = this;
         var idsByType = [[], [], [], []];
         // Create cards types:
-        for (var value = 1; value <= 15; value++) { // 1-15 green
-            idsByType[0].push(value);
+        for (var number = 1; number <= 15; number++) { // 1-15 green
+            idsByType[0].push(number);
         }
-        for (var value = 2; value <= 14; value++) { // 2-14 yellow
-            idsByType[1].push(value);
+        for (var number = 2; number <= 14; number++) { // 2-14 yellow
+            idsByType[1].push(number);
         }
-        for (var value = 3; value <= 13; value++) { // 3-13 orange
-            idsByType[2].push(value);
+        for (var number = 3; number <= 13; number++) { // 3-13 orange
+            idsByType[2].push(number);
         }
-        for (var value = 7; value <= 9; value++) { // 7,8,9 red
-            idsByType[3].push(value);
+        for (var number = 7; number <= 9; number++) { // 7,8,9 red
+            idsByType[3].push(number);
         }
         idsByType[5] = [0, 16, 21, 22, 70, 90];
-        var _loop_1 = function (type) {
-            var cardsurl = g_gamethemeurl + 'img/cards' + type + '.jpg';
-            var _loop_2 = function (id) {
-                var cardId = idsByType[type][id];
-                var card_type_id = this_1.getCardUniqueId(type, cardId);
-                var cardWeight = this_1.getCardWeight(type, cardId);
-                stocks.forEach(function (stock) { return stock.addItemType(card_type_id, cardWeight, cardsurl, id); });
-            };
-            for (var id = 0; id < idsByType[type].length; id++) {
-                _loop_2(id);
-            }
-        };
-        var this_1 = this;
-        for (var type in idsByType) {
-            _loop_1(type);
-        }
+        idsByType.forEach(function (idByType, type) {
+            var cardsurl = g_gamethemeurl + "img/cards" + type + ".jpg";
+            idByType.forEach(function (cardId, id) {
+                return stocks.forEach(function (stock) {
+                    return stock.addItemType(_this.getCardUniqueId(type, cardId), _this.getCardWeight(type, cardId), cardsurl, id);
+                });
+            });
+        });
     };
     MowCards.prototype.getCardUniqueId = function (color, value) {
-        return Number(color) * 100 + Number(value);
+        return color * 100 + value;
     };
     MowCards.prototype.getCardWeight = function (color, value) {
-        var displayedNumber = Number(value);
-        var iColor = Number(color);
+        var displayedNumber = value;
         if (displayedNumber === 70 || displayedNumber === 90) {
             displayedNumber /= 10;
         }
-        //return color;
-        return displayedNumber * 100 + iColor;
+        return displayedNumber * 100 + color;
     };
-    MowCards.prototype.getTooltip = function (card_type_id) {
-        var tooltip = "<div class=\"tooltip-fly\"><span class=\"tooltip-fly-img\"></span> : " + Math.floor(card_type_id / 100) + "</div>";
-        switch (card_type_id) {
+    MowCards.prototype.getTooltip = function (cardTypeId) {
+        var tooltip = "<div class=\"tooltip-fly\"><span class=\"tooltip-fly-img\"></span> : " + Math.floor(cardTypeId / 100) + "</div>";
+        switch (cardTypeId) {
             case 500:
             case 516:
                 tooltip += _("Blocker: Play this cow to close off one end of the line.");
@@ -401,9 +392,9 @@ var Mow = /** @class */ (function () {
         this.gamedatas.hand.forEach(function (card) { return _this.addCardToHand(card); });
         // Cards played on table
         this.gamedatas.herd.forEach(function (card) {
-            var cardUniqueId = _this.mowCards.getCardUniqueId(card.type, card.type_arg);
-            if (card.slowpoke_type_arg) {
-                _this.setSlowpokeWeight(cardUniqueId, Number(card.slowpoke_type_arg));
+            var cardUniqueId = _this.mowCards.getCardUniqueId(card.type, card.number);
+            if (card.slowpokeNumber) {
+                _this.setSlowpokeWeight(cardUniqueId, card.slowpokeNumber);
             }
             _this.addCardToHerd(card);
         });
@@ -515,7 +506,7 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.playCardOnTable = function (playerId, card, slowpokeNumber) {
         if (slowpokeNumber != -1) {
-            this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.type_arg), slowpokeNumber);
+            this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.number), slowpokeNumber);
         }
         if (playerId != this.player_id) {
             // Some opponent played a card
@@ -525,7 +516,7 @@ var Mow = /** @class */ (function () {
         else {
             // You played a card. Move card from the hand and remove corresponding item
             this.addCardToHerd(card, 'myhand_item_' + card.id);
-            this.playerHand.removeFromStockById(card.id);
+            this.playerHand.removeFromStockById('' + card.id);
         }
     };
     ///////////////////////////////////////////////////
@@ -596,8 +587,8 @@ var Mow = /** @class */ (function () {
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         this.playCardOnTable(notif.args.player_id, {
             id: notif.args.card_id,
-            type: '' + notif.args.color,
-            type_arg: '' + notif.args.value
+            type: notif.args.color,
+            number: notif.args.number
         }, notif.args.slowpokeNumber);
         this.setRemainingCards(notif.args.remainingCards);
     };
@@ -612,8 +603,8 @@ var Mow = /** @class */ (function () {
         setTimeout(function () {
             // timeout so new card appear after played card animation
             _this.addCardToHand(card, 'remainingCards');
-            if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
-                dojo.query('#myhand_item_' + card.id).addClass("disabled");
+            if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(card.id) === -1) {
+                dojo.query("#myhand_item_" + card.id).addClass("disabled");
             }
         }, 1000);
     };
@@ -667,11 +658,10 @@ var Mow = /** @class */ (function () {
     /////////    Utils    //////////
     ////////////////////////////////
     ////////////////////////////////
-    Mow.prototype.takeAction = function (action, data, callback) {
+    Mow.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
-        callback = callback || function () { };
-        this.ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
+        this.ajaxcall("/mow/mow/" + action + ".html", data, this, function () { });
     };
     Mow.prototype.setRemainingCards = function (remainingCards) {
         var $remainingCards = $('remainingCards');
@@ -736,7 +726,7 @@ var Mow = /** @class */ (function () {
         return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];
     };
     Mow.prototype.addCardToStock = function (stock, card, from) {
-        stock.addToStockWithId(this.mowCards.getCardUniqueId(card.type, card.type_arg), card.id, from);
+        stock.addToStockWithId(this.mowCards.getCardUniqueId(card.type, card.number), '' + card.id, from);
     };
     Mow.prototype.addCardToHand = function (card, from) {
         this.addCardToStock(this.playerHand, card, from);

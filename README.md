@@ -12,19 +12,19 @@ In VS Code, add extension https://marketplace.visualstudio.com/items?itemName=em
 ```json
         "commands": [
             {
-                "match": "mow\\.ts$",
+                "match": ".*\\.ts$",
                 "isAsync": true,
                 "cmd": "npm run build:ts"
             },
             {
-                "match": "mow\\.scss$",
+                "match": ".*\\.scss$",
                 "isAsync": true,
                 "cmd": "npm run build:scss"
             }
         ]
     }
 ```
-If you use it for another game, replace `mow` mentions on this snippet, on package.json `build:scss` script and on tsconfig.json `files` property.
+If you use it for another game, replace `mow` mentions on package.json `build:scss` script and on tsconfig.json `files` property.
 
 ## Auto-upload builded files
 Also add one auto-FTP upload extension (for example https://marketplace.visualstudio.com/items?itemName=lukasz-wronski.ftp-sync) and configure it. The extension will detected modified files in the workspace, including builded ones, and upload them to remote server.

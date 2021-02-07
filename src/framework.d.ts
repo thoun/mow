@@ -51,12 +51,3 @@ interface Player {
     score: string;
     zombie: number;
 }
-
-interface Card {
-    id: string;
-    location: string;
-    location_arg: string;
-    type: string;
-    type_arg: string;
-    slowpoke_type_arg?: string;
-}

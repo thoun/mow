@@ -19,6 +19,7 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once("modules/constants.inc.php");
+require_once("modules/card.php");
 
 class mow extends Table
 {
@@ -155,17 +156,17 @@ class mow extends Table
         $result['next_players_id'] = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
   
 		// Cards in player hand      
-        $result['hand'] = array_values($this->cards->getCardsInLocation( 'hand', $current_player_id ));
+        $result['hand'] = array_map(function($dbCard) { return new Card($dbCard); }, array_values($this->cards->getCardsInLocation( 'hand', $current_player_id )));
         
         // Cards played on the table
-        $result['herd'] = array_values($this->cards->getCardsInLocation( 'herd' ));
+        $result['herd'] = array_map(function($dbCard) { return new Card($dbCard); }, array_values($this->cards->getCardsInLocation( 'herd' )));
         
         $sql = "SELECT card_id, card_slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
         $slowpokes = self::getCollectionFromDb( $sql );
         foreach($slowpokes as $slowpoke) {
             foreach($result['herd'] as &$herdCard) {
-                if (intval($herdCard['id']) == intval($slowpoke['card_id'])) {
-                    $herdCard['slowpoke_type_arg'] = $slowpoke['card_slowpoke_type_arg'];
+                if ($herdCard->id == intval($slowpoke['card_id'])) {
+                    $herdCard->slowpokeNumber = intval($slowpoke['card_slowpoke_type_arg']);
                 }
             }
         }
@@ -341,13 +342,13 @@ class mow extends Table
 
         // And notify
         self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber_rec}${precision}'), array(
-            'card_id' => $card_id,
+            'card_id' => intval($card_id),
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'value' => $card['type_arg'],
+            'number' => intval($card['type_arg']),
             'displayedNumber' => $displayedNumber, // The substitution will be done in JS format_string_recursive function
             'displayedNumber_rec'=> ['log'=>'${displayedNumber}', 'args'=> ['displayedNumber'=>$displayedNumber, 'displayedColor'=>$card['type'] ]],
-            'color' => $card['type'],
+            'color' => intval($card['type']),
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
             'slowpokeNumber' => $slowpokeNumber
@@ -357,7 +358,7 @@ class mow extends Table
         $newCard = $this->cards->pickCard('deck', $player_id );
         if ($newCard) {
             self::notifyPlayer( $player_id, 'newCard', '', array( 
-                'card' => $newCard
+                'card' => new Card($newCard)
             ) );
         }
 
@@ -561,7 +562,7 @@ class mow extends Table
             
             // Notify player about his cards
             self::notifyPlayer( $player_id, 'newHand', '', array( 
-                'cards' => $cards,
+                'cards' => array_map(function($dbCard) { return new Card($dbCard); }, $cards),
                 'remainingCards' => $remainingCards
             ) );
         }

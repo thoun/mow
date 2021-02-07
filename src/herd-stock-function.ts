@@ -50,9 +50,9 @@ function updateDisplay(from: string) {
     const topDestinations = [];
     const leftDestinations = [];
     const zIndexes = [];
-    const rows = [];
+    const rows: number[][] = [];
     const acrobaticRowsIndexes = [];
-    this.items.forEach((item, i: number) => {
+    (this as Stock).items.forEach((item, i: number) => {
         if (typeof item.loc == "undefined") {
             const rowIndex = Math.max(0, rows.length - 1);
             //console.log(`item ${i}, rowIndex ${rowIndex}, arobatic ${this.isAcrobatic(i)}`);
@@ -113,7 +113,7 @@ function updateDisplay(from: string) {
         if (rowIsAcrobatic) {
             row.forEach((acrobaticNumber: number) => {
                 const acrobaticDisplayedNumber = (this.items[acrobaticNumber].type / 10) % 10;
-                const matchingItemIndex = this.items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
+                const matchingItemIndex = (this as Stock).items.findIndex(item => item.type % 10 === acrobaticDisplayedNumber);
                 //console.log('iAcrobatic: ',iAcrobatic, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
                 const item = this.items[acrobaticNumber];
                 if (typeof item.loc == "undefined") {

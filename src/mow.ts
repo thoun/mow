@@ -128,9 +128,9 @@ class Mow implements Game {
         
         // Cards played on table
         this.gamedatas.herd.forEach((card: Card) => {
-            const cardUniqueId = this.mowCards.getCardUniqueId( card.type, card.type_arg );
-            if (card.slowpoke_type_arg) {
-                this.setSlowpokeWeight(cardUniqueId, Number(card.slowpoke_type_arg));
+            const cardUniqueId = this.mowCards.getCardUniqueId(card.type, card.number);
+            if (card.slowpokeNumber) {
+                this.setSlowpokeWeight(cardUniqueId, card.slowpokeNumber);
             }            
             this.addCardToHerd(card);
         });
@@ -268,7 +268,7 @@ class Mow implements Game {
 
     private playCardOnTable(playerId: string, card: Partial<Card>, slowpokeNumber: number) {
         if (slowpokeNumber != -1) {
-            this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.type_arg), slowpokeNumber);
+            this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.number), slowpokeNumber);
         }
             
         if( playerId != this.player_id ) {
@@ -278,7 +278,7 @@ class Mow implements Game {
         } else {
             // You played a card. Move card from the hand and remove corresponding item
             this.addCardToHerd(card, 'myhand_item_'+card.id);
-            this.playerHand.removeFromStockById(card.id);
+            this.playerHand.removeFromStockById(''+card.id);
         }
 
     }
@@ -368,8 +368,8 @@ class Mow implements Game {
         
         this.playCardOnTable(notif.args.player_id, {
             id: notif.args.card_id,
-            type: ''+notif.args.color,
-            type_arg: ''+notif.args.value
+            type: notif.args.color,
+            number: notif.args.number
         }, notif.args.slowpokeNumber);
 
         this.setRemainingCards(notif.args.remainingCards);
@@ -387,8 +387,8 @@ class Mow implements Game {
         setTimeout(() => {
             // timeout so new card appear after played card animation
             this.addCardToHand(card, 'remainingCards');
-            if (this.allowedCardsIds && this.allowedCardsIds.indexOf(Number(card.id)) === -1) {
-                dojo.query('#myhand_item_' + card.id).addClass("disabled");
+            if (this.allowedCardsIds && this.allowedCardsIds.indexOf(card.id) === -1) {
+                dojo.query(`#myhand_item_${card.id}`).addClass("disabled");
             }
         }, 1000);
         
@@ -458,11 +458,10 @@ class Mow implements Game {
     ////////////////////////////////
     ////////////////////////////////
     
-    private takeAction(action: string, data?: any, callback?: Function) {
+    private takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
-        callback = callback || function () {};
-        (this as any).ajaxcall("/mow/mow/" + action + ".html", data, this, callback);
+        (this as any).ajaxcall(`/mow/mow/${action}.html`, data, this, () => {});
     }
 
     private setRemainingCards(remainingCards: number) {
@@ -531,7 +530,7 @@ class Mow implements Game {
     }
 
     private addCardToStock(stock: Stock, card: Partial<Card>, from?: string) {
-        stock.addToStockWithId(this.mowCards.getCardUniqueId(card.type, card.type_arg), card.id, from);
+        stock.addToStockWithId(this.mowCards.getCardUniqueId(card.type, card.number), ''+card.id, from);
     }
 
     private addCardToHand(card: Partial<Card>, from?: string) {
