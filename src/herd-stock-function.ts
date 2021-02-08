@@ -18,7 +18,7 @@
 /**
  * JS const
  */
-declare const dojo;
+declare const dojo: Dojo;
 
 function isAcrobatic(stockItemId: number) {
     const item = this.items[stockItemId];

@@ -33,7 +33,8 @@ class mow extends Table
         //  If your game has options (variants), you also have to associate here a label to
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
-        parent::__construct();self::initGameStateLabels( array( 
+        parent::__construct();
+        self::initGameStateLabels( array( 
                 "direction_clockwise" => 10
         ) );
 		

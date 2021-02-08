@@ -22,7 +22,7 @@
 declare const define;
 declare const ebg;
 declare const $;
-//declare const dojo;
+//declare const doj: Dojoo;
 
 class Mow implements Game {
 
@@ -190,8 +190,8 @@ class Mow implements Game {
 
     private onEnteringStateChooseDirection(args: { direction_clockwise: boolean }) {
         if ((this as any).isCurrentPlayerActive()) {
-            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-            dojo[args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+            dojo.toggleClass('keepDirectionSymbol', 'direction-anticlockwise', !args.direction_clockwise);
+            dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
 
             const keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
             const changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
@@ -202,7 +202,7 @@ class Mow implements Game {
             dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
 
             dojo.style( 'direction_popin', 'display', 'flex' );
-            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+            dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
             
         }
     }
@@ -397,7 +397,7 @@ class Mow implements Game {
     public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
         //console.log( 'notif_directionChanged', notif );
 
-        dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
+        dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
 
         dojo.removeClass("direction-animation-symbol");
         dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
@@ -475,7 +475,7 @@ class Mow implements Game {
         this.playerHand.items.map(item => Number(item.id)).forEach((id: number) => {
             try {
                 const disallowed = allowedCardsIds.indexOf(id) === -1;
-                dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                dojo.toggleClass('myhand_item_' + id, 'disabled', disallowed);
                 if (disallowed) {
                     this.playerHand.unselectItem(''+id);
                 }

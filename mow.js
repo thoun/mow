@@ -310,7 +310,7 @@ var MowCards = /** @class */ (function () {
  * In this file, you are describing the logic of your user interface, in Typescript language.
  *
  */
-//declare const dojo;
+//declare const doj: Dojoo;
 var Mow = /** @class */ (function () {
     function Mow() {
         this.playerHand = null;
@@ -446,8 +446,8 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.onEnteringStateChooseDirection = function (args) {
         if (this.isCurrentPlayerActive()) {
-            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('keepDirectionSymbol', 'direction-anticlockwise');
-            dojo[args.direction_clockwise ? 'addClass' : 'removeClass']('changeDirectionSymbol', 'direction-anticlockwise');
+            dojo.toggleClass('keepDirectionSymbol', 'direction-anticlockwise', !args.direction_clockwise);
+            dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
             var keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
             var changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
@@ -455,7 +455,7 @@ var Mow = /** @class */ (function () {
             dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
             dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
             dojo.style('direction_popin', 'display', 'flex');
-            dojo[args.direction_clockwise ? 'removeClass' : 'addClass']('direction_popin', 'swap');
+            dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -610,7 +610,7 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.notif_directionChanged = function (notif) {
         //console.log( 'notif_directionChanged', notif );
-        dojo[notif.args.direction_clockwise ? 'removeClass' : 'addClass']('direction-play-symbol', 'direction-anticlockwise');
+        dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
         dojo.removeClass("direction-animation-symbol");
         dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
     };
@@ -674,7 +674,7 @@ var Mow = /** @class */ (function () {
         this.playerHand.items.map(function (item) { return Number(item.id); }).forEach(function (id) {
             try {
                 var disallowed = allowedCardsIds.indexOf(id) === -1;
-                dojo[disallowed ? 'addClass' : 'removeClass']('myhand_item_' + id, 'disabled');
+                dojo.toggleClass('myhand_item_' + id, 'disabled', disallowed);
                 if (disallowed) {
                     _this.playerHand.unselectItem('' + id);
                 }
