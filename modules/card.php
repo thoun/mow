@@ -3,7 +3,7 @@ class Card {
     public $id;
     public $location;
     public $location_arg;
-    public $type;
+    public $type; // fly number
     public $number;
     public $slowpokeNumber;
 

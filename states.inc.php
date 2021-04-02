@@ -51,67 +51,62 @@ require_once("modules/constants.inc.php");
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
-$machinestates = array(
+$machinestates = [
 
     // The initial state. Please do not modify.
-    ST_BGA_GAME_SETUP => array(
+    ST_BGA_GAME_SETUP => [
         "name" => "gameSetup",
         "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => ST_NEW_HAND )
-    ),
+        "transitions" => [ "" => ST_NEW_HAND ]
+    ],
     	
-	ST_NEW_HAND => array(
+	ST_NEW_HAND => [
         "name" => "newHand",
         "description" => "",
         "type" => "game",
         "action" => "stNewHand",
         "updateGameProgression" => true,   
-        "transitions" => array( "" => ST_PLAYER_TURN )
-    ),  
+        "transitions" => [ "" => ST_PLAYER_TURN ]
+    ],  
 
-    ST_PLAYER_TURN => array(
+    ST_PLAYER_TURN => [
     	"name" => "playerTurn",
     	"description" => clienttranslate('${actplayer} must play a card or pick up the herd'),
     	"descriptionmyturn" => clienttranslate('${you} must play a card or pick up the herd'),
     	"type" => "activeplayer",
         "args" => "argPlayerTurn",
-    	"possibleactions" => array( "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ),
-    	"transitions" => array( 
+    	"possibleactions" => [ "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ],
+    	"transitions" => [ 
             "playCard" => ST_NEXT_PLAYER, 
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAYER_TURN, 
-            "collectLastHerd" => ST_COLLECT_HAND
-        )
-    ),
+            "collectLastHerd" => ST_COLLECT_HAND,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
 
-    ST_CHOOSE_DIRECTION => array(
+    ST_CHOOSE_DIRECTION => [
     	"name" => "chooseDirection",
     	"description" => clienttranslate('${actplayer} must choose the direction'),
     	"descriptionmyturn" => clienttranslate('${you} must choose the direction'),
     	"type" => "activeplayer",
         "args" => "argChooseDirection",
-    	"possibleactions" => array( "setDirection" ),
-    	"transitions" => array( "setDirection" => ST_NEXT_PLAYER )
-    ),
-
-    /*ST_COLLECT_HERD => array(
-        "name" => "newHand",
-        "description" => "",
-        "type" => "game",
-        "action" => "stNewHand",
-        "updateGameProgression" => true,   
-        "transitions" => array( "" => ST_PLAYER_TURN )
-    ),  */
+    	"possibleactions" => [ "setDirection" ],
+    	"transitions" => [ 
+            "setDirection" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
 	
-	ST_NEXT_PLAYER => array(
+	ST_NEXT_PLAYER => [
         "name" => "nextPlayer",
         "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "transitions" => array( "nextPlayer" => ST_PLAYER_TURN/*, "endGame" => ST_END_HAND*/ )
-    ), 
+        "transitions" => [ "nextPlayer" => ST_PLAYER_TURN ]
+    ], 
 
 
     ST_COLLECT_HAND => [
@@ -125,25 +120,25 @@ $machinestates = array(
       ],
 
     // End of the hand (scoring, etc...)
-    ST_END_HAND => array(
+    ST_END_HAND => [
       "name" => "endHand",
       "description" => "",
       "type" => "game",
       "action" => "stEndHand",
-      "transitions" => array( "nextHand" => ST_NEW_HAND, "endGame" => ST_END_GAME )
-    ),
+      "transitions" => [ "nextHand" => ST_NEW_HAND, "endGame" => ST_END_GAME ]
+    ],
 
    
     // Final state.
     // Please do not modify.
-    ST_END_GAME => array(
+    ST_END_GAME => [
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
         "args" => "argGameEnd"
-    )
+    ]
 
-);
+];
 
 

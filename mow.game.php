@@ -21,10 +21,8 @@ require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once("modules/constants.inc.php");
 require_once("modules/card.php");
 
-class mow extends Table
-{
-	function __construct( )
-	{
+class mow extends Table {
+	function __construct() {
         	
  
         // Your global variables labels:
@@ -34,16 +32,15 @@ class mow extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
-        self::initGameStateLabels( array( 
+        self::initGameStateLabels([ 
                 "direction_clockwise" => 10
-        ) );
+        ]);
 		
         $this->cards = self::getNew( "module.common.deck" );
         $this->cards->init( "card" );
 	}
 	
-    protected function getGameName( )
-    {
+    protected function getGameName() {
         return "mow";
     }	
 
@@ -54,21 +51,20 @@ class mow extends Table
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame( $players, $options = array() )
-    {    
+    protected function setupNewGame( $players, $options = [] ) {    
         $sql = "DELETE FROM player WHERE 1 ";
         self::DbQuery( $sql ); 
 
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the game
-        $default_colors = array( "ff0000", "008000", "0000ff", "ffa500", "773300" );
+        $default_colors = ["ff0000", "008000", "0000ff", "ffa500", "773300"];
 
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = array();
+        $values = [];
         foreach( $players as $player_id => $player )
         {
             $color = array_shift( $default_colors );
@@ -88,7 +84,11 @@ class mow extends Table
         self::initStat( 'table', 'collectedHerdsNumber', 0 );    // Init a table statistics
         self::initStat( 'table', 'keepDirectionNumber', 0 ); 
         self::initStat( 'table', 'changeDirectionNumber', 0 );
-        self::initStat( 'player', 'nbrNoPointCards', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'table', 'collectedPoints', 0 ); 
+        self::initStat( 'table', 'remainingPoints', 0 );
+        self::initStat( 'player', 'collectedPoints', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'remainingPoints', 0 ); 
+        self::initStat( 'player', 'nbrNoPointCards', 0 );
         self::initStat( 'player', 'nbrOnePointCards', 0 );
         self::initStat( 'player', 'nbrTwoPointsCards', 0 );
         self::initStat( 'player', 'nbrThreePointsCards', 0 );
@@ -96,32 +96,26 @@ class mow extends Table
 
         // setup the initial game situation here
 	    // Create the cards:	   
-	    $cards = array();
+	    $cards = [];
 		
-		for( $value=1; $value<=15; $value++ )   // 1-15 green
-        {
-			$cards[] = array( 'type' => 0, 'type_arg' => $value, 'nbr' => 1, 'id' => $value);
+		for( $value=1; $value<=15; $value++ ) { // 1-15 green
+			$cards[] = ['type' => 0, 'type_arg' => $value, 'nbr' => 1, 'id' => $value];
 		}
 		
-		for( $value=2; $value<=14; $value++ )   // 2-14 yellow
-        {
-			$cards[] = array( 'type' => 1, 'type_arg' => $value, 'nbr' => 1, 'id' => 100 + $value);
+		for( $value=2; $value<=14; $value++ ) { // 2-14 yellow
+			$cards[] = ['type' => 1, 'type_arg' => $value, 'nbr' => 1, 'id' => 100 + $value];
 		}
 		
-		for( $value=3; $value<=13; $value++ )   // 3-13 orange
-        {
-			$cards[] = array( 'type' => 2, 'type_arg' => $value, 'nbr' => 1, 'id' => 200 + $value);
+		for( $value=3; $value<=13; $value++ ) { // 3-13 orange
+			$cards[] = ['type' => 2, 'type_arg' => $value, 'nbr' => 1, 'id' => 200 + $value];
 		}
 		
-		for( $value=7; $value<=9; $value++ )   // 7,8,9 red
-        {
-			$cards[] = array( 'type' => 3, 'type_arg' => $value, 'nbr' => 1, 'id' => 300 + $value);
-		}
+		for( $value=7; $value<=9; $value++ ) { // 7,8,9 red
+			$cards[] = ['type' => 3, 'type_arg' => $value, 'nbr' => 1, 'id' => 300 + $value];
+		}		
 		
-		// The six special cows
-		foreach($this->special_labels as $key => $value)
-		{
-			$cards[] = array( 'type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value);
+		foreach($this->special_labels as $key => $value) { // The six special cows
+			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
         //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
@@ -143,9 +137,10 @@ class mow extends Table
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas()
-    {
-        $result = array( 'players' => array() );
+    protected function getAllDatas() {
+        $result = [
+            'players' => []
+        ];
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
     
@@ -157,17 +152,22 @@ class mow extends Table
         $result['next_players_id'] = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
   
 		// Cards in player hand      
-        $result['hand'] = array_map(function($dbCard) { return new Card($dbCard); }, array_values($this->cards->getCardsInLocation( 'hand', $current_player_id )));
+        $result['hand'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'hand', $current_player_id ));
         
         // Cards played on the table
-        $result['herd'] = array_map(function($dbCard) { return new Card($dbCard); }, array_values($this->cards->getCardsInLocation( 'herd' )));
+        $result['herd'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'herd' ));
         
-        $sql = "SELECT card_id, card_slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
-        $slowpokes = self::getCollectionFromDb( $sql );
+        $sql = "SELECT card_id id, card_slowpoke_type_arg slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
+        $slowpokes = array_map(function($db) { 
+            $slowpoke = new stdClass();
+            $slowpoke->id = intval($db['id']);
+            $slowpoke->slowpokeNumber = intval($db['slowpoke_type_arg']);
+            return $slowpoke;
+        }, array_values(self::getCollectionFromDb($sql)));
         foreach($slowpokes as $slowpoke) {
             foreach($result['herd'] as &$herdCard) {
-                if ($herdCard->id == intval($slowpoke['card_id'])) {
-                    $herdCard->slowpokeNumber = intval($slowpoke['card_slowpoke_type_arg']);
+                if ($herdCard->id == $slowpoke->id) {
+                    $herdCard->slowpokeNumber = $slowpoke->slowpokeNumber;
                 }
             }
         }
@@ -192,8 +192,7 @@ class mow extends Table
         This method is called each time we are in a game state with the "updateGameProgression" property set to true 
         (see states.inc.php)
     */
-    function getGameProgression()
-    {
+    function getGameProgression() {
         $sql = "SELECT min(player_score) FROM player ";
         $minscore = self::getUniqueValueFromDB( $sql );
 
@@ -205,27 +204,30 @@ class mow extends Table
 //////////// Utility functions
 ////////////    
 
-    /*
-        In this space, you can put any utility methods useful for your game logic
-    */
 
-    
-    /*
-        Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
-        These methods function is to return some additional information that is specific to the current
-        game state.
-    */
+    function getCardFromDb(array $dbCard) {
+        if (!$dbCard || !array_key_exists('id', $dbCard)) {
+            throw new Error('card doesn\'t exists '.json_encode($dbCard));
+        }
+        if (!$dbCard || !array_key_exists('location', $dbCard)) {
+            throw new Error('location doesn\'t exists '.json_encode($dbCard));
+        }
+        return new Card($dbCard);
+    }
 
-    function getAllowedCardsIds($pId) {
-        $hand = $this->cards->getCardsInLocation('hand', $pId);
-        $herd = $this->cards->getCardsInLocation('herd');
+    function getCardsFromDb(array $dbCards) {
+        return array_map(function($dbCard) { return $this->getCardFromDb($dbCard); }, array_values($dbCards));
+    }
+
+    function getAllowedCardsIds(int $pId) {
+        $hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $pId));
         
         $allowedCardIds = [];
         foreach($hand as $card) {
             try {
                 $this->controlCardPlayable($card);
-                $allowedCardIds[] = intval($card['id']);
-            } catch (Exception $e){}
+                $allowedCardIds[] = $card->id;
+            } catch (Exception $e) {}
         }
     
         return $allowedCardIds;
@@ -241,31 +243,31 @@ class mow extends Table
         (note: each method below must match an input method in mow.action.php)
     */
 
-    function controlCardInHand($player_id, $card_id) {
+    function controlCardInHand(int $player_id, int $card_id) {
         // Get all cards in player hand        
-        $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
+        $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $player_id));
 
         // Check that the card is in this hand
         $bIsInHand = false;
         foreach($player_hand as $current_card) {
-            if($current_card['id'] == $card_id) {
+            if($current_card->id == $card_id) {
                 $bIsInHand = true;
             }
         }
 
         if(!$bIsInHand) {
-            throw new BgaUserException(self::_("This card is not in your hand"));
+            throw new BgaUserException("This card is not in your hand");
         }
     }
 
-    function controlCardPlayable($card) {
-        $herdCards = $this->cards->getCardsInLocation('herd');
+    function controlCardPlayable(object $card) {
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd'));
 
         //self::dump('herdCards', json_encode($herdCards));
         $herdDisplayedNumbers = array_filter(
             array_map(function($current_card) {
-                if ($current_card['type'] != '5' || $current_card['type_arg'] == '0' || $current_card['type_arg'] == '16') {
-                    return intval($current_card['type_arg']);
+                if ($current_card->type != 5 || $current_card->number == 0 || $current_card->number == 16) {
+                    return $current_card->number;
                 } else {
                     return -1;
                 }
@@ -275,14 +277,14 @@ class mow extends Table
             });
 
         
-        $cardNumber = intval($card['type_arg']);
+        $cardNumber = $card->number;
 
         if (count($herdCards) > 0) {
             $minHerd = min($herdDisplayedNumbers);
             $maxHerd = max($herdDisplayedNumbers);
             
             // if it's not in the interval
-            if (($card['type'] != '5' || $card['type_arg'] == '0' || $card['type_arg'] == '16') && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
+            if (($card->type != 5 || $card->number == 0 || $card->number == 16) && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
                 if ($minHerd == $maxHerd) {
                     throw new BgaUserException(sprintf(self::_("You must play different than %s"), $minHerd), true);
                 } else {
@@ -302,28 +304,29 @@ class mow extends Table
             $places = $this->getPlacesForSlowpoke();
 
             if (count($places) == 0) {
-                throw new BgaUserException(self::_("You can't play slowpoke cow, no place available"), true);
+                throw new BgaUserException(self::_("You can't play slowpoke mow, no place available"), true);
             }
         }
     }    
     
     // Play a card from player hand
-    function playCard($card_id) {
-        self::checkAction("playCard");        
+    function playCard(int $card_id) {
+        self::checkAction("playCard");  
+              
         $player_id = self::getActivePlayerId();
-        $card = $this->cards->getCard( $card_id );
-
         $this->controlCardInHand($player_id, $card_id);
+
+        $card = $this->getCardFromDb($this->cards->getCard($card_id));
         $this->controlCardPlayable($card);
 
         $slowpokeNumber = -1;
-        if ($card['type_arg'] == 21 || $card['type_arg'] == 22) {
+        if ($card->number == 21 || $card->number == 22) {
             $places = $this->getPlacesForSlowpoke();
             
             //self::dump('$places', json_encode($places));
 
-            $slowpokeNumber = intval($places[0][0]['type_arg']);
-            $card['card_slowpoke_type_arg'] = $slowpokeNumber;             
+            $slowpokeNumber = intval($places[0][0]->number);
+            $card->slowpokeNumber = $slowpokeNumber;             
             $sql = "UPDATE card SET card_slowpoke_type_arg=$slowpokeNumber WHERE card_id='$card_id'";
             self::DbQuery($sql);
         }
@@ -331,7 +334,7 @@ class mow extends Table
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
             
-        $displayedNumber = intval($card['type_arg']);
+        $displayedNumber = $card->number;
         $precision = '';
         if ($displayedNumber == 21 || $displayedNumber == 22) {
             $displayedNumber = '';
@@ -342,62 +345,63 @@ class mow extends Table
         }
 
         // And notify
-        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber_rec}${precision}'), array(
+        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber_rec}${precision}'), [
             'card_id' => intval($card_id),
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'number' => intval($card['type_arg']),
+            'number' => $card->number,
             'displayedNumber' => $displayedNumber, // The substitution will be done in JS format_string_recursive function
-            'displayedNumber_rec'=> ['log'=>'${displayedNumber}', 'args'=> ['displayedNumber'=>$displayedNumber, 'displayedColor'=>$card['type'] ]],
-            'color' => intval($card['type']),
+            'displayedNumber_rec'=> ['log'=>'${displayedNumber}', 'args'=> ['displayedNumber'=>$displayedNumber, 'displayedColor'=>$card->type ]],
+            'color' => $card->type,
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
+            'i18n' => ['precision'],
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
-            'slowpokeNumber' => $slowpokeNumber
-        ));
+            'slowpokeNumber' => $slowpokeNumber,
+        ]);
 
         // get new card if possible
-        $newCard = $this->cards->pickCard('deck', $player_id );
-        if ($newCard) {
-            self::notifyPlayer( $player_id, 'newCard', '', array( 
-                'card' => new Card($newCard)
-            ) );
+        $dbCard = $this->cards->pickCard('deck', $player_id);
+        if ($dbCard) {
+            $newCard = $this->getCardFromDb($dbCard);
+            self::notifyPlayer( $player_id, 'newCard', '', [
+                'card' => $newCard
+            ]);
         }
 
-        // TODO notify all players
+        // notify all players
         $players = self::loadPlayersBasicInfos();
-        foreach( $players as $pId => $player )
-        {
+        foreach ($players as $pId => $player) {
             $allowedCardsIds = $this->getAllowedCardsIds($pId);
 
-            self::notifyPlayer( $pId, 'allowedCards', '', array( 
+            self::notifyPlayer( $pId, 'allowedCards', '', [
                 'allowedCardsIds' => $allowedCardsIds
-            ) );
+            ]);
         }
         
         // changing direction is useless with 2 players
-        $canChooseDirection = $card['type'] === '5' && self::getPlayersNumber() > 2;
+        $canChooseDirection = $card->type === 5 && self::getPlayersNumber() > 2;
         // Next player
         $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
     }
 
     function getPlacesForSlowpoke() {
         $places = [];
-        $herd = $this->cards->getCardsInLocation('herd');
-        $herdWithoutSlowpokes = array_values(array_filter($herd, function($card) { return $card['type_arg'] != 21 && $card['type_arg'] != 22; }));
+        $herd = $this->getCardsFromDb($this->cards->getCardsInLocation('herd'));
+        $herdWithoutSlowpokes = array_values(array_filter($herd, function($card) { return $card->number != 21 && $card->number != 22; }));
 
-        usort($herdWithoutSlowpokes, function ($a, $b) { return intval($a['type_arg']) - intval($b['type_arg']); });
+        usort($herdWithoutSlowpokes, function ($a, $b) { return $a->number - $b->number; });
         //self::dump('$sortedHerdWithoutSlowpokes', json_encode($herdWithoutSlowpokes));
 
         $lastDisplayedNumber = null;
         $lastCard = null;
-        $herdHasSlowpoke = count(array_filter($herd, function($card) { return $card['type_arg'] == '21' || $card['type_arg'] == '22'; })) > 0;
+        $herdHasSlowpoke = count(array_filter($herd, function($card) { return $card->number == 21 || $card->number == 22; })) > 0;
         $herdSlowPokeAlreadyPlaced = false;
         for($i=0;$i<count(array_values($herdWithoutSlowpokes));$i++) {
             $card = $herdWithoutSlowpokes[$i];
             //self::dump('$card', json_encode($card));
 
             if ($lastDisplayedNumber != null) {
-                $currentDisplayedNumber = intval($card['type_arg']);
+                $currentDisplayedNumber = $card->number;
                 if ($currentDisplayedNumber == 70 || $currentDisplayedNumber == 90) {
                     $currentDisplayedNumber = $currentDisplayedNumber / 10;
                 }
@@ -417,7 +421,7 @@ class mow extends Table
                 $lastDisplayedNumber = $currentDisplayedNumber;
                 $lastCard = $card;
             }            
-            $lastDisplayedNumber = intval($card['type_arg']);
+            $lastDisplayedNumber = $card->number;
             $lastCard = $card;
             if ($lastDisplayedNumber == 70 || $lastDisplayedNumber == 90) {
                 $lastDisplayedNumber = $lastDisplayedNumber / 10;
@@ -428,16 +432,16 @@ class mow extends Table
         return $places;
     }
 
-    function setDirection($change) {
+    function setDirection(bool $change) {
 
         if ($change) {
             $direction_clockwise = intval(self::getGameStateValue( 'direction_clockwise' )) == 1 ? 0 : 1;
             self::setGameStateValue('direction_clockwise', $direction_clockwise);
 
-            self::notifyAllPlayers('directionChanged', clienttranslate('${player_name} changes direction !'), array(
+            self::notifyAllPlayers('directionChanged', clienttranslate('${player_name} changes direction !'), [
                 'player_name' => self::getActivePlayerName(),
                 'direction_clockwise' => $direction_clockwise == 1
-            ));
+            ]);
 
             self::incStat( 1, "changeDirectionNumber" );
         } else {
@@ -448,12 +452,12 @@ class mow extends Table
     }
 
     function getCardsValues($cards) {
-        return array_sum(array_map(function($card) { return intval($card['type']); }, $cards));
+        return array_sum(array_map(function($card) { return $card->type; }, $cards));
     }
 
-    function collectedCardsStats($cards, $player_id) {
+    function collectedCardsStats(array $cards, int $player_id) {
         foreach( $cards as $card ) {
-            switch (intval($card['type'])) {
+            switch ($card->type) {
                 case 0:
                     self::incStat( 1, "nbrNoPointCards", $player_id );
                     break;
@@ -480,11 +484,11 @@ class mow extends Table
         
         $player_id = self::getActivePlayerId();
 
-        $herdCards = $this->cards->getCardsInLocation( "herd" );
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation( "herd"));
         $collectedPoints = $this->getCardsValues($herdCards);
         $this->collectedCardsStats($herdCards, $player_id);
 
-        $sql = "UPDATE player SET player_score=player_score-$collectedPoints, hand_points=hand_points-$collectedPoints WHERE player_id='$player_id'";
+        $sql = "UPDATE player SET player_score=player_score-$collectedPoints, collected_points=collected_points-$collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
 
         $this->cards->moveAllCardsInLocation( "herd", "discard" );
@@ -494,16 +498,15 @@ class mow extends Table
         self::incStat( 1, "collectedHerdsNumber" );
             
         // And notify
-        self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), array(
+        self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'points' => $collectedPoints
-        ));
+        ]);
 
         if (count($this->cards->getCardsInLocation( "deck" )) > 0) {
             $this->gamestate->nextState('collectHerd');
         } else {
-
             $this->gamestate->nextState('collectLastHerd');
         }
     }
@@ -543,13 +546,12 @@ class mow extends Table
     */
     
 	
-    function stNewHand()
-    {
+    function stNewHand() {
         // Take back all cards (from any location => null) to deck
         $this->cards->moveAllCardsInLocation( null, "deck" );
         $this->cards->shuffle( 'deck' );
     
-	    self::DbQuery("UPDATE player SET hand_points = 0 WHERE 1");
+	    self::DbQuery("UPDATE player SET hand_points = 0, collected_points = 0 WHERE 1");
         //self::notifyAllPlayers('cleanUp');
 
         $players = self::loadPlayersBasicInfos();
@@ -557,23 +559,21 @@ class mow extends Table
 
         // Deal 5 cards to each players
         // Create deck, shuffle it and give 5 initial cards
-        foreach( $players as $player_id => $player )
-        {
-            $cards = $this->cards->pickCards( 5, 'deck', $player_id );
+        foreach( $players as $player_id => $player ) {
+            $cards = $this->getCardsFromDb($this->cards->pickCards( 5, 'deck', $player_id));
             
             // Notify player about his cards
-            self::notifyPlayer( $player_id, 'newHand', '', array( 
-                'cards' => array_map(function($dbCard) { return new Card($dbCard); }, $cards),
+            self::notifyPlayer( $player_id, 'newHand', '', [
+                'cards' => $cards,
                 'remainingCards' => $remainingCards
-            ) );
+            ]);
         }
 
         $this->gamestate->nextState( "" );
     }
     
     
-function stNextPlayer()
-{
+function stNextPlayer() {
 	$players = self::loadPlayersBasicInfos();
 	$nbr_players = self::getPlayersNumber();
 
@@ -586,13 +586,11 @@ function stNextPlayer()
 	$this->gamestate->nextState( 'nextPlayer' );
 }
 
-function stCollectHand()
-{
+function stCollectHand() {
 
     $players = self::loadPlayersBasicInfos();
-    foreach( $players as $player_id => $player )
-    {
-        $player_hand = $this->cards->getCardsInLocation('hand', $player_id);
+    foreach( $players as $player_id => $player ) {
+        $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $player_id));
         $cardsValue = $this->getCardsValues($player_hand);
         $this->collectedCardsStats($player_hand, $player_id);
 
@@ -601,66 +599,59 @@ function stCollectHand()
             self::DbQuery($sql);
                 
             // And notify
-            self::notifyAllPlayers('handCollected', clienttranslate('${player_name} collects points in his hand'), array(
+            self::notifyAllPlayers('handCollected', clienttranslate('${player_name} collects points in his hand'), [
                 'player_id' => $player_id,
                 'player_name' => $player['player_name'],
                 'points' => $cardsValue
-            ));
+            ]);
         }
-    }/*
-
-
-	self::notifyAllPlayers( 'throwDice', clienttranslate('The dice value is ${dice_name} ${dice_symbole}'), [
-		'i18n' => ['dice_symbole'],
-		'dice_value' => $dice_value,
-		'dice_name' => $this->dice_colors[$dice_value]['name'],
-		'dice_symbole' => $this->dice_colors[$dice_value]['symbole'],
-	]);
-	$this->gamestate->changeActivePlayer(self::getGameStateValue('dealer_id'));*/
+    }
 	$this->gamestate->nextState( "endHand" );
 }
 
-function stEndHand()
-{
+function stEndHand() {
 	$players = self::getObjectListFromDB("SELECT * FROM player");
-	/*foreach($players as $player){
-		$score = $player['hand_points'];
-		$msg = $score == 0? clienttranslate( '${player_name} did not get any point' ) : clienttranslate( '${player_name} wins ${points} points' );
-		self::notifyAllPlayers( "points", $msg, [
-			'player_id' => $player['player_id'],
-			'player_name' => $player['player_name'],
-			'points' => $score
-		]);
-	}*/
-
 	/// Display table window with results ////
 
 	// Header line
 	$headers = [''];
+	$collectedPoints = [ ['str' => clienttranslate('Collected points'), 'args' => [] ] ];
+	$remainingPoints = [ ['str' => clienttranslate('Remaining cards points'), 'args' => [] ] ];
 	$handPoints = [ ['str' => clienttranslate('Hand points'), 'args' => [] ] ];
 	$totalPoints = [ ['str' => clienttranslate('Total points'), 'args' => [] ] ];
-	foreach($players as $player){
+	foreach ($players as $player) {
 		$headers[] = [
-				'str' => '${player_name}',
-				'args' => ['player_name' => $player['player_name']],
-				'type' => 'header'
-    ];
-		$handPoints[] = $player['hand_points'];
+            'str' => '${player_name}',
+            'args' => ['player_name' => $player['player_name']],
+            'type' => 'header'
+        ];
+        $playerId = intval($player['player_id']);
+        $playerCollectedPoints = intval($player['collected_points']);
+        $playerRemainingPoints = intval($player['hand_points']);
+
+		$collectedPoints[] = $playerCollectedPoints;
+		$remainingPoints[] = $playerRemainingPoints;
+		$handPoints[] = $playerCollectedPoints + $playerRemainingPoints;
 		$totalPoints[] = $player['player_score'];
+
+        self::incStat($playerCollectedPoints, 'collectedPoints');
+        self::incStat($playerCollectedPoints, 'collectedPoints', $playerId);
+        self::incStat($playerRemainingPoints, 'remainingPoints');
+        self::incStat($playerRemainingPoints, 'remainingPoints', $playerId);
 	}
-	$table = [$headers, $handPoints, $totalPoints];
+	$table = [$headers, $collectedPoints, $remainingPoints, $handPoints, $totalPoints];
 
     // Test if this is the end of the game
     $sql = "SELECT min(player_score) FROM player ";
     $minscore = self::getUniqueValueFromDB( $sql );
     $end = intval($minscore) <= -END_SCORE;
 
-	$this->notifyAllPlayers( "tableWindow", '', array(
+	$this->notifyAllPlayers( "tableWindow", '', [
 		"id" => 'finalScoring',
 		"title" => clienttranslate('Result of hand'),
 		"table" => $table,
 		"closing" => $end ? clienttranslate("End of game") : clienttranslate("Next hand")
-    ));
+    ]);
     
     $sql = "SELECT player_id  FROM player where player_score=(select min(player_score) from player) limit 1";
     $minscore_player_id = self::getUniqueValueFromDB( $sql );
@@ -682,8 +673,7 @@ function stEndHand()
         (ex: pass).
     */
 
-    function zombieTurn( $state, $active_player )
-    {   
-        $this->gamestate->nextState("playCard");
+    function zombieTurn($state, $active_player) {   
+        $this->gamestate->nextState("zombiePass");
     }
 }

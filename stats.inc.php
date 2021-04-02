@@ -47,64 +47,87 @@
     
 */
 
-$stats_type = array(
+$stats_type = [
 
     // Statistics global to table
-    "table" => array(
+    "table" => [
 
-        "collectedHerdsNumber" => array(
+        "collectedHerdsNumber" => [
             "id"=> 10,
             "name" => totranslate("Number of collected herds"),
             "type" => "int"
-        ),
+        ],
 
-        "keepDirectionNumber" => array(
+        "keepDirectionNumber" => [
             "id"=> 11,
             "name" => totranslate("Number of times player choosed to keep direction"),
             "type" => "int" 
-        ),
+        ],
 
-        "changeDirectionNumber" => array(
+        "changeDirectionNumber" => [
             "id"=> 12,
             "name" => totranslate("Number of times player choosed to change direction"),
             "type" => "int" 
-        )
-        
-    ),
+        ],
+           
+        "collectedPoints" => [   
+            "id"=> 15,
+            "name" => totranslate("Number of points with collected herds"), 
+            "type" => "int" 
+        ],
+
+        "remainingPoints" => [   
+            "id"=> 16,
+            "name" => totranslate("Number of points with remaining cards in hand"), 
+            "type" => "int" 
+        ],
+    ],
     
     // Statistics existing for each player
-    "player" => array(    
+    "player" => [  
+           
+        "collectedPoints" => [   
+            "id"=> 15,
+            "name" => totranslate("Number of points with collected herds"), 
+            "type" => "int" 
+        ],
 
-        "nbrNoPointCards" => array(   
+        "remainingPoints" => [   
+            "id"=> 16,
+            "name" => totranslate("Number of points with remaining cards in hand"), 
+            "type" => "int" 
+        ],  
+
+        "nbrNoPointCards" => [   
             "id"=> 20,
             "name" => totranslate("Number of cards with no points collected"), 
             "type" => "int" 
-        ),
+        ],
 
-        "nbrOnePointCards" => array(   
+        "nbrOnePointCards" => [   
             "id"=> 21,
             "name" => totranslate("Number of cards with 1 point collected"), 
             "type" => "int" 
-        ),
+        ],
 
-        "nbrTwoPointsCards" => array(   
+        "nbrTwoPointsCards" => [   
             "id"=> 22,
             "name" => totranslate("Number of cards with 2 points collected"), 
             "type" => "int" 
-        ),
+        ],
 
-        "nbrThreePointsCards" => array(   
+        "nbrThreePointsCards" => [   
             "id"=> 23,
             "name" => totranslate("Number of cards with 3 points collected"), 
             "type" => "int" 
-        ),
+        ],
 
-        "nbrFivePointsCards" => array(   
+        "nbrFivePointsCards" => [   
             "id"=> 25,
             "name" => totranslate("Number of cards with 5 points collected"), 
             "type" => "int" 
-        )
+        ],
 
-    )
+    ],
 
-);
+];
