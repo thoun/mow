@@ -162,6 +162,8 @@ class Mow implements Game {
         
         switch( stateName ) {            
             case 'playerTurn':
+                const suffix = args.args.suffix;
+                this.setGamestateDescription(suffix);
                 this.onEnteringStatePlayerTurn(args);                    
                 break;
 
@@ -207,6 +209,13 @@ class Mow implements Game {
         }
     }
 
+    private setGamestateDescription(suffix: string = '') {
+        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        this.gamedatas.gamestate.description = `${originalState['description' + suffix]}`; 
+        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + suffix]}`; 
+        (this as any).updatePageTitle();        
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -235,13 +244,11 @@ class Mow implements Game {
         //console.log( 'onUpdateActionButtons: '+stateName );
         (this as any).removeActionButtons();
                     
-        if( (this as any).isCurrentPlayerActive() )
-        {            
-            switch( stateName )
-            {
+        if ((this as any).isCurrentPlayerActive()) {            
+            switch (stateName) {
                 case 'playerTurn':
                 if (args.canCollect) {
-                    (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd' );
+                    (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                 }
                 break;
             }
@@ -510,7 +517,7 @@ class Mow implements Game {
     }
 
     public setupNewCard( card_div: HTMLDivElement, card_type_id: number, card_id: string ) {
-        (this as any).addTooltip( card_div.id, this.mowCards.getTooltip(card_type_id), '' );
+        (this as any).addTooltipHtml( card_div.id, this.mowCards.getTooltip(card_type_id));
     }
 
     private getNextPlayer() {

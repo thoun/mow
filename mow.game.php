@@ -304,7 +304,7 @@ class mow extends Table {
             $places = $this->getPlacesForSlowpoke();
 
             if (count($places) == 0) {
-                throw new BgaUserException(self::_("You can't play slowpoke mow, no place available"), true);
+                throw new BgaUserException(self::_("You can't play slowpoke cow, no place available"), true);
             }
         }
     }    
@@ -354,7 +354,6 @@ class mow extends Table {
             'displayedNumber_rec'=> ['log'=>'${displayedNumber}', 'args'=> ['displayedNumber'=>$displayedNumber, 'displayedColor'=>$card->type ]],
             'color' => $card->type,
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
-            'i18n' => ['precision'],
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
             'slowpokeNumber' => $slowpokeNumber,
         ]);
@@ -523,10 +522,33 @@ class mow extends Table {
     */
 
     function argPlayerTurn() {
+        $player_id = self::getActivePlayerId();
+
+        // check if player can collect
         $herd = $this->cards->getCardsInLocation('herd');
+        $canCollect = count($herd) > 0;
+
+        // check if player can play
+        $canPlay = false;
+        $hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $player_id));
+        foreach ($hand as $card) {
+            try {
+                $this->controlCardPlayable($card);
+                $canPlay = true;
+                break;
+            } catch (Exception $e) {}
+        }
+
+        $suffix = '';
+        if (!$canCollect) {
+            $suffix = 'noHerd';
+        } else if (!$canPlay) {
+            $suffix = 'mustTake';
+        }
 
         return [
-            'canCollect' => count($herd) > 0
+            'canCollect' => $canCollect,
+            'suffix' => $suffix,
         ];
     }
 

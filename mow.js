@@ -419,6 +419,8 @@ var Mow = /** @class */ (function () {
         //console.log( 'Entering state: '+stateName );
         switch (stateName) {
             case 'playerTurn':
+                var suffix = args.args.suffix;
+                this.setGamestateDescription(suffix);
                 this.onEnteringStatePlayerTurn(args);
                 break;
             case 'chooseDirection':
@@ -458,6 +460,13 @@ var Mow = /** @class */ (function () {
             dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
         }
     };
+    Mow.prototype.setGamestateDescription = function (suffix) {
+        if (suffix === void 0) { suffix = ''; }
+        var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
+        this.gamedatas.gamestate.description = "" + originalState['description' + suffix];
+        this.gamedatas.gamestate.descriptionmyturn = "" + originalState['descriptionmyturn' + suffix];
+        this.updatePageTitle();
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -484,7 +493,7 @@ var Mow = /** @class */ (function () {
             switch (stateName) {
                 case 'playerTurn':
                     if (args.canCollect) {
-                        this.addActionButton('collectHerd_button', _('Collect herd'), 'onCollectHerd');
+                        this.addActionButton('collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                     }
                     break;
             }
@@ -709,7 +718,7 @@ var Mow = /** @class */ (function () {
         return this.inherited(arguments);
     };
     Mow.prototype.setupNewCard = function (card_div, card_type_id, card_id) {
-        this.addTooltip(card_div.id, this.mowCards.getTooltip(card_type_id), '');
+        this.addTooltipHtml(card_div.id, this.mowCards.getTooltip(card_type_id));
     };
     Mow.prototype.getNextPlayer = function () {
         var activePlayerId = this.getActivePlayerId();
