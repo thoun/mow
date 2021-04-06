@@ -57,6 +57,20 @@
 #gamezone #playertables .playertable .playertablename {
   font-weight: bold;
 }
+#gamezone #playertables .playertable.selectable {
+  border: 4px dashed transparent;
+  animation: blink 0.5s step-end infinite alternate;
+  cursor: pointer;
+}
+@keyframes blink {
+  50% {
+    border-color: red;
+  }
+}
+#gamezone #playertables .playertable.selectable.selected {
+  animation: none;
+  box-shadow: 0 0 5px 5px red;
+}
 #gamezone #playertables #theherd {
   min-height: 183px;
 }

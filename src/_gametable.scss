@@ -42,6 +42,20 @@
             .playertablename {
                 font-weight: bold;
             }
+
+            &.selectable {
+                @keyframes blink { 
+                    50% { border-color: red; } 
+                }
+                border: 4px dashed transparent;
+                animation: blink .5s step-end infinite alternate;
+                cursor: pointer;
+
+                &.selected {
+                    animation: none;
+                    box-shadow: 0 0 5px 5px red;
+                }
+            }
         }
 
         #theherd {

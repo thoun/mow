@@ -38,8 +38,8 @@ Cards images are not definitive, waiting for official images
 </div>
 
 <script type="text/javascript">
-var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable">
-  <div class="playertablename" style="color:#\${player_color}">
+var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable" data-id="\${player_id}">
+  <div class="playertablename" style="color:#\${player_color}" data-id="\${player_id}">
     \${player_name}
   </div>
 </div>`;

@@ -317,6 +317,7 @@ var Mow = /** @class */ (function () {
         this.theHerd = null;
         this.cardwidth = 121;
         this.cardheight = 178;
+        this.playersSelectable = false;
         this.selectedPlayerId = null;
         this.colors = [
             'forestgreen',
@@ -406,6 +407,7 @@ var Mow = /** @class */ (function () {
         }
         dojo.connect($('keepDirectionButton'), 'onclick', this, 'onKeepDirection');
         dojo.connect($('changeDirectionButton'), 'onclick', this, 'onChangeDirection');
+        Object.keys(gamedatas.players).forEach(function (playerId) { return dojo.connect($("playertable-" + playerId), 'onclick', _this, 'onPlayerSelection'); });
         // Setup game notifications to handle (see "setupNotifications" method below)
         //console.log('setupNotifications');
         this.setupNotifications();
@@ -426,6 +428,9 @@ var Mow = /** @class */ (function () {
                 break;
             case 'chooseDirection':
                 this.onEnteringStateChooseDirection(args.args);
+                break;
+            case 'swapHands':
+                this.onEnteringStateSwapHands();
                 break;
         }
     };
@@ -461,6 +466,16 @@ var Mow = /** @class */ (function () {
             dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
         }
     };
+    Mow.prototype.onEnteringStateSwapHands = function () {
+        var _this = this;
+        if (this.isCurrentPlayerActive()) {
+            this.playersSelectable = true;
+            Object.keys(this.gamedatas.players).filter(function (playerId) { return Number(playerId) !== Number(_this.player_id); }).forEach(function (playerId) {
+                return dojo.addClass("playertable-" + playerId, 'selectable');
+            });
+            // update selectedPlayerId on click and add Swap button
+        }
+    };
     Mow.prototype.setGamestateDescription = function (suffix) {
         if (suffix === void 0) { suffix = ''; }
         var originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
@@ -481,7 +496,10 @@ var Mow = /** @class */ (function () {
                 dojo.style('direction_popin', 'display', 'none');
                 break;
             case 'swapHands':
-                // TODO make players selectable and update selectedPlayerId on click and add Swap button
+                this.playersSelectable = false;
+                Object.keys(this.gamedatas.players).forEach(function (playerId) {
+                    return dojo.removeClass("playertable-" + playerId, 'selectable');
+                });
                 break;
             case 'dummmy':
                 break;
@@ -547,6 +565,24 @@ var Mow = /** @class */ (function () {
         _ make a call to the game server
     
     */
+    Mow.prototype.onPlayerSelection = function (event) {
+        if (!this.playersSelectable) {
+            return;
+        }
+        var playerId = Number(event.target.dataset.id);
+        if (playerId === this.player_id) {
+            return;
+        }
+        if (this.selectedPlayerId) {
+            dojo.removeClass("playertable-" + this.selectedPlayerId, 'selected');
+        }
+        else {
+            // first selection, we add Swap button
+            this.addActionButton('swapHands_button', _("Swap"), 'onSwap');
+        }
+        this.selectedPlayerId = playerId;
+        dojo.addClass("playertable-" + playerId, 'selected');
+    };
     Mow.prototype.onCollectHerd = function () {
         if (!this.checkAction('collectHerd'))
             return;
@@ -601,6 +637,7 @@ var Mow = /** @class */ (function () {
         dojo.subscribe('directionChanged', this, "notif_directionChanged");
         dojo.subscribe('herdCollected', this, "notif_herdCollected");
         dojo.subscribe('handCollected', this, "notif_handCollected");
+        dojo.subscribe('allTopFlies', this, "notif_allTopFlies");
         this.notifqueue.setSynchronous('herdCollected', 2000);
         this.notifqueue.setSynchronous('handCollected', 1500);
     };
@@ -666,6 +703,9 @@ var Mow = /** @class */ (function () {
             dojo.query("#myhand").addClass("bounce");
         }
         this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+    };
+    Mow.prototype.notif_allTopFlies = function (notif) {
+        this.scoreCtrl[notif.args.playerId].toValue(notif.args.points);
     };
     ////////////////////////////////
     ////////////////////////////////

@@ -120,7 +120,7 @@ class mow extends Table {
 			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
-        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        // $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
         $this->cards->createCards( $cards, 'deck' );
 	   
 
@@ -207,7 +207,7 @@ class mow extends Table {
 ////////////    
 
     function newRulesActived() {
-        return false;
+        return true;
     }
 
     function getCardFromDb(array $dbCard) {
@@ -657,7 +657,7 @@ class mow extends Table {
             $this->collectedCardsStats($player_hand, $player_id);
 
             if ($cardsValue > 0) {
-                $sql = "UPDATE player SET player_score=player_score-$cardsValue, hand_points=hand_points-$cardsValue WHERE player_id='$player_id'";
+                $sql = "UPDATE player SET player_score = player_score - $cardsValue, hand_points = hand_points - $cardsValue WHERE player_id = $player_id";
                 self::DbQuery($sql);
                     
                 // And notify
@@ -673,12 +673,21 @@ class mow extends Table {
 
     function stEndHand() {
         if ($this->newRulesActived()) {
+            // TODO what if multiple cards in play (6-10 players) ?
+            // TODO what if one of this cards is in players hand at the end ?
             // we reset player's points to 0 for this hand if he got the 6 5-flies cards
             $sql = "SELECT card_location_arg FROM `card` where card_location = 'discard' and card_type = 5 group by card_location_arg having count(*) >= 6";
             $playerId = intval(self::getUniqueValueFromDB($sql));
+
             if ($playerId > 0) {
                 $sql = "UPDATE player SET player_score = player_score - (hand_points + collected_points), hand_points = 0, collected_points = 0 WHERE player_id = $playerId";
                 self::DbQuery($sql);
+
+                self::notifyAllPlayers('allTopFlies', clienttranslate('${player_name} got all 5 flies cards, his points in this hand are erased'), [
+                    'playerId' => $playerId,
+                    'player_name' => self::getUniqueValueFromDB("SELECT player_name FROM player where player_id = $playerId"),
+                    'points' => intval(self::getUniqueValueFromDB("SELECT player_score FROM player where player_id = $playerId")),
+                ]);
             }
 
             // TODO check farmer card

@@ -68,3 +68,8 @@ interface NotifCollectedArgs {
 
 type NotifHandCollectedArgs = NotifCollectedArgs;
 type NotifHerdCollectedArgs = NotifCollectedArgs;
+
+interface NotifAllTopFliesArgs {
+    playerId: string;
+    points: number;
+}

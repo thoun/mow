@@ -36,6 +36,7 @@ class Mow implements Game {
     private cardheight: number = 178;
     private players: { [playerId: number]: Player };
     private playerNumber: number;
+    private playersSelectable: boolean = false;
     private selectedPlayerId: number | null = null;
     
     private colors = [
@@ -145,6 +146,9 @@ class Mow implements Game {
         dojo.connect( $('keepDirectionButton'), 'onclick', this, 'onKeepDirection' );
         dojo.connect( $('changeDirectionButton'), 'onclick', this, 'onChangeDirection' );
 
+        
+        Object.keys(gamedatas.players).forEach(playerId => dojo.connect($(`playertable-${playerId}`), 'onclick', this, 'onPlayerSelection'));
+
         // Setup game notifications to handle (see "setupNotifications" method below)
         //console.log('setupNotifications');
         this.setupNotifications();
@@ -171,11 +175,16 @@ class Mow implements Game {
             case 'chooseDirection':    
                 this.onEnteringStateChooseDirection(args.args);     
                 break;
+
+
+            case 'swapHands':  
+                this.onEnteringStateSwapHands();
+                break;
         }
     }
 
     private onEnteringStatePlayerTurn(args: { active_player: string | number }) {
-        dojo.addClass("playertable-" + args.active_player, "active");
+        dojo.addClass(`playertable-${args.active_player}`, "active");
         if((this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             const selectedCardId = this.playerHand.getSelectedItems()[0].id;
             if (this.allowedCardsIds?.indexOf(Number(selectedCardId)) !== -1) {
@@ -210,6 +219,16 @@ class Mow implements Game {
         }
     }
 
+    private onEnteringStateSwapHands() {
+        if ((this as any).isCurrentPlayerActive()) {
+            this.playersSelectable = true;  
+            Object.keys(this.gamedatas.players).filter(playerId => Number(playerId) !== Number((this as any).player_id)).forEach(playerId => 
+                dojo.addClass(`playertable-${playerId}`, 'selectable')
+            );            
+            // update selectedPlayerId on click and add Swap button
+        }
+    }
+
     private setGamestateDescription(suffix: string = '') {
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         this.gamedatas.gamestate.description = `${originalState['description' + suffix]}`; 
@@ -233,8 +252,11 @@ class Mow implements Game {
                 dojo.style( 'direction_popin', 'display', 'none' );
                 break;   
 
-            case 'swapHands':    
-                // TODO make players selectable and update selectedPlayerId on click and add Swap button
+            case 'swapHands':  
+                this.playersSelectable = false;    
+                Object.keys(this.gamedatas.players).forEach(playerId => 
+                    dojo.removeClass(`playertable-${playerId}`, 'selectable')
+                ); 
                 break;   
         
             case 'dummmy':
@@ -309,7 +331,29 @@ class Mow implements Game {
         _ check the action is possible at this game state.
         _ make a call to the game server
     
-    */
+    */    
+
+   public onPlayerSelection(event: MouseEvent) {
+        if (!this.playersSelectable) {
+            return;
+        }
+
+        const playerId = Number((event.target as HTMLDivElement).dataset.id);
+
+        if (playerId === (this as any).player_id) {
+            return;
+        }
+
+        if (this.selectedPlayerId) {
+            dojo.removeClass(`playertable-${this.selectedPlayerId}`, 'selected');
+        } else {
+            // first selection, we add Swap button
+            (this as any).addActionButton( 'swapHands_button', _(`Swap`), 'onSwap');
+        }
+
+        this.selectedPlayerId = playerId;
+        dojo.addClass(`playertable-${playerId}`, 'selected');
+    }
     
 
    public onCollectHerd() {
@@ -377,6 +421,7 @@ class Mow implements Game {
         dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
         dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
         dojo.subscribe( 'handCollected', this, "notif_handCollected" );
+        dojo.subscribe( 'allTopFlies', this, "notif_allTopFlies" );
 
         (this as any).notifqueue.setSynchronous( 'herdCollected', 2000 );
         (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
@@ -463,6 +508,10 @@ class Mow implements Game {
         }
         
         (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+    }
+    
+    public notif_allTopFlies( notif: Notif<NotifAllTopFliesArgs> ) {
+        (this as any).scoreCtrl[notif.args.playerId].toValue(notif.args.points);
     }
 
     ////////////////////////////////

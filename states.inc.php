@@ -68,7 +68,10 @@ $machinestates = [
         "type" => "game",
         "action" => "stNewHand",
         "updateGameProgression" => true,   
-        "transitions" => [ "playerTurn" => ST_PLAYER_TURN ]
+        "transitions" => [ 
+            "swapHands" => ST_SWAP_HANDS,
+            "playerTurn" => ST_PLAYER_TURN,
+        ]
     ],  
 
     ST_SWAP_HANDS => [
