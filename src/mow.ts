@@ -36,6 +36,7 @@ class Mow implements Game {
     private cardheight: number = 178;
     private players: { [playerId: number]: Player };
     private playerNumber: number;
+    private selectedPlayerId: number | null = null;
     
     private colors = [
         'forestgreen',
@@ -102,7 +103,7 @@ class Mow implements Game {
             dojo.style( 'direction-text', 'display', 'none' );
         }
         
-        // TODO: Set up your game interface here, according to "gamedatas"
+        // Set up your game interface here, according to "gamedatas"
         this.playerHand = new ebg.stock() as Stock;
         this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
         this.playerHand.setSelectionMode(1);            
@@ -231,6 +232,10 @@ class Mow implements Game {
             case 'chooseDirection':    
                 dojo.style( 'direction_popin', 'display', 'none' );
                 break;   
+
+            case 'swapHands':    
+                // TODO make players selectable and update selectedPlayerId on click and add Swap button
+                break;   
         
             case 'dummmy':
                 break;
@@ -244,15 +249,17 @@ class Mow implements Game {
         //console.log( 'onUpdateActionButtons: '+stateName );
         (this as any).removeActionButtons();
                     
-        if ((this as any).isCurrentPlayerActive()) {            
+        if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'playerTurn':
                 if (args.canCollect) {
                     (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                 }
                 break;
+                case 'swapHands':
+                    (this as any).addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
+                break;
             }
-
         }
     }       
 
@@ -327,6 +334,26 @@ class Mow implements Game {
             change: true
         });
     }
+
+    public onSwap() {
+         if(!(this as any).checkAction('swap'))
+         return;
+     
+         this.takeAction("swap", {
+            playerId: this.selectedPlayerId
+        });
+        
+        this.selectedPlayerId = null;
+    }
+
+    public onDontSwap() {
+         if(!(this as any).checkAction('dontSwap'))
+         return;
+     
+         this.takeAction("swap", {
+            playerId: 0
+        });
+    }
     
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -355,7 +382,7 @@ class Mow implements Game {
         (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
     }
     
-    // TODO: from this point and below, you can write your game notifications handling methods
+    // from this point and below, you can write your game notifications handling methods
     
     public notif_newHand( notif: Notif<NotifNewHandArgs> ) {
         //console.log( 'notif_newHand', notif );
@@ -365,7 +392,9 @@ class Mow implements Game {
 
         notif.args.cards.forEach((card: Card) => this.addCardToHand(card));
 
-        this.setRemainingCards(notif.args.remainingCards);         
+        if (notif.args.remainingCards) {
+            this.setRemainingCards(notif.args.remainingCards);         
+        }
     }
     
     public notif_cardPlayed( notif: Notif<NotifCardPlayedArgs> ) {

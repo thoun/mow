@@ -68,8 +68,20 @@ $machinestates = [
         "type" => "game",
         "action" => "stNewHand",
         "updateGameProgression" => true,   
-        "transitions" => [ "" => ST_PLAYER_TURN ]
+        "transitions" => [ "playerTurn" => ST_PLAYER_TURN ]
     ],  
+
+    ST_SWAP_HANDS => [
+    	"name" => "swapHands",
+    	"description" => clienttranslate('${actplayer} can swap cards in hand with another player'),
+    	"descriptionmyturn" => clienttranslate('${you} can swap cards in hand with another player'),
+    	"type" => "activeplayer",
+        "args" => "argChooseDirection",
+    	"possibleactions" => [ "swap", "dontSwap" ],
+    	"transitions" => [ 
+            "playerTurn" => ST_PLAYER_TURN,
+        ]
+    ],
 
     ST_PLAYER_TURN => [
     	"name" => "playerTurn",

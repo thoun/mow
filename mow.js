@@ -317,6 +317,7 @@ var Mow = /** @class */ (function () {
         this.theHerd = null;
         this.cardwidth = 121;
         this.cardheight = 178;
+        this.selectedPlayerId = null;
         this.colors = [
             'forestgreen',
             'goldenrod',
@@ -371,7 +372,7 @@ var Mow = /** @class */ (function () {
         if (Object.keys(gamedatas.players).length == 2) {
             dojo.style('direction-text', 'display', 'none');
         }
-        // TODO: Set up your game interface here, according to "gamedatas"
+        // Set up your game interface here, according to "gamedatas"
         this.playerHand = new ebg.stock();
         this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);
         this.playerHand.setSelectionMode(1);
@@ -479,6 +480,9 @@ var Mow = /** @class */ (function () {
             case 'chooseDirection':
                 dojo.style('direction_popin', 'display', 'none');
                 break;
+            case 'swapHands':
+                // TODO make players selectable and update selectedPlayerId on click and add Swap button
+                break;
             case 'dummmy':
                 break;
         }
@@ -495,6 +499,9 @@ var Mow = /** @class */ (function () {
                     if (args.canCollect) {
                         this.addActionButton('collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                     }
+                    break;
+                case 'swapHands':
+                    this.addActionButton('dontSwapHands_button', _("Don't swap"), 'onDontSwap');
                     break;
             }
         }
@@ -559,6 +566,21 @@ var Mow = /** @class */ (function () {
             change: true
         });
     };
+    Mow.prototype.onSwap = function () {
+        if (!this.checkAction('swap'))
+            return;
+        this.takeAction("swap", {
+            playerId: this.selectedPlayerId
+        });
+        this.selectedPlayerId = null;
+    };
+    Mow.prototype.onDontSwap = function () {
+        if (!this.checkAction('dontSwap'))
+            return;
+        this.takeAction("swap", {
+            playerId: 0
+        });
+    };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
     /*
@@ -582,14 +604,16 @@ var Mow = /** @class */ (function () {
         this.notifqueue.setSynchronous('herdCollected', 2000);
         this.notifqueue.setSynchronous('handCollected', 1500);
     };
-    // TODO: from this point and below, you can write your game notifications handling methods
+    // from this point and below, you can write your game notifications handling methods
     Mow.prototype.notif_newHand = function (notif) {
         //console.log( 'notif_newHand', notif );
         var _this = this;
         // We received a new full hand of 5 cards.
         this.playerHand.removeAll();
         notif.args.cards.forEach(function (card) { return _this.addCardToHand(card); });
-        this.setRemainingCards(notif.args.remainingCards);
+        if (notif.args.remainingCards) {
+            this.setRemainingCards(notif.args.remainingCards);
+        }
     };
     Mow.prototype.notif_cardPlayed = function (notif) {
         //console.log( 'notif_cardPlayed', notif );

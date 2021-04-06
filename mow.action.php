@@ -39,27 +39,31 @@
       }
   	}
 	
-    public function playCard()
-    {
+    public function playCard() {
         self::setAjaxMode();     
         $card_id = self::getArg( "card_id", AT_posint, true );
         $this->game->playCard( $card_id );
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 	
-    public function setDirection()
-    {
+    public function setDirection() {
         self::setAjaxMode();     
         $change = self::getArg( "change", AT_bool, true );
         $this->game->setDirection( $change );
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
     
-    public function collectHerd()
-    {
+    public function collectHerd() {
         self::setAjaxMode();
         $this->game->collectHerd();
-        self::ajaxResponse( );    
+        self::ajaxResponse();    
+    }
+	
+    public function swap() {
+        self::setAjaxMode();     
+        $playerId = self::getArg( "playerId", AT_posint, true ); // 0 means "don't swap"
+        $this->game->swap($playerId);
+        self::ajaxResponse();
     }
 
   }
