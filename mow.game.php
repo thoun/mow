@@ -35,6 +35,7 @@ class mow extends Table {
         self::initGameStateLabels([ 
                 "direction_clockwise" => 10,
                 "swapping_player" => 11,
+                "simpleVersion" => 100
         ]);
 		
         $this->cards = self::getNew( "module.common.deck" );
@@ -206,8 +207,8 @@ class mow extends Table {
 //////////// Utility functions
 ////////////    
 
-    function newRulesActived() {
-        return true;
+    function isSimpleVersion() {
+        return self::getGameStateValue('simpleVersion');
     }
 
     function getCardFromDb(array $dbCard) {
@@ -622,7 +623,7 @@ class mow extends Table {
         }
 
         $swapPlayerId = 0;
-        if ($this->newRulesActived()) {
+        if (!$this->isSimpleVersion()) {
             $sql = "SELECT min(player_score) FROM player  ";
             $players = self::getObjectListFromDB("SELECT player_id, player_score FROM player where player_score < 0 order by player_score ASC");
             if (count($players) >= 1) { // TODO what if some players have same lowest score ?
@@ -672,8 +673,7 @@ class mow extends Table {
     }
 
     function stEndHand() {
-        if ($this->newRulesActived()) {
-            // TODO what if multiple cards in play (6-10 players) ?
+        if (!$this->isSimpleVersion()) {
             // TODO what if one of this cards is in players hand at the end ?
             // we reset player's points to 0 for this hand if he got the 6 5-flies cards
             $sql = "SELECT card_location_arg FROM `card` where card_location = 'discard' and card_type = 5 group by card_location_arg having count(*) >= 6";

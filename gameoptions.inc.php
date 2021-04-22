@@ -24,32 +24,20 @@
  *
  */
 
-$game_options = array(
-
-    /* Example of game variant:
-    
-    
-    // note: game variant ID should start at 100 (ie: 100, 101, 102, ...). The maximum is 199.
-    100 => array(
-                'name' => totranslate('my game option'),    
-                'values' => array(
-
-                            // A simple value for this option:
-                            1 => array( 'name' => totranslate('option 1') )
-
-                            // A simple value for this option.
-                            // If this value is chosen, the value of "tmdisplay" is displayed in the game lobby
-                            2 => array( 'name' => totranslate('option 2'), 'tmdisplay' => totranslate('option 2') ),
-
-                            // Another value, with other options:
-                            //  beta=true => this option is in beta version right now.
-                            //  nobeginner=true  =>  this option is not recommended for beginners
-                            3 => array( 'name' => totranslate('option 3'),  'beta' => true, 'nobeginner' => true ),) )
-                        )
-            )
-
-    */
-
-);
-
+$game_options = [
+    100 => [
+        'name' => totranslate('Simple version (2008 edition)'),
+        'values' => [
+            1 => [
+                'name' => totranslate('No'), 
+                'description' => totranslate('Standard rules')
+            ],
+            2 => [
+                'name' => totranslate('Yes'), 
+                'description' => totranslate('No farmer, no card swap, no special rule if all 5 flies card are collected'), // TODO check translation for this rule
+                'tmdisplay' => totranslate('Simple version (2008 edition)'),
+            ],
+        ],
+    ],
+];
 
