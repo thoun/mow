@@ -89,6 +89,16 @@
   align-items: center;
   z-index: 2;
 }
+#gamezone #direction_popin .popin-content {
+  display: flex;
+}
+#gamezone #direction_popin .popin-content #pickBlock {
+  display: none;
+  flex-direction: row;
+}
+#gamezone #direction_popin .popin-content #pickBlock.visible {
+  display: flex;
+}
 #gamezone #direction_popin .direction-button {
   cursor: pointer;
   display: flex;

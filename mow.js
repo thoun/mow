@@ -458,6 +458,7 @@ var Mow = /** @class */ (function () {
             dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
             var keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
             var changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+            this.setPick(args.canPick);
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
             $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
             dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
@@ -553,6 +554,21 @@ var Mow = /** @class */ (function () {
             this.playerHand.removeFromStockById('' + card.id);
         }
     };
+    Mow.prototype.setPick = function (canPick) {
+        var _this = this;
+        dojo.toggleClass('pickBlock', 'visible', canPick);
+        document.getElementById('pickBlock').innerHTML = '';
+        if (canPick) {
+            var ids = this.gamedatas.playerorder.map(function (id) { return Number(id); });
+            var html_1 = '';
+            ids.forEach(function (id) {
+                var player = _this.gamedatas.players[id];
+                html_1 += "<button id=\"pickBtn" + id + "\" class=\"bgabutton bgabutton_blue\" style=\"border: 3px solid #" + player.color + "\">";
+            });
+            document.getElementById('pickBlock').innerHTML = html_1;
+            ids.forEach(function (id) { return document.getElementById("pickBtn" + id).addEventListener('click', function () { return _this.pickPlayer(id); }); });
+        }
+    };
     ///////////////////////////////////////////////////
     //// Player's action
     /*
@@ -600,6 +616,13 @@ var Mow = /** @class */ (function () {
             return;
         this.takeAction("setDirection", {
             change: true
+        });
+    };
+    Mow.prototype.pickPlayer = function (id) {
+        if (!this.checkAction('setPlayer'))
+            return;
+        this.takeAction("setPlayer", {
+            id: id
         });
     };
     Mow.prototype.onSwap = function () {

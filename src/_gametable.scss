@@ -81,6 +81,19 @@
         align-items: center;
         z-index: 2;
 
+        .popin-content {
+            display: flex;
+
+            #pickBlock {
+                display: none;
+                flex-direction: row;
+
+                &.visible {
+                    display: flex;
+                }
+            }
+        }
+
         .direction-button {
             cursor: pointer;
             display: flex;

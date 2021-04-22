@@ -200,13 +200,15 @@ class Mow implements Game {
         }
     }
 
-    private onEnteringStateChooseDirection(args: { direction_clockwise: boolean }) {
+    private onEnteringStateChooseDirection(args: { direction_clockwise: boolean, canPick: boolean }) {
         if ((this as any).isCurrentPlayerActive()) {
             dojo.toggleClass('keepDirectionSymbol', 'direction-anticlockwise', !args.direction_clockwise);
             dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
 
             const keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
             const changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+
+            this.setPick(args.canPick);
 
             $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
             $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
@@ -319,6 +321,26 @@ class Mow implements Game {
 
     }
     
+    private setPick(canPick: boolean) {
+        dojo.toggleClass('pickBlock', 'visible', canPick);
+        
+        document.getElementById('pickBlock').innerHTML = '';
+
+        if (canPick) {
+            const ids: number[] = this.gamedatas.playerorder.map(id => Number(id));
+
+            let html = '';
+            ids.forEach(id => {
+                const player = this.gamedatas.players[id];
+                html += `<button id="pickBtn${id}" class="bgabutton bgabutton_blue" style="border: 3px solid #${player.color}">`;
+            });
+
+            document.getElementById('pickBlock').innerHTML = html;
+
+            ids.forEach(id => document.getElementById(`pickBtn${id}`).addEventListener('click', () => this.pickPlayer(id)));
+        }
+    }
+    
     ///////////////////////////////////////////////////
     //// Player's action
     
@@ -376,6 +398,14 @@ class Mow implements Game {
         return;
         this.takeAction("setDirection", {
             change: true
+        });
+    }
+
+    public pickPlayer(id: number) {
+        if(!(this as any).checkAction('setPlayer'))
+        return;
+        this.takeAction("setPlayer", {
+            id
         });
     }
 

@@ -14,22 +14,25 @@ Cards images are not definitive, waiting for official images
     </div>
 
     <div id="direction_popin">
-        <div class="centered whiteblock">
-            <div>
-                <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
-                    {KEEP_DIRECTION}
-                    <div id="keepDirectionSymbol" class="direction-symbol">↻</div>
+        <div class="popin-content">
+            <div class="centered whiteblock">
+                <div>
+                    <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
+                        {KEEP_DIRECTION}
+                        <div id="keepDirectionSymbol" class="direction-symbol">↻</div>
+                    </div>
+                    {NEXT_PLAYER} : <div id="keepDirectionNextPlayer" class="next-player"></div>
                 </div>
-                {NEXT_PLAYER} : <div id="keepDirectionNextPlayer" class="next-player"></div>
-            </div>
 
-            <div>
-                <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
-                    {CHANGE_DIRECTION}
-                    <div id="changeDirectionSymbol" class="direction-symbol">↻</div>
+                <div>
+                    <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
+                        {CHANGE_DIRECTION}
+                        <div id="changeDirectionSymbol" class="direction-symbol">↻</div>
+                    </div>
+                    {NEXT_PLAYER} : <div id="changeDirectionNextPlayer" class="next-player"></div>
                 </div>
-                {NEXT_PLAYER} : <div id="changeDirectionNextPlayer" class="next-player"></div>
             </div>
+            <div id="pickBlock"></div>
         </div>
     </div>
     <div id="direction_animation">

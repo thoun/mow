@@ -35,7 +35,9 @@ class mow extends Table {
         self::initGameStateLabels([ 
                 "direction_clockwise" => 10,
                 "swapping_player" => 11,
-                "simpleVersion" => 100
+                "canPick" => 12,
+
+                "simpleVersion" => 100,
         ]);
 		
         $this->cards = self::getNew( "module.common.deck" );
@@ -81,6 +83,7 @@ class mow extends Table {
         // Init global values with their initial values
         self::setGameStateInitialValue( 'direction_clockwise', 1 );
         self::setGameStateInitialValue( 'swapping_player', 0 );
+        self::setGameStateInitialValue( 'canPick', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -459,6 +462,9 @@ class mow extends Table {
         
         // changing direction is useless with 2 players
         $canChooseDirection = $card->type === 5 && self::getPlayersNumber() > 2;
+        if ($canChooseDirection) {
+            self::setGameStateValue('canPick', ($displayedNumber == 0 || $displayedNumber == 16) ? 1 : 0);
+        }
         // Next player
         $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
     }
@@ -480,6 +486,12 @@ class mow extends Table {
         }
 
         $this->gamestate->nextState('setDirection');
+    }
+
+    function setPlayer(int $playerId) {
+        $this->gamestate->changeActivePlayer($playerId); // TODO place in a game state
+
+        $this->gamestate->nextState('setPlayer');
     }
 
     function collectHerd() {
@@ -585,7 +597,8 @@ class mow extends Table {
 
     function argChooseDirection() {
         return [
-            'direction_clockwise' => intval(self::getGameStateValue( 'direction_clockwise' )) == 1
+            'direction_clockwise' => intval(self::getGameStateValue('direction_clockwise')) == 1,
+            'canPick' => intval(self::getGameStateValue('canPick')) == 1
         ];  
     }
 

@@ -49,7 +49,14 @@
     public function setDirection() {
         self::setAjaxMode();     
         $change = self::getArg( "change", AT_bool, true );
-        $this->game->setDirection( $change );
+        $this->game->setDirection($change);
+        self::ajaxResponse();
+    }
+	
+    public function setPlayer() {
+        self::setAjaxMode();     
+        $playerId = self::getArg( "id", AT_posint, true );
+        $this->game->setPlayer($playerId);
         self::ajaxResponse();
     }
     

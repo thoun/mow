@@ -112,9 +112,10 @@ $machinestates = [
     	"descriptionmyturn" => clienttranslate('${you} must choose the direction'),
     	"type" => "activeplayer",
         "args" => "argChooseDirection",
-    	"possibleactions" => [ "setDirection" ],
+    	"possibleactions" => [ "setDirection", "setPlayer" ],
     	"transitions" => [ 
             "setDirection" => ST_NEXT_PLAYER,
+            "setPlayer" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
