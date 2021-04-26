@@ -14,6 +14,7 @@
         "src/mow.d.ts",
         "src/herd-stock-function.ts",
         "src/mow-cards.ts",
+        "src/farmer-cards.ts",
         "src/mow.ts",
         "src/define.ts"
     ]

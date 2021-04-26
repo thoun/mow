@@ -40,8 +40,11 @@ class mow extends Table {
                 "simpleVersion" => 100,
         ]);
 		
-        $this->cards = self::getNew( "module.common.deck" );
-        $this->cards->init( "card" );
+        $this->cards = self::getNew("module.common.deck");
+        $this->cards->init("cow");
+		
+        $this->farmerCards = self::getNew("module.common.deck");
+        $this->farmerCards->init("farmer");
 	}
 	
     protected function getGameName() {
@@ -125,7 +128,14 @@ class mow extends Table {
         }
                
         // $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
-        $this->cards->createCards( $cards, 'deck' );
+        $this->cards->createCards($cards, 'deck');
+
+        
+        $farmerCards = [];
+        for( $value=1; $value<=10; $value++ ) { // 7,8,9 red
+			$farmerCards[] = ['type' => $value, 'type_arg' => $this->farmers_placement[$value], 'nbr' => 1];
+		}
+        $this->farmerCards->createCards($farmerCards, 'deck');
 	   
 
         // Activate first player (which is in general a good idea :) )

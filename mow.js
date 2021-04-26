@@ -235,6 +235,19 @@ function updateDisplay(from) {
     }
     dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
 }
+var FarmerCards = /** @class */ (function () {
+    function FarmerCards() {
+    }
+    FarmerCards.prototype.createCards = function (stocks) {
+        var cardsurl = g_gamethemeurl + "img/farmers.jpg";
+        stocks.forEach(function (stock) {
+            for (var number = 1; number <= 10; number++) {
+                stock.addItemType(number, number, cardsurl, number - 1);
+            }
+        });
+    };
+    return FarmerCards;
+}());
 var MowCards = /** @class */ (function () {
     function MowCards() {
     }
