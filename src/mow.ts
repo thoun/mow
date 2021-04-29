@@ -323,7 +323,7 @@ class Mow implements Game {
                     break;                
                 case 'selectOpponent':
                     if (args.lookOpponentHand) {
-                        (this as any).addActionButton( 'selectionAction_button', _(`OK, I've seen it`), 'onSeeHand');
+                        (this as any).addActionButton( 'selectionAction_button', _(`Look player's hand`), 'onLookHand');
                     } else {
                         (this as any).addActionButton( 'selectionAction_button', _(`Pick a card`), 'onPickOpponentCard');
                     }
@@ -417,6 +417,8 @@ class Mow implements Game {
             return;
         }
 
+        // TODO check player has cards to select
+
         const playerId = Number((event.target as HTMLDivElement).dataset.id);
 
         if (playerId === (this as any).player_id) {
@@ -492,7 +494,7 @@ class Mow implements Game {
         });
     }
 
-    public onSeeHand() {
+    public onLookHand() {
         if(!(this as any).checkAction('viewCards'))
          return;
      

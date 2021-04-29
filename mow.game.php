@@ -656,7 +656,7 @@ class mow extends Table {
             }
 
             foreach( $removedCards as $opponentId => $removedCard ) {
-                self::notifyPlayer($player_id, 'removedCard', 'Card TODO was removed from your hand', [
+                self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
                     'playerId' => $opponentId,
                     'card' => $removedCard,
                 ]);
@@ -864,6 +864,37 @@ class mow extends Table {
         return [
             'lookOpponentHand' => intval(self::getGameStateValue('lookOpponentHand')) == 1,
             'exchangeCard' => intval(self::getGameStateValue('exchangeCard')) == 1,
+        ];
+    }
+
+    function argViewCards() {
+        $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', intval(self::getGameStateValue('lookOpponentHand'))));
+
+        return [
+            'cards' => $player_hand,
+        ];
+    }
+
+    function argGiveCard() {
+        $player_id = self::getActivePlayerId();
+        $opponentId = intval(self::getGameStateValue('exchangeCard'));
+
+        $cardsInHand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $opponentId));
+        $removedCard = null;
+        $cardsNumber = count($cardsInHand);
+        if ($cardsNumber > 0) {
+            $removedCard = $cardsInHand[bga_rand(1, $cardsNumber) - 1];
+            $this->cards->moveCard($removedCard->id, 'hand', $player_id);
+            $removedCards[$opponentId] = $removedCard;
+
+            self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
+                'playerId' => $opponentId,
+                'card' => $removedCard,
+            ]);
+        }
+
+        return [
+            'card' => $removedCard,
         ];
     }
 

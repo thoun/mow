@@ -608,7 +608,7 @@ var Mow = /** @class */ (function () {
                     break;
                 case 'selectOpponent':
                     if (args.lookOpponentHand) {
-                        this.addActionButton('selectionAction_button', _("OK, I've seen it"), 'onSeeHand');
+                        this.addActionButton('selectionAction_button', _("Look player's hand"), 'onLookHand');
                     }
                     else {
                         this.addActionButton('selectionAction_button', _("Pick a card"), 'onPickOpponentCard');
@@ -688,6 +688,7 @@ var Mow = /** @class */ (function () {
         if (!this.playersSelectable) {
             return;
         }
+        // TODO check player has cards to select
         var playerId = Number(event.target.dataset.id);
         if (playerId === this.player_id) {
             return;
@@ -748,7 +749,7 @@ var Mow = /** @class */ (function () {
             playerId: 0
         });
     };
-    Mow.prototype.onSeeHand = function () {
+    Mow.prototype.onLookHand = function () {
         if (!this.checkAction('viewCards'))
             return;
         this.takeAction("viewCards", {
