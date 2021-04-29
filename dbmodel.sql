@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `cow` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 -- type : id/number
--- type_arg : when to play card (see material.inc.php)
+-- type_arg : time when to play card (see material.inc.php)
 CREATE TABLE IF NOT EXISTS `farmer` (
   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `card_type` varchar(16) NOT NULL,

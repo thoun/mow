@@ -20,6 +20,7 @@
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once("modules/constants.inc.php");
 require_once("modules/card.php");
+require_once("modules/farmer-card.php");
 
 class mow extends Table {
 	function __construct() {
@@ -37,6 +38,7 @@ class mow extends Table {
                 "swapping_player" => 11,
                 "canPick" => 12,
                 "gotoPlayer" => 13,
+                'cowPlayed' => 14,
 
                 "simpleVersion" => 100,
         ]);
@@ -89,6 +91,7 @@ class mow extends Table {
         self::setGameStateInitialValue( 'swapping_player', 0 );
         self::setGameStateInitialValue( 'canPick', 0 );
         self::setGameStateInitialValue( 'gotoPlayer', 0 );
+        self::setGameStateInitialValue( 'cowPlayed', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -138,7 +141,9 @@ class mow extends Table {
 			$farmerCards[] = ['type' => $value, 'type_arg' => $this->farmers_placement[$value], 'nbr' => 1];
 		}
         $this->farmerCards->createCards($farmerCards, 'deck');
-	   
+
+        // TODO TEMP
+        foreach( $players as $player_id => $player ){ $this->farmerCards->pickCard('deck', $player_id); }	   
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -171,6 +176,7 @@ class mow extends Table {
   
 		// Cards in player hand      
         $result['hand'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'hand', $current_player_id ));
+        $result['farmerHand'] = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation( 'hand', $current_player_id ));
         
         // Cards played on the table
         $result['herd'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'herd' ));
@@ -238,6 +244,20 @@ class mow extends Table {
 
     function getCardsFromDb(array $dbCards) {
         return array_map(function($dbCard) { return $this->getCardFromDb($dbCard); }, array_values($dbCards));
+    }
+
+    function getFarmerCardFromDb(array $dbCard) {
+        if (!$dbCard || !array_key_exists('id', $dbCard)) {
+            throw new Error('farmer card doesn\'t exists '.json_encode($dbCard));
+        }
+        if (!$dbCard || !array_key_exists('location', $dbCard)) {
+            throw new Error('farmer location doesn\'t exists '.json_encode($dbCard));
+        }
+        return new FarmerCard($dbCard);
+    }
+
+    function getFarmerCardsFromDb(array $dbCards) {
+        return array_map(function($dbCard) { return $this->getFarmerCardFromDb($dbCard); }, array_values($dbCards));
     }
 
     function getAllowedCardsIds(int $pId) {
@@ -318,7 +338,38 @@ class mow extends Table {
                 throw new BgaUserException(self::_("You can't play slowpoke cow, no place available"), true);
             }
         }
-    }   
+    }
+
+    function controlFarmerCardInHand(int $player_id, int $card_id) {
+        // Get all cards in player hand        
+        $player_hand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
+
+        // Check that the card is in this hand
+        $bIsInHand = false;
+        foreach($player_hand as $current_card) {
+            if($current_card->id == $card_id) {
+                $bIsInHand = true;
+            }
+        }
+
+        if(!$bIsInHand) {
+            throw new BgaUserException("This card is not in your hand");
+        }
+    }
+
+    function controlFarmerCardPlayable(object $card, $endHand = false) {
+        if ($card->time == 9) {
+            return $endHand;
+        }        
+        
+        $alreadyPlayed = intval(self::getGameStateValue('cowPlayed')) > 0;
+        if ($card->time == 1) {
+            return !$alreadyPlayed;
+        } else if ($card->time == 3) {
+            return $alreadyPlayed;
+        }
+        return true;
+    }
 
     function getPlacesForSlowpoke() {
         $places = [];
@@ -428,6 +479,8 @@ class mow extends Table {
         
         // Checks are done! now we can play our card
         $this->cards->moveCard( $card_id, 'herd');
+
+        self::setGameStateValue('cowPlayed', 1);
             
         $displayedNumber = $card->number;
         $precision = '';
@@ -498,6 +551,30 @@ class mow extends Table {
         }
 
         $this->gamestate->nextState('setDirection');
+    }
+    
+    // Play a farmer card from player hand
+    function playFarmer(int $cardId) {
+        self::checkAction("playFarmer");  
+              
+        $player_id = self::getActivePlayerId();
+        $this->controlFarmerCardInHand($player_id, $card_id);
+
+        $card = $this->getFarmerCardFromDb($this->farmerCards->getCard($card_id));
+        $this->controlFarmerCardPlayable($card);
+
+        // TODO apply effets
+
+        $this->cards->moveCard($card_id, 'discard');
+
+        // And notify
+        self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays TODO'), [
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'card' => $card,
+        ]);
+
+        $this->gamestate->nextState('playFarmer');
     }
 
     function setPlayer(int $playerId) {
@@ -659,8 +736,28 @@ class mow extends Table {
         $this->gamestate->nextState( $swapPlayerId > 0 ? "swapHands" : "playerTurn" );
     }
     
+    function stPlayAgain() {
+        if ($this->isSimpleVersion()) {
+            $this->gamestate->nextState('nextPlayer');
+        } else {
+            $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
+
+            $hasPlayableCards = false;
+            foreach ($farmerCardsInHand as $card) {
+                try {
+                    $this->controlFarmerCardPlayable($card);
+                    $hasPlayableCards = true;
+                    break;
+                } catch (Exception $e) {}
+            }
+            
+            $this->gamestate->nextState($hasPlayableCards ? 'playAgain' : 'nextPlayer');
+        }
+    }
     
     function stNextPlayer() {
+        self::setGameStateValue('cowPlayed', 0);
+
         $players = self::loadPlayersBasicInfos();
         $nbr_players = self::getPlayersNumber();
 
@@ -722,7 +819,19 @@ class mow extends Table {
                 ]);
             }
 
+            // TODO can a player getting top flies with all black cards also get farmer card ?
+
             // TODO check farmer card
+            $sql = "SELECT playerId FROM `player` WHERE (hand_points + collected_points) > 0 order by (hand_points + collected_points) desc limit 1";
+            $playerId = intval(self::getUniqueValueFromDB($sql));
+            if ($playerId > 0) {
+                $farmerCard = $this->getFarmerCardFromDb($this->farmerCards->pickCard('deck', $playerId));
+                if ($farmerCard) {
+                    self::notifyPlayer($playerId, 'newFarmerCard', '', [
+                        'card' => $farmerCard
+                    ]);
+                }
+            }
         }
 
         $players = self::getObjectListFromDB("SELECT * FROM player");

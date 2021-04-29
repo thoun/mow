@@ -11,6 +11,14 @@ interface Card {
     slowpokeNumber?: number;
 }
 
+interface FarmerCard {
+    id: number;
+    location: string;
+    location_arg: number;
+    type: number;
+    time: number; // (see material.inc.php)
+}
+
 interface MowGamedatas {
     allowedCardsIds: number[];
     current_player_id: string;
@@ -20,6 +28,7 @@ interface MowGamedatas {
     gamestate: Gamestate;
     gamestates: { [gamestateId: number]: Gamestate };
     hand: Card[];
+    farmerHand: FarmerCard[];
     herd: Card[];
     neutralized_player_id: string;
     next_players_id: { [playerId: number]: number };
@@ -49,12 +58,21 @@ interface NotifCardPlayedArgs {
     remainingCards: number;
 }
 
+interface NotifFarmerCardPlayedArgs {
+    player_id: string; 
+    card: FarmerCard;
+}
+
 interface NotifAllowedCardsArgs {
     allowedCardsIds: number[];
 }
 
 interface NotifNewCardArgs {
     card: Card;
+}
+
+interface NotifNewFarmerCardArgs {
+    card: FarmerCard;
 }
 
 interface DirectionChangedArgs {

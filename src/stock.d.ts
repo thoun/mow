@@ -17,8 +17,10 @@ interface Stock {
     create: (game: Game, $div: any, cardwidth: number, cardheight: number) => void;
     setSelectionMode: (selectionMode: number) => void;            
     centerItems: boolean;
+    image_items_per_row: number;
     updateDisplay: (from: string) => void;
-    setSelectionAppearance: (appearance: string) => void;            
+    setSelectionAppearance: (appearance: string) => void;   
+    selectionClass: string;         
     onItemCreate: ($itemDiv: any, itemType, itemDivId: string) => void; 
     addToStockWithId: (cardUniqueId: number, cardId: string, from?: string) => void;
     addItemType: (cardUniqueId: number, cardWeight: number, cardsurl: string, id: number) => void;	

@@ -235,19 +235,6 @@ function updateDisplay(from) {
     }
     dojo.style(this.control_name, "minHeight", (itemHeight + itemMargin) + "px");
 }
-var FarmerCards = /** @class */ (function () {
-    function FarmerCards() {
-    }
-    FarmerCards.prototype.createCards = function (stocks) {
-        var cardsurl = g_gamethemeurl + "img/farmers.jpg";
-        stocks.forEach(function (stock) {
-            for (var number = 1; number <= 10; number++) {
-                stock.addItemType(number, number, cardsurl, number - 1);
-            }
-        });
-    };
-    return FarmerCards;
-}());
 var MowCards = /** @class */ (function () {
     function MowCards() {
     }
@@ -305,7 +292,44 @@ var MowCards = /** @class */ (function () {
         }
         return tooltip;
     };
+    MowCards.prototype.setupNewCard = function (game, card_div, card_type_id) {
+        game.addTooltipHtml(card_div.id, this.getTooltip(card_type_id));
+    };
     return MowCards;
+}());
+var FarmerCards = /** @class */ (function () {
+    function FarmerCards() {
+    }
+    FarmerCards.prototype.createCards = function (stocks) {
+        var cardsurl = g_gamethemeurl + "img/farmers.jpg";
+        stocks.forEach(function (stock) {
+            for (var number = 1; number <= 10; number++) {
+                stock.addItemType(number, number, cardsurl, number - 1);
+            }
+        });
+    };
+    FarmerCards.prototype.getTooltip = function (cardTypeId) {
+        var tooltip = "<div class=\"tooltip-fly\"><span class=\"tooltip-fly-img\"></span> : " + Math.floor(cardTypeId / 100) + "</div>";
+        switch (cardTypeId) {
+            case 500:
+            case 516:
+                tooltip += _("Blocker: Play this cow to close off one end of the line.");
+                break;
+            case 570:
+            case 590:
+                tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
+                break;
+            case 521:
+            case 522:
+                tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
+                break;
+        }
+        return tooltip;
+    };
+    FarmerCards.prototype.setupNewCard = function (game, card_div, card_type_id) {
+        game.addTooltipHtml(card_div.id, this.getTooltip(card_type_id));
+    };
+    return FarmerCards;
 }());
 /**
  *------
@@ -327,6 +351,7 @@ var MowCards = /** @class */ (function () {
 var Mow = /** @class */ (function () {
     function Mow() {
         this.playerHand = null;
+        this.playerFarmerHand = null;
         this.theHerd = null;
         this.cardwidth = 121;
         this.cardheight = 178;
@@ -349,6 +374,7 @@ var Mow = /** @class */ (function () {
             '#FFFF00'
         ];
         this.mowCards = new MowCards();
+        this.farmerCards = new FarmerCards();
     }
     /*
         setup:
@@ -392,7 +418,7 @@ var Mow = /** @class */ (function () {
         this.playerHand.setSelectionMode(1);
         this.playerHand.setSelectionAppearance('class');
         this.playerHand.centerItems = true;
-        this.playerHand.onItemCreate = dojo.hitch(this, 'setupNewCard');
+        this.playerHand.onItemCreate = function (card_div, card_type_id) { return _this.mowCards.setupNewCard(_this, card_div, card_type_id); };
         dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
         this.theHerd = new ebg.stock();
         this.theHerd.create(this, $('theherd'), this.cardwidth, this.cardheight);
@@ -402,9 +428,20 @@ var Mow = /** @class */ (function () {
         this.theHerd.updateDisplay = function (from) { return updateDisplay.apply(_this.theHerd, [from]); };
         this.theHerd.isAcrobatic = function (stockItemId) { return isAcrobatic.apply(_this.theHerd, [stockItemId]); };
         this.mowCards.createCards([this.theHerd, this.playerHand]);
+        this.playerFarmerHand = new ebg.stock();
+        this.playerFarmerHand.create(this, $('myfarmers'), this.cardwidth, this.cardheight);
+        this.playerFarmerHand.setSelectionMode(1);
+        this.playerFarmerHand.setSelectionAppearance('class');
+        this.playerFarmerHand.selectionClass = 'no-visible-selection';
+        this.playerFarmerHand.centerItems = true;
+        this.playerFarmerHand.onItemCreate = function (card_div, card_type_id) { return _this.farmerCards.setupNewCard(_this, card_div, card_type_id); };
+        dojo.connect(this.playerFarmerHand, 'onChangeSelection', this, 'onPlayerFarmerHandSelectionChanged');
+        this.playerFarmerHand.image_items_per_row = 1;
+        this.farmerCards.createCards([this.playerFarmerHand]);
         //console.log('this.gamedatas', this.gamedatas);
         // Cards in player's hand
         this.gamedatas.hand.forEach(function (card) { return _this.addCardToHand(card); });
+        this.gamedatas.farmerHand.forEach(function (card) { return _this.addFarmerCardToHand(card); });
         // Cards played on table
         this.gamedatas.herd.forEach(function (card) {
             var cardUniqueId = _this.mowCards.getCardUniqueId(card.type, card.number);
@@ -668,7 +705,9 @@ var Mow = /** @class */ (function () {
         //console.log( 'notifications subscriptions setup' );
         dojo.subscribe('newHand', this, "notif_newHand");
         dojo.subscribe('cardPlayed', this, "notif_cardPlayed");
+        dojo.subscribe('farmerCardPlayed', this, "notif_farmerCardPlayed");
         dojo.subscribe('newCard', this, "notif_newCard");
+        dojo.subscribe('newFarmerCard', this, "notif_newFarmerCard");
         dojo.subscribe('allowedCards', this, "notif_allowedCards");
         dojo.subscribe('directionChanged', this, "notif_directionChanged");
         dojo.subscribe('herdCollected', this, "notif_herdCollected");
@@ -698,6 +737,9 @@ var Mow = /** @class */ (function () {
         }, notif.args.slowpokeNumber);
         this.setRemainingCards(notif.args.remainingCards);
     };
+    Mow.prototype.notif_farmerCardPlayed = function (notif) {
+        this.playerFarmerHand.removeFromStockById('' + notif.args.card.id);
+    };
     Mow.prototype.notif_allowedCards = function (notif) {
         // console.log( 'notif_allowedCards', notif );            
         this.enableAllowedCards(notif.args.allowedCardsIds);
@@ -713,6 +755,11 @@ var Mow = /** @class */ (function () {
                 dojo.query("#myhand_item_" + card.id).addClass("disabled");
             }
         }, 1000);
+    };
+    Mow.prototype.notif_newFarmerCard = function (notif) {
+        //console.log( 'notif_newCard', notif );
+        var card = notif.args.card;
+        this.addFarmerCardToHand(card);
     };
     Mow.prototype.notif_directionChanged = function (notif) {
         //console.log( 'notif_directionChanged', notif );
@@ -753,12 +800,24 @@ var Mow = /** @class */ (function () {
         if (items.length == 1) {
             if (this.checkAction('playCard', true)) {
                 // Can play a card
-                var card_id = items[0].id; //items[0].type
+                var id = items[0].id;
                 this.takeAction("playCard", {
-                    'card_id': card_id,
-                    'lock': true
+                    id: id
                 });
                 this.playerHand.unselectAll();
+            }
+        }
+    };
+    Mow.prototype.onPlayerFarmerHandSelectionChanged = function () {
+        var items = this.playerFarmerHand.getSelectedItems();
+        if (items.length == 1) {
+            if (this.checkAction('playFarmer', true)) {
+                // Can play a card
+                var id = items[0].id;
+                this.takeAction("playFarmer", {
+                    id: id
+                });
+                this.playerFarmerHand.unselectAll();
             }
         }
     };
@@ -817,9 +876,6 @@ var Mow = /** @class */ (function () {
         }
         return this.inherited(arguments);
     };
-    Mow.prototype.setupNewCard = function (card_div, card_type_id, card_id) {
-        this.addTooltipHtml(card_div.id, this.mowCards.getTooltip(card_type_id));
-    };
     Mow.prototype.getNextPlayer = function () {
         var activePlayerId = this.getActivePlayerId();
         var activePlayerIndex = this.gamedatas.playerorder.findIndex(function (playerId) { return '' + playerId === activePlayerId; });
@@ -842,6 +898,12 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.addCardToHerd = function (card, from) {
         this.addCardToStock(this.theHerd, card, from);
+    };
+    Mow.prototype.addFarmerCardToStock = function (stock, card, from) {
+        stock.addToStockWithId(card.type, '' + card.id, from);
+    };
+    Mow.prototype.addFarmerCardToHand = function (card, from) {
+        this.addFarmerCardToStock(this.playerFarmerHand, card, from);
     };
     return Mow;
 }());

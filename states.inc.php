@@ -98,10 +98,10 @@ $machinestates = [
         "args" => "argPlayerTurn",
     	"possibleactions" => [ "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ],
     	"transitions" => [ 
-            "playCard" => ST_NEXT_PLAYER, 
-            "playFarmer" => ST_PLAYER_PLAY_FARMER,
+            "playCard" => ST_PLAY_AGAIN, 
+            "playFarmer" => ST_PLAY_AGAIN,
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
-            "collectHerd" => ST_PLAYER_TURN, 
+            "collectHerd" => ST_PLAY_AGAIN, 
             "collectLastHerd" => ST_COLLECT_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
@@ -116,8 +116,8 @@ $machinestates = [
     	"possibleactions" => [ "setDirection", "setPlayer" ],
     	"transitions" => [ 
             "playFarmer" => ST_PLAYER_PLAY_FARMER,
-            "setDirection" => ST_NEXT_PLAYER,
-            "setPlayer" => ST_NEXT_PLAYER,
+            "setDirection" => ST_PLAY_AGAIN,
+            "setPlayer" => ST_PLAY_AGAIN,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -130,9 +130,20 @@ $machinestates = [
         "args" => "argPlayFarmer",
     	"possibleactions" => [ "playFarmer", "end" ],
     	"transitions" => [ 
-            "playFarmer" => ST_PLAYER_PLAY_FARMER,
+            "playFarmer" => ST_PLAY_AGAIN,
             "end" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAY_AGAIN => [
+        "name" => "playAgain",
+        "description" => "",
+        "type" => "game",
+        "action" => "stPlayAgain",
+        "transitions" => [ 
+            "playAgain" => ST_PLAYER_PLAY_FARMER,
+            "nextPlayer" => ST_PLAYER_TURN,
         ]
     ],
 	

@@ -28,6 +28,7 @@ class Mow implements Game {
 
     private gamedatas: MowGamedatas;
     private playerHand: Stock = null;
+    private playerFarmerHand: Stock = null;
     private theHerd: MowHerdStock = null;
     private allowedCardsIds: number[];
     private player_id: string;
@@ -58,6 +59,7 @@ class Mow implements Game {
     ];
 
     private mowCards = new MowCards();
+    private farmerCards = new FarmerCards();
 
     constructor() {}
         
@@ -108,9 +110,9 @@ class Mow implements Game {
         this.playerHand = new ebg.stock() as Stock;
         this.playerHand.create( this, $('myhand'), this.cardwidth, this.cardheight );
         this.playerHand.setSelectionMode(1);            
-        this.playerHand.setSelectionAppearance('class');            
+        this.playerHand.setSelectionAppearance('class');
         this.playerHand.centerItems = true;
-        this.playerHand.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
+        this.playerHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
         dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
         this.theHerd = new ebg.stock() as MowHerdStock;
@@ -122,11 +124,23 @@ class Mow implements Game {
         this.theHerd.isAcrobatic = (stockItemId: number) => isAcrobatic.apply(this.theHerd, [stockItemId]);
 
         this.mowCards.createCards([this.theHerd, this.playerHand]);
+
+        this.playerFarmerHand = new ebg.stock() as Stock;
+        this.playerFarmerHand.create( this, $('myfarmers'), this.cardwidth, this.cardheight );
+        this.playerFarmerHand.setSelectionMode(1);            
+        this.playerFarmerHand.setSelectionAppearance('class');    
+        this.playerFarmerHand.selectionClass = 'no-visible-selection';        
+        this.playerFarmerHand.centerItems = true;
+        this.playerFarmerHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.farmerCards.setupNewCard(this, card_div, card_type_id); 
+        dojo.connect( this.playerFarmerHand, 'onChangeSelection', this, 'onPlayerFarmerHandSelectionChanged' );
+        this.playerFarmerHand.image_items_per_row = 1;
+        this.farmerCards.createCards([this.playerFarmerHand]);
         
         //console.log('this.gamedatas', this.gamedatas);
         
         // Cards in player's hand
         this.gamedatas.hand.forEach((card: Card) => this.addCardToHand(card));
+        this.gamedatas.farmerHand.forEach((card: FarmerCard) => this.addFarmerCardToHand(card));
         
         // Cards played on table
         this.gamedatas.herd.forEach((card: Card) => {
@@ -445,8 +459,10 @@ class Mow implements Game {
         //console.log( 'notifications subscriptions setup' );
         
         dojo.subscribe( 'newHand', this, "notif_newHand" );
-        dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );            
-        dojo.subscribe( 'newCard', this, "notif_newCard" );
+        dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );   
+        dojo.subscribe( 'farmerCardPlayed', this, "notif_farmerCardPlayed" );         
+        dojo.subscribe( 'newCard', this, "notif_newCard" );         
+        dojo.subscribe( 'newFarmerCard', this, "notif_newFarmerCard" );
         dojo.subscribe( 'allowedCards', this, "notif_allowedCards" );  
         dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
         dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
@@ -485,6 +501,10 @@ class Mow implements Game {
 
         this.setRemainingCards(notif.args.remainingCards);
     }
+
+    public notif_farmerCardPlayed( notif: Notif<NotifFarmerCardPlayedArgs> ) {
+        this.playerFarmerHand.removeFromStockById(''+notif.args.card.id);
+    }
     
     public notif_allowedCards( notif: Notif<NotifAllowedCardsArgs> ) {
         // console.log( 'notif_allowedCards', notif );            
@@ -503,6 +523,13 @@ class Mow implements Game {
             }
         }, 1000);
         
+    }
+    
+    public notif_newFarmerCard( notif: Notif<NotifNewFarmerCardArgs> ) {
+        //console.log( 'notif_newCard', notif );
+
+        const card = notif.args.card;
+        this.addFarmerCardToHand(card);        
     }
     
     public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
@@ -554,11 +581,10 @@ class Mow implements Game {
         if (items.length == 1) {
             if ((this as any).checkAction('playCard', true)) {
                 // Can play a card
-                const card_id = items[0].id;//items[0].type
+                const id = items[0].id;
 
                 this.takeAction("playCard", { 
-                    'card_id': card_id,
-                    'lock': true 
+                    id
                 });
                 
                 this.playerHand.unselectAll();
@@ -566,6 +592,21 @@ class Mow implements Game {
         }
     }
 
+    public onPlayerFarmerHandSelectionChanged() {            
+        const items = this.playerFarmerHand.getSelectedItems();
+        if (items.length == 1) {
+            if ((this as any).checkAction('playFarmer', true)) {
+                // Can play a card
+                const id = items[0].id;
+
+                this.takeAction("playFarmer", { 
+                    id
+                });
+                
+                this.playerFarmerHand.unselectAll();
+            }
+        }
+    }
 
     ////////////////////////////////
     ////////////////////////////////
@@ -624,10 +665,6 @@ class Mow implements Game {
         return (this as any).inherited(arguments);
     }
 
-    public setupNewCard( card_div: HTMLDivElement, card_type_id: number, card_id: string ) {
-        (this as any).addTooltipHtml( card_div.id, this.mowCards.getTooltip(card_type_id));
-    }
-
     private getNextPlayer() {
         const activePlayerId = (this as any).getActivePlayerId();
         const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
@@ -654,5 +691,13 @@ class Mow implements Game {
 
     private addCardToHerd(card: Partial<Card>, from?: string) {
         this.addCardToStock(this.theHerd, card, from);
+    }
+
+    private addFarmerCardToStock(stock: Stock, card: Partial<FarmerCard>, from?: string) {
+        stock.addToStockWithId(card.type, ''+card.id, from);
+    }
+
+    private addFarmerCardToHand(card: Partial<FarmerCard>, from?: string) {
+        this.addFarmerCardToStock(this.playerFarmerHand, card, from);
     }
 }

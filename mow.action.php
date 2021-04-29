@@ -41,8 +41,15 @@
 	
     public function playCard() {
         self::setAjaxMode();     
-        $card_id = self::getArg( "card_id", AT_posint, true );
-        $this->game->playCard( $card_id );
+        $cardId = self::getArg( "id", AT_posint, true );
+        $this->game->playCard( $cardId );
+        self::ajaxResponse();
+    }
+	
+    public function playFarmer() {
+        self::setAjaxMode();     
+        $cardId = self::getArg( "id", AT_posint, true );
+        $this->game->playFarmer( $cardId );
         self::ajaxResponse();
     }
 	
