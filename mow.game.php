@@ -576,8 +576,9 @@ class mow extends Table {
 
         if ($card->type == 1) {
             self::setGameStateValue('cantPlaySpecial', 1);
-        } else {
-            // TODO apply other effets
+        } else if ($card->type == 4) {
+            self::setGameStateValue('cowPlayed', 1);
+            $this->gamestate->nextState('playFarmer');
         }
 
         $this->farmerCards->moveCard($cardId, 'discard');
@@ -778,7 +779,11 @@ class mow extends Table {
                 } catch (Exception $e) {}
             }
             
-            $this->gamestate->nextState($hasPlayableCards ? 'playAgain' : 'nextPlayer');
+            if (intval(self::setGameStateValue('cowPlayed')) > 0) {
+                $this->gamestate->nextState($hasPlayableCards ? 'playAgain' : 'nextPlayer');
+            } else {
+                $this->gamestate->nextState('playCard');
+            }
         }
     }
     

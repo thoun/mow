@@ -142,6 +142,7 @@ $machinestates = [
         "type" => "game",
         "action" => "stPlayAgain",
         "transitions" => [ 
+            "playCard" => ST_PLAYER_TURN,
             "playAgain" => ST_PLAYER_PLAY_FARMER,
             "nextPlayer" => ST_NEXT_PLAYER,
         ]
