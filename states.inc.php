@@ -118,6 +118,7 @@ $machinestates = [
     	"transitions" => [
             "setDirection" => ST_PLAY_AGAIN,
             "setPlayer" => ST_PLAY_AGAIN,
+            "nextPlayer" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -145,6 +146,7 @@ $machinestates = [
         "transitions" => [ 
             "playCard" => ST_PLAYER_TURN,
             "playAgain" => ST_PLAYER_PLAY_FARMER,
+            "chooseDirectionPick" => ST_CHOOSE_DIRECTION,
             "nextPlayer" => ST_NEXT_PLAYER,
         ]
     ],

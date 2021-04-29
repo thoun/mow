@@ -42,6 +42,7 @@ class mow extends Table {
 
                 // farmer cards constants
                 'cantPlaySpecial' => 50,
+                'chooseDirectionPick' => 51,
 
                 // game options
                 "simpleVersion" => 100,
@@ -97,6 +98,7 @@ class mow extends Table {
         self::setGameStateInitialValue( 'gotoPlayer', 0 );
         self::setGameStateInitialValue( 'cowPlayed', 0 );
         self::setGameStateInitialValue( 'cantPlaySpecial', 0 );
+        self::setGameStateInitialValue( 'chooseDirectionPick', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -578,7 +580,12 @@ class mow extends Table {
             self::incStat( 1, "keepDirectionNumber" );
         }
 
-        $this->gamestate->nextState('setDirection');
+        if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
+            self::setGameStateValue('chooseDirectionPick', 0);
+            $this->gamestate->nextState('nextPlayer');
+        } else {
+            $this->gamestate->nextState('setDirection');
+        }
     }
     
     // Play a farmer card from player hand
@@ -625,7 +632,7 @@ class mow extends Table {
                 ]);
             }
         } else if ($card->type == 8) {
-            // TODO
+            self::setGameStateValue( 'chooseDirectionPick', 1);
         } else if ($card->type == 9) {
             // TODO
         }
@@ -642,7 +649,13 @@ class mow extends Table {
 
     function setPlayer(int $playerId) {
         self::setGameStateValue('gotoPlayer', $playerId);
-        $this->gamestate->nextState('setPlayer');
+
+        if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
+            self::setGameStateValue('chooseDirectionPick', 0);
+            $this->gamestate->nextState('nextPlayer');
+        } else {
+            $this->gamestate->nextState('setPlayer');
+        }
     }
 
     function collectHerd() {
@@ -839,7 +852,7 @@ class mow extends Table {
     function stPlayAgain() {
         if ($this->isSimpleVersion()) {
             $this->gamestate->nextState('nextPlayer');
-        } else {
+        } else if (intval(self::setGameStateValue('cowPlayed')) > 0) {
             $player_id = self::getActivePlayerId();
             $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
 
@@ -851,12 +864,19 @@ class mow extends Table {
                     break;
                 } catch (Exception $e) {}
             }
-            
-            if (intval(self::setGameStateValue('cowPlayed')) > 0) {
-                $this->gamestate->nextState($hasPlayableCards ? 'playAgain' : 'nextPlayer');
-            } else {
-                $this->gamestate->nextState('playCard');
+
+            if ($hasPlayableCards) {
+                $this->gamestate->nextState('playAgain');
+            } else { // end of turn
+                if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
+                    $this->gamestate->nextState('chooseDirectionPick');
+                } else {
+                    $this->gamestate->nextState('nextPlayer');
+                }
             }
+        } else {
+            $this->gamestate->nextState('playCard');
+        }
         }
     }
     
