@@ -806,6 +806,10 @@ class mow extends Table {
     function getFarmerCardSelectFliesType() {
         return $this->getFarmerCardsFromDb($this->farmerCards->getCardsOfType(10)[0]);
     }
+
+    function opponentCardsViewed() {
+        $this->gamestate->nextState('next');
+    }
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments

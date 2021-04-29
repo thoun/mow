@@ -92,6 +92,12 @@
         $this->game->exchangeCard($playerId);
         self::ajaxResponse();
     } 
+	
+    public function next() {
+        self::setAjaxMode();
+        $this->game->opponentCardsViewed();
+        self::ajaxResponse();
+    }
     
     public function ignoreFlies() {
         self::setAjaxMode();

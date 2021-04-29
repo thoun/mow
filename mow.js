@@ -505,6 +505,9 @@ var Mow = /** @class */ (function () {
             case 'selectOpponent':
                 this.onEnteringSelectionAction(args.args.lookOpponentHand ? 'look' : 'exchange');
                 break;
+            case 'viewCards':
+                this.onEnteringViewCards(args.args);
+                break;
         }
     };
     Mow.prototype.onEnteringStatePlayerTurn = function (args) {
@@ -550,6 +553,30 @@ var Mow = /** @class */ (function () {
             this.selectionAction = selectionAction;
             // selectedPlayerId and corresponding button are added on click
         }
+    };
+    Mow.prototype.onEnteringViewCards = function (args) {
+        var _this = this;
+        var viewCardsDialog = new ebg.popindialog();
+        viewCardsDialog.create('mowViewCardsDialog');
+        viewCardsDialog.setTitle(dojo.string.substitute(_(" ${player_name} cards"), { player_name: this.gamedatas.players[args.opponentId].name }));
+        var html = "<div id=\"opponent-hand\"></div>";
+        // Show the dialog
+        viewCardsDialog.setContent(html);
+        var opponentHand = new ebg.stock();
+        opponentHand.create(this, $('opponent-hand'), this.cardwidth, this.cardheight);
+        opponentHand.setSelectionMode(0);
+        opponentHand.centerItems = true;
+        opponentHand.onItemCreate = function (card_div, card_type_id) { return _this.mowCards.setupNewCard(_this, card_div, card_type_id); };
+        this.mowCards.createCards([opponentHand]);
+        args.cards.forEach(function (card) { return _this.addCardToStock(opponentHand, card); });
+        viewCardsDialog.show();
+        // Replace the function call when it's clicked
+        viewCardsDialog.replaceCloseCallback(function () {
+            if (!_this.checkAction('next'))
+                return;
+            _this.takeAction("next");
+            viewCardsDialog.destroy();
+        });
     };
     Mow.prototype.setGamestateDescription = function (suffix) {
         if (suffix === void 0) { suffix = ''; }
