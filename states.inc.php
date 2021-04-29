@@ -100,6 +100,7 @@ $machinestates = [
     	"transitions" => [ 
             "playCard" => ST_PLAY_AGAIN, 
             "playFarmer" => ST_PLAY_AGAIN,
+            "playFarmerWithOpponentSelection" => ST_PLAYER_SELECT_OPPONENT,
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAY_AGAIN, 
             "collectLastHerd" => ST_COLLECT_HAND,
@@ -114,8 +115,7 @@ $machinestates = [
     	"type" => "activeplayer",
         "args" => "argChooseDirection",
     	"possibleactions" => [ "setDirection", "setPlayer" ],
-    	"transitions" => [ 
-            "playFarmer" => ST_PLAYER_PLAY_FARMER,
+    	"transitions" => [
             "setDirection" => ST_PLAY_AGAIN,
             "setPlayer" => ST_PLAY_AGAIN,
             "zombiePass" => ST_NEXT_PLAYER,
@@ -131,6 +131,7 @@ $machinestates = [
     	"possibleactions" => [ "playFarmer", "pass" ],
     	"transitions" => [ 
             "playFarmer" => ST_PLAY_AGAIN,
+            "playFarmerWithOpponentSelection" => ST_PLAYER_SELECT_OPPONENT,
             "pass" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
@@ -145,6 +146,39 @@ $machinestates = [
             "playCard" => ST_PLAYER_TURN,
             "playAgain" => ST_PLAYER_PLAY_FARMER,
             "nextPlayer" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_SELECT_OPPONENT =>  [
+        "name" => "selectOpponent",
+    	"description" => clienttranslate('${actplayer} must select an opponent for played farmer card'),
+    	"descriptionmyturn" => clienttranslate('${you} must select an opponent for played farmer card'),
+    	"type" => "activeplayer",
+    	"possibleactions" => [ "selectOpponent" ],
+    	"transitions" => [ 
+            "selectOpponent" => ST_PLAY_AGAIN,
+        ]
+    ],
+
+    ST_PLAYER_VIEW_CARDS =>  [
+        "name" => "viewCards",
+    	"description" => clienttranslate('${actplayer} looks to chosen opponent cards'),
+    	"descriptionmyturn" => clienttranslate('${you} look to chosen opponent cards'),
+    	"type" => "activeplayer",
+    	"possibleactions" => [ "next" ],
+    	"transitions" => [ 
+            "next" => ST_PLAY_AGAIN,
+        ]
+    ],
+
+    ST_PLAYER_GIVE_CARD =>  [
+        "name" => "giveCard",
+    	"description" => clienttranslate('${actplayer} must give back a card to chosen opponent'),
+    	"descriptionmyturn" => clienttranslate('${you} must give back a card to chosen opponent'),
+    	"type" => "activeplayer",
+    	"possibleactions" => [ "giveCard" ],
+    	"transitions" => [ 
+            "giveCard" => ST_PLAY_AGAIN,
         ]
     ],
 	

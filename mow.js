@@ -802,9 +802,14 @@ var Mow = /** @class */ (function () {
     Mow.prototype.notif_herdCollected = function (notif) {
         //console.log( 'notif_herdCollected', notif );
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-        this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-        this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
-        this.theHerd.removeAllTo('player_board_' + notif.args.player_id);
+        if (notif.args.player_id) {
+            this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+            this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            this.theHerd.removeAllTo('player_board_' + notif.args.player_id);
+        }
+        else {
+            this.theHerd.removeAllTo('topbar');
+        }
         dojo.query("#myhand .stockitem").removeClass("disabled");
         this.allowedCardsIds = null;
         this.playerHand.unselectAll();

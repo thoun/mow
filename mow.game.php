@@ -574,11 +574,20 @@ class mow extends Table {
         $card = $this->getFarmerCardFromDb($this->farmerCards->getCard($cardId));
         $this->controlFarmerCardPlayable($card);
 
+        $nextState = 'playFarmer';
         if ($card->type == 1) {
             self::setGameStateValue('cantPlaySpecial', 1);
+        } else if ($card->type == 2) {
+            $nextState = 'playFarmerWithOpponentSelection';
+        } else if ($card->type == 3) {
+            $nextState = 'playFarmerWithOpponentSelection';
         } else if ($card->type == 4) {
             self::setGameStateValue('cowPlayed', 1);
             $this->gamestate->nextState('playFarmer');
+        } else if ($card->type == 5) {
+            // TODO in 2 players, can player select row to remove ? or remove all ?
+            $this->removeHerdAndNotify(null);
+            self::setGameStateValue('cowPlayed', 0);
         } else if ($card->type == 6) {
             $this->pickFarmerCard($player_id);
             $this->pickFarmerCard($player_id);
@@ -593,7 +602,7 @@ class mow extends Table {
             'card' => $card,
         ]);
 
-        $this->gamestate->nextState('playFarmer');
+        $this->gamestate->nextState($nextState);
     }
 
     function setPlayer(int $playerId) {
@@ -613,9 +622,7 @@ class mow extends Table {
         $sql = "UPDATE player SET player_score=player_score-$collectedPoints, collected_points=collected_points-$collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
 
-        $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id );
-        $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
-        self::DbQuery($sql);
+        $this->removeHerdAndNotify($player_id);
 
         self::incStat( 1, "collectedHerdsNumber" );
             
@@ -632,6 +639,25 @@ class mow extends Table {
             $this->gamestate->nextState('collectHerd');
         } else {
             $this->gamestate->nextState('collectLastHerd');
+        }
+    }
+
+    function removeHerdAndNotify($player_id) {  
+        $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id );
+        $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
+        self::DbQuery($sql);
+            
+        // And notify
+        if ($player_id) {
+            self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), [
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+                'points' => $collectedPoints
+            ]);
+        } else {
+            self::notifyAllPlayers('herdCollected', clienttranslate('Herd removed'), [
+                'player_id' => 0,
+            ]);
         }
     }
 
