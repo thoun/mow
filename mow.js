@@ -745,6 +745,8 @@ var Mow = /** @class */ (function () {
         dojo.subscribe('herdCollected', this, "notif_herdCollected");
         dojo.subscribe('handCollected', this, "notif_handCollected");
         dojo.subscribe('allTopFlies', this, "notif_allTopFlies");
+        dojo.subscribe('replaceCards', this, "notif_replaceCards");
+        dojo.subscribe('removedCard', this, "notif_removedCard");
         this.notifqueue.setSynchronous('herdCollected', 2000);
         this.notifqueue.setSynchronous('handCollected', 1500);
     };
@@ -831,6 +833,9 @@ var Mow = /** @class */ (function () {
         var _this = this;
         notif.args.oldCards.forEach(function (card) { return _this.playerHand.removeFromStockById('' + card.id); });
         notif.args.newCards.forEach(function (card) { return _this.addCardToHand(card, 'remainingCards'); });
+    };
+    Mow.prototype.notif_removedCard = function (notif) {
+        this.playerHand.removeFromStockById('' + notif.args.card.id);
     };
     ////////////////////////////////
     ////////////////////////////////

@@ -486,6 +486,8 @@ class Mow implements Game {
         dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
         dojo.subscribe( 'handCollected', this, "notif_handCollected" );
         dojo.subscribe( 'allTopFlies', this, "notif_allTopFlies" );
+        dojo.subscribe( 'replaceCards', this, "notif_replaceCards" );
+        dojo.subscribe( 'removedCard', this, "notif_removedCard" );
 
         (this as any).notifqueue.setSynchronous( 'herdCollected', 2000 );
         (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
@@ -596,6 +598,10 @@ class Mow implements Game {
     public notif_replaceCards( notif: Notif<NotifReplaceCardsArgs> ) {
         notif.args.oldCards.forEach(card => this.playerHand.removeFromStockById(''+card.id));
         notif.args.newCards.forEach(card => this.addCardToHand(card, 'remainingCards'));
+    }
+    
+    public notif_removedCard( notif: Notif<NotifRemovedCardArgs> ) {
+        this.playerHand.removeFromStockById(''+notif.args.card.id);
     }
 
     ////////////////////////////////

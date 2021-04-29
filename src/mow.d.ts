@@ -92,8 +92,14 @@ interface NotifAllTopFliesArgs {
     playerId: number;
     points: number;
 }
+
 interface NotifReplaceCardsArgs {
     playerId: number;
     oldCards: Card[];
     newCards: Card[];
+}
+
+interface NotifRemovedCardArgs {
+    playerId: number;
+    card: Card;
 }

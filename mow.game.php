@@ -634,7 +634,27 @@ class mow extends Table {
         } else if ($card->type == 8) {
             self::setGameStateValue( 'chooseDirectionPick', 1);
         } else if ($card->type == 9) {
-            // TODO
+            $removedCards = [];
+            $players = self::loadPlayersBasicInfos();
+            foreach( $players as $opponentId => $player ) {
+                if ($player_id != $opponentId) {
+                    $cardsInHand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $opponentId));
+
+                    $cardsNumber = count($cardsInHand);
+                    if ($cardsNumber > 0) {
+                        $removedCard = $cardsInHand[bga_rand(1, $cardsNumber) - 1];
+                        $this->cards->moveCard($removedCard->id, 'discard');
+                        $removedCards[$opponentId] = $removedCard;
+                    }
+                }
+            }
+
+            foreach( $removedCards as $opponentId => $removedCard ) {
+                self::notifyPlayer($player_id, 'removedCard', 'Card TODO was removed from your hand', [
+                    'playerId' => $opponentId,
+                    'card' => $removedCard,
+                ]);
+            }
         }
 
         // And notify
