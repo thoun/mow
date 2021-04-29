@@ -9,6 +9,7 @@ define('ST_NEW_HAND', 20);
 define('ST_PLAYER_TURN', 21);
 define('ST_CHOOSE_DIRECTION', 22);
 define('ST_SWAP_HANDS', 23);
+define('ST_PLAYER_PLAY_FARMER', 25);
 
 define('ST_NEXT_PLAYER', 32);
 

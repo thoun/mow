@@ -576,7 +576,7 @@ var Mow = /** @class */ (function () {
             var html_1 = '';
             ids.forEach(function (id) {
                 var player = _this.gamedatas.players[id];
-                html_1 += "<button id=\"pickBtn" + id + "\" class=\"bgabutton bgabutton_blue\" style=\"border: 3px solid #" + player.color + "\">";
+                html_1 += "<button id=\"pickBtn" + id + "\" class=\"bgabutton bgabutton_blue pickButton\" style=\"border: 3px solid #" + player.color + "\">" + player.name + "</button>";
             });
             document.getElementById('pickBlock').innerHTML = html_1;
             ids.forEach(function (id) { return document.getElementById("pickBtn" + id).addEventListener('click', function () { return _this.pickPlayer(id); }); });

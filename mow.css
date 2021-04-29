@@ -91,13 +91,21 @@
 }
 #gamezone #direction_popin .popin-content {
   display: flex;
+  background: white;
+  border-radius: 10px;
 }
 #gamezone #direction_popin .popin-content #pickBlock {
   display: none;
-  flex-direction: row;
+  padding: 10px;
+  flex-direction: column;
+  justify-content: center;
 }
 #gamezone #direction_popin .popin-content #pickBlock.visible {
   display: flex;
+}
+#gamezone #direction_popin .popin-content #pickBlock .pickButton {
+  min-width: 100px;
+  max-width: 200px;
 }
 #gamezone #direction_popin .direction-button {
   cursor: pointer;
@@ -110,8 +118,6 @@
   font-weight: bold;
 }
 #gamezone #direction_popin .centered {
-  background: white;
-  border-radius: 10px;
   display: flex;
 }
 #gamezone #direction_popin.swap .centered {

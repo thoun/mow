@@ -332,7 +332,7 @@ class Mow implements Game {
             let html = '';
             ids.forEach(id => {
                 const player = this.gamedatas.players[id];
-                html += `<button id="pickBtn${id}" class="bgabutton bgabutton_blue" style="border: 3px solid #${player.color}">`;
+                html += `<button id="pickBtn${id}" class="bgabutton bgabutton_blue pickButton" style="border: 3px solid #${player.color}">${player.name}</button>`;
             });
 
             document.getElementById('pickBlock').innerHTML = html;

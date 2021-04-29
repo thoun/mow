@@ -83,13 +83,22 @@
 
         .popin-content {
             display: flex;
+            background: white;
+            border-radius:10px;
 
             #pickBlock {
                 display: none;
-                flex-direction: row;
+                padding: 10px;
+                flex-direction: column;
+                justify-content: center;
 
                 &.visible {
                     display: flex;
+                }
+
+                .pickButton {
+                    min-width: 100px;
+                    max-width: 200px;
                 }
             }
         }
@@ -107,8 +116,6 @@
         }
 
         .centered {
-            background: white;
-            border-radius:10px;
             display: flex;
         }
 

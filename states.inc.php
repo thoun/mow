@@ -99,6 +99,7 @@ $machinestates = [
     	"possibleactions" => [ "playCard", "chooseDirection", "collectHerd", "collectLastHerd", "endGame" ],
     	"transitions" => [ 
             "playCard" => ST_NEXT_PLAYER, 
+            "playFarmer" => ST_PLAYER_PLAY_FARMER,
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAYER_TURN, 
             "collectLastHerd" => ST_COLLECT_HAND,
@@ -114,8 +115,23 @@ $machinestates = [
         "args" => "argChooseDirection",
     	"possibleactions" => [ "setDirection", "setPlayer" ],
     	"transitions" => [ 
+            "playFarmer" => ST_PLAYER_PLAY_FARMER,
             "setDirection" => ST_NEXT_PLAYER,
             "setPlayer" => ST_NEXT_PLAYER,
+            "zombiePass" => ST_NEXT_PLAYER,
+        ]
+    ],
+
+    ST_PLAYER_PLAY_FARMER => [
+        "name" => "playFarmer",
+    	"description" => clienttranslate('${actplayer} can play a farmer'),
+    	"descriptionmyturn" => clienttranslate('${you} can play a farmer'),
+    	"type" => "activeplayer",
+        "args" => "argPlayFarmer",
+    	"possibleactions" => [ "playFarmer", "end" ],
+    	"transitions" => [ 
+            "playFarmer" => ST_PLAYER_PLAY_FARMER,
+            "end" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],

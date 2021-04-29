@@ -36,6 +36,7 @@ class mow extends Table {
                 "direction_clockwise" => 10,
                 "swapping_player" => 11,
                 "canPick" => 12,
+                "gotoPlayer" => 13,
 
                 "simpleVersion" => 100,
         ]);
@@ -87,6 +88,7 @@ class mow extends Table {
         self::setGameStateInitialValue( 'direction_clockwise', 1 );
         self::setGameStateInitialValue( 'swapping_player', 0 );
         self::setGameStateInitialValue( 'canPick', 0 );
+        self::setGameStateInitialValue( 'gotoPlayer', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -127,8 +129,8 @@ class mow extends Table {
 			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
-        // $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
-        $this->cards->createCards($cards, 'deck');
+        $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        //$this->cards->createCards($cards, 'deck');
 
         
         $farmerCards = [];
@@ -173,7 +175,7 @@ class mow extends Table {
         // Cards played on the table
         $result['herd'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'herd' ));
         
-        $sql = "SELECT card_id id, card_slowpoke_type_arg slowpoke_type_arg FROM card WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
+        $sql = "SELECT card_id id, card_slowpoke_type_arg slowpoke_type_arg FROM cow WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
         $slowpokes = array_map(function($db) { 
             $slowpoke = new stdClass();
             $slowpoke->id = intval($db['id']);
@@ -420,7 +422,7 @@ class mow extends Table {
 
             $slowpokeNumber = intval($places[0][0]->number);
             $card->slowpokeNumber = $slowpokeNumber;             
-            $sql = "UPDATE card SET card_slowpoke_type_arg=$slowpokeNumber WHERE card_id='$card_id'";
+            $sql = "UPDATE cow SET card_slowpoke_type_arg=$slowpokeNumber WHERE card_id='$card_id'";
             self::DbQuery($sql);
         }
         
@@ -499,8 +501,7 @@ class mow extends Table {
     }
 
     function setPlayer(int $playerId) {
-        $this->gamestate->changeActivePlayer($playerId); // TODO place in a game state
-
+        self::setGameStateValue('gotoPlayer', $playerId);
         $this->gamestate->nextState('setPlayer');
     }
 
@@ -517,7 +518,7 @@ class mow extends Table {
         self::DbQuery($sql);
 
         $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id );
-        $sql = "UPDATE card SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
+        $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
 
         self::incStat( 1, "collectedHerdsNumber" );
@@ -663,12 +664,20 @@ class mow extends Table {
         $players = self::loadPlayersBasicInfos();
         $nbr_players = self::getPlayersNumber();
 
-        if (intval(self::getGameStateValue( 'direction_clockwise' )) == 1) {
-            $player_id = self::activePrevPlayer();
+        $gotoPlayer = intval(self::getGameStateValue('gotoPlayer'));
+        if ($gotoPlayer > 0) {
+            $this->gamestate->changeActivePlayer($gotoPlayer);
+            $player_id = $gotoPlayer;
+            self::setGameStateValue('gotoPlayer', 0);
         } else {
-            $player_id = self::activeNextPlayer();
+            if (intval(self::getGameStateValue('direction_clockwise')) == 1) {
+                $player_id = self::activePrevPlayer();
+            } else {
+                $player_id = self::activeNextPlayer();
+            }
         }
         self::giveExtraTime($player_id);
+
         $this->gamestate->nextState( 'nextPlayer' );
     }
 
@@ -699,7 +708,7 @@ class mow extends Table {
         if (!$this->isSimpleVersion()) {
             // TODO what if one of this cards is in players hand at the end ?
             // we reset player's points to 0 for this hand if he got the 6 5-flies cards
-            $sql = "SELECT card_location_arg FROM `card` where card_location = 'discard' and card_type = 5 group by card_location_arg having count(*) >= 6";
+            $sql = "SELECT card_location_arg FROM `cow` where card_location = 'discard' and card_type = 5 group by card_location_arg having count(*) >= 6";
             $playerId = intval(self::getUniqueValueFromDB($sql));
 
             if ($playerId > 0) {
