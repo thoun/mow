@@ -827,6 +827,11 @@ var Mow = /** @class */ (function () {
     Mow.prototype.notif_allTopFlies = function (notif) {
         this.scoreCtrl[notif.args.playerId].toValue(notif.args.points);
     };
+    Mow.prototype.notif_replaceCards = function (notif) {
+        var _this = this;
+        notif.args.oldCards.forEach(function (card) { return _this.playerHand.removeFromStockById('' + card.id); });
+        notif.args.newCards.forEach(function (card) { return _this.addCardToHand(card, 'remainingCards'); });
+    };
     ////////////////////////////////
     ////////////////////////////////
     /////    Cards selection    ////

@@ -89,6 +89,11 @@ type NotifHandCollectedArgs = NotifCollectedArgs;
 type NotifHerdCollectedArgs = NotifCollectedArgs;
 
 interface NotifAllTopFliesArgs {
-    playerId: string;
+    playerId: number;
     points: number;
+}
+interface NotifReplaceCardsArgs {
+    playerId: number;
+    oldCards: Card[];
+    newCards: Card[];
 }

@@ -367,17 +367,34 @@ class mow extends Table {
         }
     }
 
-    function controlFarmerCardPlayable(object $card, $endHand = false) {
+    function controlFarmerCardPlayable(object $card, int $playerId, bool $endHand = false) {
+        $validTime;
         if ($card->time == 9) {
-            return $endHand;
-        }        
-        
-        $alreadyPlayed = intval(self::getGameStateValue('cowPlayed')) > 0;
-        if ($card->time == 1) {
-            return !$alreadyPlayed;
-        } else if ($card->time == 3) {
-            return $alreadyPlayed;
+            $validTime = $endHand;
+        } else if ($card->time == 2) {
+            $validTime = true;
+        } else { 
+            $alreadyPlayed = intval(self::getGameStateValue('cowPlayed')) > 0;
+            if ($card->time == 1) {
+                $validTime = !$alreadyPlayed;
+            } else if ($card->time == 3) {
+                $validTime = $alreadyPlayed;
+            }
         }
+
+        if (!$validTime) {
+            throw new BgaUserException(self::_("You can't play this farmer card at this moment"), true);
+        }
+
+        if ($card->type == 7) {
+            $player_hand = $this->getcardsFromDb($this->cards->getCardsInLocation('hand', $playerId));
+            $centerCardsNumber = count(array_values(array_filter($player_hand, function($card) { return $card->number >= 7 && $card->number <= 9; })));
+
+            if (count($this->cards->getCardsInLocation( 'deck' )) < $centerCardsNumber) {
+                throw new BgaUserException(self::_("Not enough remaining cards to play this farmer card"), true);
+            }
+        }
+
         return true;
     }
 
@@ -572,7 +589,9 @@ class mow extends Table {
         $this->controlFarmerCardInHand($player_id, $cardId);
 
         $card = $this->getFarmerCardFromDb($this->farmerCards->getCard($cardId));
-        $this->controlFarmerCardPlayable($card);
+        $this->controlFarmerCardPlayable($card, $player_id);
+
+        $this->farmerCards->moveCard($cardId, 'discard');
 
         $nextState = 'playFarmer';
         if ($card->type == 1) {
@@ -591,12 +610,28 @@ class mow extends Table {
         } else if ($card->type == 6) {
             $this->pickFarmerCard($player_id);
             $this->pickFarmerCard($player_id);
+        } else if ($card->type == 7) {
+            $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $playerId));
+            $centerCards = array_values(array_filter($player_hand, function($card) { return $card->number >= 7 && $card->number <= 9; }));
+            $number = count($centerCards);
+            if ($number > 0) { // TODO should we block if card has no effect ?
+                $this->cards->moveCards(array_map(function($card) { return $card->id; }, $centerCards), 'discard');
+                $newCards = $this->getCardsFromDb($this->cards->pickCards(count($centerCards), 'hand', $playerId));
+
+                self::notifyPlayer($player_id, 'replaceCards', '', [
+                    'playerId' => $player_id,
+                    'oldCards' => $centerCards,
+                    'newCards' => $newCards,
+                ]);
+            }
+        } else if ($card->type == 8) {
+            // TODO
+        } else if ($card->type == 9) {
+            // TODO
         }
 
-        $this->farmerCards->moveCard($cardId, 'discard');
-
         // And notify
-        self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays TODO'), [
+        self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays farmer card TODO'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'card' => $card,
@@ -811,7 +846,7 @@ class mow extends Table {
             $hasPlayableCards = false;
             foreach ($farmerCardsInHand as $card) {
                 try {
-                    $this->controlFarmerCardPlayable($card);
+                    $this->controlFarmerCardPlayable($card, $player_id);
                     $hasPlayableCards = true;
                     break;
                 } catch (Exception $e) {}

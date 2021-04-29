@@ -592,6 +592,11 @@ class Mow implements Game {
     public notif_allTopFlies( notif: Notif<NotifAllTopFliesArgs> ) {
         (this as any).scoreCtrl[notif.args.playerId].toValue(notif.args.points);
     }
+    
+    public notif_replaceCards( notif: Notif<NotifReplaceCardsArgs> ) {
+        notif.args.oldCards.forEach(card => this.playerHand.removeFromStockById(''+card.id));
+        notif.args.newCards.forEach(card => this.addCardToHand(card, 'remainingCards'));
+    }
 
     ////////////////////////////////
     ////////////////////////////////
