@@ -305,6 +305,13 @@ class Mow implements Game {
                 case 'swapHands':
                     (this as any).addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
                     break;
+                case 'selectFliesType':
+                    (this as any).addActionButton( 'flyType1_button', _(`1 fly`), 'onSelectFlyType1');
+                    (this as any).addActionButton( 'flyType2_button', _(`2 flies`), 'onSelectFlyType2');
+                    (this as any).addActionButton( 'flyType3_button', _(`3 flies`), 'onSelectFlyType3');
+                    (this as any).addActionButton( 'flyType5_button', _(`5 flies`), 'onSelectFlyType5');
+                    (this as any).addActionButton( 'flyTypeIgnore_button', _(`Ignore`), 'onSelectNoFlyType', null, false, 'red');
+                    break;
             }
         }
     }       
@@ -458,6 +465,33 @@ class Mow implements Game {
      
          this.takeAction("swap", {
             playerId: 0
+        });
+    }
+
+    public onSelectFlyType1() {
+         this.selectFlieType(1);
+    }
+
+    public onSelectFlyType2() {
+         this.selectFlieType(2);
+    }
+
+    public onSelectFlyType3() {
+         this.selectFlieType(3);
+    }
+
+    public onSelectFlyType5() {
+         this.selectFlieType(5);
+    }
+
+    public onSelectNoFlyType() {
+         this.selectFlieType(null);
+    }
+
+    public selectFlieType(type: number | null) {
+         this.takeAction("ignoreFlies", {
+            playerId: type === null ? 0 : (this as any).player_id,
+            type
         });
     }
     

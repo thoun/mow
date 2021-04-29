@@ -192,16 +192,28 @@ $machinestates = [
         "transitions" => [ "nextPlayer" => ST_PLAYER_TURN ]
     ], 
 
-
     ST_COLLECT_HAND => [
         "name" => "collectHand",
         "description" => clienttranslate("Collect points in each player's hand"),
         "type" => "game",
         "action" => "stCollectHand",
         "transitions" => [
-          "endHand" => ST_END_HAND
+            "selectFliesType" => ST_MULTIPLAYER_SELECT_FLIES_TYPE,
+            "endHand" => ST_END_HAND
         ]
-      ],
+    ],    
+
+    ST_MULTIPLAYER_SELECT_FLIES_TYPE => [
+        "name" => "selectFliesType",
+        "description" => clienttranslate('Player with special farmer can choose flies to ignore'),
+        "descriptionmyturn" => clienttranslate('${you} can choose flies to ignore'),
+        "type" => "multipleactiveplayer",
+        "action" => "stSelectFliesType",
+        "possibleactions" => [ "choose" ],
+        "transitions" => [
+            "endHand" => ST_COLLECT_HAND,
+        ],
+    ],
 
     // End of the hand (scoring, etc...)
     ST_END_HAND => [

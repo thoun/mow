@@ -17,6 +17,7 @@ define('ST_NEXT_PLAYER', 32);
 define('ST_PLAYER_SELECT_OPPONENT', 40);
 define('ST_PLAYER_VIEW_CARDS', 41);
 define('ST_PLAYER_GIVE_CARD', 42);
+define('ST_MULTIPLAYER_SELECT_FLIES_TYPE', 45);
 
 define('ST_COLLECT_HAND', 89);
 define('ST_END_HAND', 90);

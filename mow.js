@@ -596,6 +596,13 @@ var Mow = /** @class */ (function () {
                 case 'swapHands':
                     this.addActionButton('dontSwapHands_button', _("Don't swap"), 'onDontSwap');
                     break;
+                case 'selectFliesType':
+                    this.addActionButton('flyType1_button', _("1 fly"), 'onSelectFlyType1');
+                    this.addActionButton('flyType2_button', _("2 flies"), 'onSelectFlyType2');
+                    this.addActionButton('flyType3_button', _("3 flies"), 'onSelectFlyType3');
+                    this.addActionButton('flyType5_button', _("5 flies"), 'onSelectFlyType5');
+                    this.addActionButton('flyTypeIgnore_button', _("Ignore"), 'onSelectNoFlyType', null, false, 'red');
+                    break;
             }
         }
     };
@@ -720,6 +727,27 @@ var Mow = /** @class */ (function () {
             return;
         this.takeAction("swap", {
             playerId: 0
+        });
+    };
+    Mow.prototype.onSelectFlyType1 = function () {
+        this.selectFlieType(1);
+    };
+    Mow.prototype.onSelectFlyType2 = function () {
+        this.selectFlieType(2);
+    };
+    Mow.prototype.onSelectFlyType3 = function () {
+        this.selectFlieType(3);
+    };
+    Mow.prototype.onSelectFlyType5 = function () {
+        this.selectFlieType(5);
+    };
+    Mow.prototype.onSelectNoFlyType = function () {
+        this.selectFlieType(null);
+    };
+    Mow.prototype.selectFlieType = function (type) {
+        this.takeAction("ignoreFlies", {
+            playerId: type === null ? 0 : this.player_id,
+            type: type
         });
     };
     ///////////////////////////////////////////////////

@@ -769,6 +769,27 @@ class mow extends Table {
         $this->gamestate->nextState('playerTurn');
     }
 
+    function ignoreFlies(int $playerId, int $type) {
+        if ($playerId > 0) {
+            // TODO check remaining in hand cards are taken into account
+            $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $notifPlayerId));
+            $removedCards = array_values(array_filter($playerDiscard, function ($card) use ($type) { return $card->type == $type; }));
+
+            $cardsValue = $this->getCardsValues($removedCards);
+
+            if ($cardsValue > 0) {
+                $sql = "UPDATE player SET player_score = player_score - $cardsValue, hand_points = hand_points - $cardsValue WHERE player_id = $player_id";
+                self::DbQuery($sql);
+            }
+
+            $this->cards->moveCards(array_map(function($card) { return $card->id; }, $removedCards), "discard");            
+        }
+        $this->gamestate->setPlayerNonMultiactive($playerId, "endHand");
+    }
+
+    function getFarmerCardSelectFliesType() {
+        return $this->getFarmerCardsFromDb($this->farmerCards->getCardsOfType(10)[0]);
+    }
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -897,7 +918,6 @@ class mow extends Table {
         } else {
             $this->gamestate->nextState('playCard');
         }
-        }
     }
     
     function stNextPlayer() {
@@ -945,7 +965,13 @@ class mow extends Table {
                 ]);
             }
         }
-        $this->gamestate->nextState( "endHand" );
+
+
+        if ($this->getFarmerCardSelectFliesType()->location == 'hand') {
+            $this->gamestate->nextState( "selectFliesType" );
+        } else {
+            $this->gamestate->nextState( "endHand" );
+        }
     }
 
     function stEndHand() {
@@ -1023,6 +1049,10 @@ class mow extends Table {
         $this->gamestate->changeActivePlayer( $minscore_player_id );
 
         $this->gamestate->nextState($end ? "endGame" : "nextHand");
+    }
+
+    function stSelectFliesType() {
+        $this->gamestate->setPlayersMultiactive([intval($this->getFarmerCardSelectFliesType()->location_arg)], 'choose');
     }
 
 //////////////////////////////////////////////////////////////////////////////

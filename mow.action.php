@@ -78,6 +78,14 @@
         $this->game->collectHerd();
         self::ajaxResponse();    
     }
+    
+    public function ignoreFlies() {
+        self::setAjaxMode();
+        $playerId = self::getArg("playerId", AT_posint, true); // 0 means "don't use card"
+        $type = self::getArg("type", AT_posint, true);
+        $this->game->ignoreFlies($playerId, $type);
+        self::ajaxResponse();    
+    }
 	
     public function swap() {
         self::setAjaxMode();     
