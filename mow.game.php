@@ -230,7 +230,7 @@ class mow extends Table {
 ////////////    
 
     function isSimpleVersion() {
-        return self::getGameStateValue('simpleVersion');
+        return intval(self::getGameStateValue('simpleVersion')) === 2;
     }
 
     function getCardFromDb(array $dbCard) {

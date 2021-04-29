@@ -137,7 +137,7 @@ class Mow implements Game {
         this.farmerCards.createCards([this.playerFarmerHand]);
 
         if (this.isSimpleVersion()) {
-           dojo.style(('#myfarmers'), "display", "none");
+           dojo.style(('myfarmers'), "display", "none");
         
         }
         
