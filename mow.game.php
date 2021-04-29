@@ -579,6 +579,9 @@ class mow extends Table {
         } else if ($card->type == 4) {
             self::setGameStateValue('cowPlayed', 1);
             $this->gamestate->nextState('playFarmer');
+        } else if ($card->type == 6) {
+            $this->pickFarmerCard($player_id);
+            $this->pickFarmerCard($player_id);
         }
 
         $this->farmerCards->moveCard($cardId, 'discard');
@@ -634,6 +637,15 @@ class mow extends Table {
 
     function passFarmer() {
         $this->gamestate->nextState('pass');
+    }
+
+    function pickFarmerCard($playerId) {
+        $farmerCard = $this->getFarmerCardFromDb($this->farmerCards->pickCard('deck', $playerId));
+        if ($farmerCard) {
+            self::notifyPlayer($playerId, 'newFarmerCard', '', [
+                'card' => $farmerCard
+            ]);
+        }
     }
 
     function swap($playerId) {
@@ -857,12 +869,7 @@ class mow extends Table {
             $sql = "SELECT player_id FROM `player` WHERE (hand_points + collected_points) > 0 order by (hand_points + collected_points) desc limit 1";
             $playerId = intval(self::getUniqueValueFromDB($sql));
             if ($playerId > 0) {
-                $farmerCard = $this->getFarmerCardFromDb($this->farmerCards->pickCard('deck', $playerId));
-                if ($farmerCard) {
-                    self::notifyPlayer($playerId, 'newFarmerCard', '', [
-                        'card' => $farmerCard
-                    ]);
-                }
+                $this->pickFarmerCard($playerId);
             }
         }
 
