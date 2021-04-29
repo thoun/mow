@@ -365,7 +365,6 @@ var FarmerCards = /** @class */ (function () {
  * In this file, you are describing the logic of your user interface, in Typescript language.
  *
  */
-//declare const doj: Dojoo;
 var Mow = /** @class */ (function () {
     function Mow() {
         this.playerHand = null;
@@ -501,7 +500,10 @@ var Mow = /** @class */ (function () {
                 this.onEnteringStateChooseDirection(args.args);
                 break;
             case 'swapHands':
-                this.onEnteringStateSwapHands();
+                this.onEnteringSelectionAction('swap');
+                break;
+            case 'selectOpponent':
+                this.onEnteringSelectionAction(args.args.lookOpponentHand ? 'look' : 'exchange');
                 break;
         }
     };
@@ -538,14 +540,15 @@ var Mow = /** @class */ (function () {
             dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
         }
     };
-    Mow.prototype.onEnteringStateSwapHands = function () {
+    Mow.prototype.onEnteringSelectionAction = function (selectionAction) {
         var _this = this;
         if (this.isCurrentPlayerActive()) {
             this.playersSelectable = true;
             Object.keys(this.gamedatas.players).filter(function (playerId) { return Number(playerId) !== Number(_this.player_id); }).forEach(function (playerId) {
                 return dojo.addClass("playertable-" + playerId, 'selectable');
             });
-            // update selectedPlayerId on click and add Swap button
+            this.selectionAction = selectionAction;
+            // selectedPlayerId and corresponding button are added on click
         }
     };
     Mow.prototype.setGamestateDescription = function (suffix) {
@@ -568,14 +571,19 @@ var Mow = /** @class */ (function () {
                 dojo.style('direction_popin', 'display', 'none');
                 break;
             case 'swapHands':
-                this.playersSelectable = false;
-                Object.keys(this.gamedatas.players).forEach(function (playerId) {
-                    return dojo.removeClass("playertable-" + playerId, 'selectable');
-                });
+            case 'selectOpponent':
+                this.onLeavingSelectionAction();
                 break;
             case 'dummmy':
                 break;
         }
+    };
+    Mow.prototype.onLeavingSelectionAction = function () {
+        this.playersSelectable = false;
+        Object.keys(this.gamedatas.players).forEach(function (playerId) {
+            return dojo.removeClass("playertable-" + playerId, 'selectable');
+        });
+        this.selectionAction = null;
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -595,6 +603,17 @@ var Mow = /** @class */ (function () {
                     break;
                 case 'swapHands':
                     this.addActionButton('dontSwapHands_button', _("Don't swap"), 'onDontSwap');
+                    this.addActionButton('selectionAction_button', _("Swap"), 'onSwap');
+                    dojo.addClass('selectionAction_button', 'disabled');
+                    break;
+                case 'selectOpponent':
+                    if (args.lookOpponentHand) {
+                        this.addActionButton('selectionAction_button', _("OK, I've seen it"), 'onSeeHand');
+                    }
+                    else {
+                        this.addActionButton('selectionAction_button', _("Pick a card"), 'onPickOpponentCard');
+                    }
+                    dojo.addClass('selectionAction_button', 'disabled');
                     break;
                 case 'selectFliesType':
                     this.addActionButton('flyType1_button', _("1 fly"), 'onSelectFlyType1');
@@ -677,8 +696,8 @@ var Mow = /** @class */ (function () {
             dojo.removeClass("playertable-" + this.selectedPlayerId, 'selected');
         }
         else {
-            // first selection, we add Swap button
-            this.addActionButton('swapHands_button', _("Swap"), 'onSwap');
+            // first selection, we add action button
+            dojo.removeClass('selectionAction_button', 'disabled');
         }
         this.selectedPlayerId = playerId;
         dojo.addClass("playertable-" + playerId, 'selected');
@@ -727,6 +746,20 @@ var Mow = /** @class */ (function () {
             return;
         this.takeAction("swap", {
             playerId: 0
+        });
+    };
+    Mow.prototype.onSeeHand = function () {
+        if (!this.checkAction('viewCards'))
+            return;
+        this.takeAction("viewCards", {
+            playerId: this.selectedPlayerId
+        });
+    };
+    Mow.prototype.onPickOpponentCard = function () {
+        if (!this.checkAction('exchangeCard'))
+            return;
+        this.takeAction("exchangeCard", {
+            playerId: this.selectedPlayerId
         });
     };
     Mow.prototype.onSelectFlyType1 = function () {

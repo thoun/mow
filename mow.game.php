@@ -43,6 +43,8 @@ class mow extends Table {
                 // farmer cards constants
                 'cantPlaySpecial' => 50,
                 'chooseDirectionPick' => 51,
+                'lookOpponentHand' => 52,
+                'exchangeCard' => 53,
 
                 // game options
                 "simpleVersion" => 100,
@@ -99,6 +101,8 @@ class mow extends Table {
         self::setGameStateInitialValue( 'cowPlayed', 0 );
         self::setGameStateInitialValue( 'cantPlaySpecial', 0 );
         self::setGameStateInitialValue( 'chooseDirectionPick', 0 );
+        self::setGameStateInitialValue( 'lookOpponentHand', 0 );
+        self::setGameStateInitialValue( 'exchangeCard', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -605,8 +609,10 @@ class mow extends Table {
             self::setGameStateValue('cantPlaySpecial', 1);
         } else if ($card->type == 2) {
             $nextState = 'playFarmerWithOpponentSelection';
+            self::setGameStateValue('lookOpponentHand', 1);
         } else if ($card->type == 3) {
             $nextState = 'playFarmerWithOpponentSelection';
+            self::setGameStateValue('exchangeCard', 1);
         } else if ($card->type == 4) {
             self::setGameStateValue('cowPlayed', 1);
             $this->gamestate->nextState('playFarmer');
@@ -740,6 +746,16 @@ class mow extends Table {
                 'card' => $farmerCard
             ]);
         }
+    }       
+    
+    function viewCards($playerId) {
+        self::setGameStateValue('lookOpponentHand', $playerId);
+        $this->gamestate->nextState('viewCards');
+    }
+
+    function exchangeCard($playerId) {
+        self::setGameStateValue('exchangeCard', $playerId);
+        $this->gamestate->nextState('exchangeCard');
     }
 
     function swap($playerId) {
@@ -842,6 +858,13 @@ class mow extends Table {
     function argPlayFarmer() {
         $player_id = self::getActivePlayerId();
         // TODO
+    }
+
+    function argSelectOpponent() {
+        return [
+            'lookOpponentHand' => intval(self::getGameStateValue('lookOpponentHand')) == 1,
+            'exchangeCard' => intval(self::getGameStateValue('exchangeCard')) == 1,
+        ];
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -967,7 +990,7 @@ class mow extends Table {
         }
 
 
-        if ($this->getFarmerCardSelectFliesType()->location == 'hand') {
+        if (!$this->isSimpleVersion() && $this->getFarmerCardSelectFliesType()->location == 'hand') {
             $this->gamestate->nextState( "selectFliesType" );
         } else {
             $this->gamestate->nextState( "endHand" );

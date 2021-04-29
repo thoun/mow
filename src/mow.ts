@@ -22,7 +22,9 @@
 declare const define;
 declare const ebg;
 declare const $;
-//declare const doj: Dojoo;
+//declare const dojo: Dojo;
+
+type SelectionAction = 'swap' | 'look' | 'exchange';
 
 class Mow implements Game {
 
@@ -39,6 +41,7 @@ class Mow implements Game {
     private playerNumber: number;
     private playersSelectable: boolean = false;
     private selectedPlayerId: number | null = null;
+    private selectionAction: SelectionAction;
     
     private colors = [
         'forestgreen',
@@ -195,9 +198,11 @@ class Mow implements Game {
                 this.onEnteringStateChooseDirection(args.args);     
                 break;
 
-
             case 'swapHands':  
-                this.onEnteringStateSwapHands();
+                this.onEnteringSelectionAction('swap');
+                break;
+            case 'selectOpponent':
+                this.onEnteringSelectionAction(args.args.lookOpponentHand ? 'look' : 'exchange');
                 break;
         }
     }
@@ -240,15 +245,18 @@ class Mow implements Game {
         }
     }
 
-    private onEnteringStateSwapHands() {
+    private onEnteringSelectionAction(selectionAction: SelectionAction) {
         if ((this as any).isCurrentPlayerActive()) {
             this.playersSelectable = true;  
             Object.keys(this.gamedatas.players).filter(playerId => Number(playerId) !== Number((this as any).player_id)).forEach(playerId => 
                 dojo.addClass(`playertable-${playerId}`, 'selectable')
-            );            
-            // update selectedPlayerId on click and add Swap button
+            );  
+            this.selectionAction = selectionAction;          
+            // selectedPlayerId and corresponding button are added on click
         }
     }
+
+
 
     private setGamestateDescription(suffix: string = '') {
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
@@ -274,10 +282,8 @@ class Mow implements Game {
                 break;   
 
             case 'swapHands':  
-                this.playersSelectable = false;    
-                Object.keys(this.gamedatas.players).forEach(playerId => 
-                    dojo.removeClass(`playertable-${playerId}`, 'selectable')
-                ); 
+            case 'selectOpponent':
+                this.onLeavingSelectionAction(); 
                 break;   
         
             case 'dummmy':
@@ -285,10 +291,18 @@ class Mow implements Game {
         }               
     }
 
+    private onLeavingSelectionAction() {
+        this.playersSelectable = false;    
+        Object.keys(this.gamedatas.players).forEach(playerId => 
+            dojo.removeClass(`playertable-${playerId}`, 'selectable')
+        ); 
+        this.selectionAction = null;
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //        
-    public onUpdateActionButtons(stateName: string, args: { canCollect: boolean }) {
+    public onUpdateActionButtons(stateName: string, args: any) {
         //console.log( 'onUpdateActionButtons: '+stateName );
         (this as any).removeActionButtons();
                     
@@ -304,6 +318,16 @@ class Mow implements Game {
                     break;
                 case 'swapHands':
                     (this as any).addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
+                    (this as any).addActionButton( 'selectionAction_button', _(`Swap`), 'onSwap');
+                    dojo.addClass('selectionAction_button', 'disabled');
+                    break;                
+                case 'selectOpponent':
+                    if (args.lookOpponentHand) {
+                        (this as any).addActionButton( 'selectionAction_button', _(`OK, I've seen it`), 'onSeeHand');
+                    } else {
+                        (this as any).addActionButton( 'selectionAction_button', _(`Pick a card`), 'onPickOpponentCard');
+                    }
+                    dojo.addClass('selectionAction_button', 'disabled');
                     break;
                 case 'selectFliesType':
                     (this as any).addActionButton( 'flyType1_button', _(`1 fly`), 'onSelectFlyType1');
@@ -402,8 +426,8 @@ class Mow implements Game {
         if (this.selectedPlayerId) {
             dojo.removeClass(`playertable-${this.selectedPlayerId}`, 'selected');
         } else {
-            // first selection, we add Swap button
-            (this as any).addActionButton( 'swapHands_button', _(`Swap`), 'onSwap');
+            // first selection, we add action button
+            dojo.removeClass('selectionAction_button', 'disabled');
         }
 
         this.selectedPlayerId = playerId;
@@ -465,6 +489,24 @@ class Mow implements Game {
      
          this.takeAction("swap", {
             playerId: 0
+        });
+    }
+
+    public onSeeHand() {
+        if(!(this as any).checkAction('viewCards'))
+         return;
+     
+         this.takeAction("viewCards", {
+            playerId: this.selectedPlayerId
+        });
+    }
+
+    public onPickOpponentCard() {
+        if(!(this as any).checkAction('exchangeCard'))
+         return;
+     
+         this.takeAction("exchangeCard", {
+            playerId: this.selectedPlayerId
         });
     }
 

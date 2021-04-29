@@ -77,7 +77,21 @@
         self::setAjaxMode();
         $this->game->collectHerd();
         self::ajaxResponse();    
+    } 
+	
+    public function viewCards() {
+        self::setAjaxMode();     
+        $playerId = self::getArg( "playerId", AT_posint, true );
+        $this->game->viewCards($playerId);
+        self::ajaxResponse();
     }
+	
+    public function exchangeCard() {
+        self::setAjaxMode();     
+        $playerId = self::getArg( "playerId", AT_posint, true );
+        $this->game->exchangeCard($playerId);
+        self::ajaxResponse();
+    } 
     
     public function ignoreFlies() {
         self::setAjaxMode();
