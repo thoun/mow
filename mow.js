@@ -438,6 +438,9 @@ var Mow = /** @class */ (function () {
         dojo.connect(this.playerFarmerHand, 'onChangeSelection', this, 'onPlayerFarmerHandSelectionChanged');
         this.playerFarmerHand.image_items_per_row = 1;
         this.farmerCards.createCards([this.playerFarmerHand]);
+        if (this.isSimpleVersion()) {
+            dojo.style(('#myfarmers'), "display", "none");
+        }
         //console.log('this.gamedatas', this.gamedatas);
         // Cards in player's hand
         this.gamedatas.hand.forEach(function (card) { return _this.addCardToHand(card); });
@@ -583,6 +586,9 @@ var Mow = /** @class */ (function () {
         script.
     
     */
+    Mow.prototype.isSimpleVersion = function () {
+        return this.gamedatas.simpleVersion;
+    };
     Mow.prototype.setSlowpokeWeight = function (slowpokeId, slowpokeNumber) {
         var keys = Object.keys(this.theHerd.item_type).filter(function (key) { return key % 100 == slowpokeNumber; });
         var lastKey = keys[keys.length - 1];

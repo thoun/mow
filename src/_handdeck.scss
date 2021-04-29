@@ -16,34 +16,43 @@
     #myhand_wrap {
         flex: 1;
 
-        #myhand {
-            .stockitem_selected {
-                margin:3px;
-                transform:scale(1.02);
-                border:2px solid black !important;
-                box-shadow:1px 1px 5px black, 2px 2px 4px black;
-            }
+        #cows-and-farmers {
+            display: flex;            
 
-            .stockitem {
-                &:not(.disabled) {
-                    cursor:pointer;
-                }
-
-                &:hover {
-                    margin:4px;
+            #myhand {
+                flex: 3;
+                .stockitem_selected {
+                    margin:3px;
+                    transform:scale(1.02);
                     border:2px solid black !important;
+                    box-shadow:1px 1px 5px black, 2px 2px 4px black;
                 }
 
-                &.disabled {
-                    cursor:not-allowed;
-                    opacity:0.5 !important;
+                .stockitem {
+                    &:not(.disabled) {
+                        cursor:pointer;
+                    }
 
                     &:hover {
+                        margin:4px;
+                        border:2px solid black !important;
+                    }
+
+                    &.disabled {
                         cursor:not-allowed;
-                        margin:5px;
-                        border:1px solid gray !important;
+                        opacity:0.5 !important;
+
+                        &:hover {
+                            cursor:not-allowed;
+                            margin:5px;
+                            border:1px solid gray !important;
+                        }
                     }
                 }
+            }
+
+            #myfarmers {
+                flex: 1;
             }
         }
     }

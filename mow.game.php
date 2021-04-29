@@ -173,6 +173,7 @@ class mow extends Table {
         $result['players'] = self::getCollectionFromDb( $sql );
         $result['current_player_id'] = $current_player_id;
         $result['next_players_id'] = self::createNextPlayerTable(array_keys(self::loadPlayersBasicInfos()));
+        $result['simpleVersion'] = $this->isSimpleVersion();
   
 		// Cards in player hand      
         $result['hand'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'hand', $current_player_id ));

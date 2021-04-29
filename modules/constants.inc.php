@@ -11,6 +11,7 @@ define('ST_CHOOSE_DIRECTION', 22);
 define('ST_SWAP_HANDS', 23);
 define('ST_PLAYER_PLAY_FARMER', 25);
 
+define('ST_PLAY_AGAIN', 31);
 define('ST_NEXT_PLAYER', 32);
 
 define('ST_COLLECT_HAND', 89);

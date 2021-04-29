@@ -37,6 +37,7 @@ interface MowGamedatas {
     players: { [playerId: number]: Player };
     remainingCards: number;
     tablespeed: string;
+    simpleVersion: boolean;
 }
 
 interface MowHerdStock extends Stock {

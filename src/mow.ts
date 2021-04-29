@@ -135,6 +135,11 @@ class Mow implements Game {
         dojo.connect( this.playerFarmerHand, 'onChangeSelection', this, 'onPlayerFarmerHandSelectionChanged' );
         this.playerFarmerHand.image_items_per_row = 1;
         this.farmerCards.createCards([this.playerFarmerHand]);
+
+        if (this.isSimpleVersion()) {
+           dojo.style(('#myfarmers'), "display", "none");
+        
+        }
         
         //console.log('this.gamedatas', this.gamedatas);
         
@@ -310,6 +315,10 @@ class Mow implements Game {
         script.
     
     */
+
+    private isSimpleVersion(): boolean {
+        return this.gamedatas.simpleVersion;
+    }
     
     private setSlowpokeWeight(slowpokeId: number, slowpokeNumber: number) {
         const keys = Object.keys(this.theHerd.item_type).filter((key) => (key as any as number) % 100 == slowpokeNumber);

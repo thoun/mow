@@ -52,9 +52,9 @@ var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable"
 <div id="handdeck">
     <div id="myhand_wrap" class="whiteblock">
         <h3>{MY_HAND}</h3>
-        <div id="myhand">
-        </div>
-        <div id="myfarmers">
+        <div id="cows-and-farmers">
+            <div id="myhand"></div>
+            <div id="myfarmers"></div>
         </div>
     </div>
     
