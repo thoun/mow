@@ -67,6 +67,12 @@
         self::ajaxResponse();
     }
     
+    public function pass() {
+        self::setAjaxMode();
+        $this->game->passFarmer();
+        self::ajaxResponse();    
+    }
+    
     public function collectHerd() {
         self::setAjaxMode();
         $this->game->collectHerd();

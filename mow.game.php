@@ -40,6 +40,10 @@ class mow extends Table {
                 "gotoPlayer" => 13,
                 'cowPlayed' => 14,
 
+                // farmer cards constants
+                'cantPlaySpecial' => 50,
+
+                // game options
                 "simpleVersion" => 100,
         ]);
 		
@@ -92,6 +96,7 @@ class mow extends Table {
         self::setGameStateInitialValue( 'canPick', 0 );
         self::setGameStateInitialValue( 'gotoPlayer', 0 );
         self::setGameStateInitialValue( 'cowPlayed', 0 );
+        self::setGameStateInitialValue( 'cantPlaySpecial', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -143,7 +148,7 @@ class mow extends Table {
         $this->farmerCards->createCards($farmerCards, 'deck');
 
         // TODO TEMP
-        foreach( $players as $player_id => $player ){ $this->farmerCards->pickCard('deck', $player_id); }	   
+        foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(2, 'deck', $player_id); }	   
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -293,6 +298,10 @@ class mow extends Table {
     }
 
     function controlCardPlayable(object $card) {
+        if ($card->type == 5 && intval(self::getGameStateValue('cantPlaySpecial')) > 0) {
+            throw new BgaUserException(self::_("You can't play a special cow because of a farmer card"), true);
+        }
+
         $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd'));
 
         //self::dump('herdCards', json_encode($herdCards));
@@ -482,6 +491,7 @@ class mow extends Table {
         $this->cards->moveCard( $card_id, 'herd');
 
         self::setGameStateValue('cowPlayed', 1);
+        self::setGameStateValue('cantPlaySpecial', 0);
             
         $displayedNumber = $card->number;
         $precision = '';
@@ -559,14 +569,18 @@ class mow extends Table {
         self::checkAction("playFarmer");  
               
         $player_id = self::getActivePlayerId();
-        $this->controlFarmerCardInHand($player_id, $card_id);
+        $this->controlFarmerCardInHand($player_id, $cardId);
 
-        $card = $this->getFarmerCardFromDb($this->farmerCards->getCard($card_id));
+        $card = $this->getFarmerCardFromDb($this->farmerCards->getCard($cardId));
         $this->controlFarmerCardPlayable($card);
 
-        // TODO apply effets
+        if ($card->type == 1) {
+            self::setGameStateValue('cantPlaySpecial', 1);
+        } else {
+            // TODO apply other effets
+        }
 
-        $this->cards->moveCard($card_id, 'discard');
+        $this->farmerCards->moveCard($cardId, 'discard');
 
         // And notify
         self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays TODO'), [
@@ -608,11 +622,17 @@ class mow extends Table {
             'points' => $collectedPoints
         ]);
 
+        self::setGameStateValue('cantPlaySpecial', 0);
+
         if (count($this->cards->getCardsInLocation( "deck" )) > 0) {
             $this->gamestate->nextState('collectHerd');
         } else {
             $this->gamestate->nextState('collectLastHerd');
         }
+    }
+
+    function passFarmer() {
+        $this->gamestate->nextState('pass');
     }
 
     function swap($playerId) {
@@ -691,6 +711,11 @@ class mow extends Table {
         ];  
     }
 
+    function argPlayFarmer() {
+        $player_id = self::getActivePlayerId();
+        // TODO
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
 ////////////
@@ -741,6 +766,7 @@ class mow extends Table {
         if ($this->isSimpleVersion()) {
             $this->gamestate->nextState('nextPlayer');
         } else {
+            $player_id = self::getActivePlayerId();
             $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
 
             $hasPlayableCards = false;
@@ -758,6 +784,8 @@ class mow extends Table {
     
     function stNextPlayer() {
         self::setGameStateValue('cowPlayed', 0);
+
+        $player_id = self::getActivePlayerId();
 
         $players = self::loadPlayersBasicInfos();
         $nbr_players = self::getPlayersNumber();
@@ -821,9 +849,7 @@ class mow extends Table {
             }
 
             // TODO can a player getting top flies with all black cards also get farmer card ?
-
-            // TODO check farmer card
-            $sql = "SELECT playerId FROM `player` WHERE (hand_points + collected_points) > 0 order by (hand_points + collected_points) desc limit 1";
+            $sql = "SELECT player_id FROM `player` WHERE (hand_points + collected_points) > 0 order by (hand_points + collected_points) desc limit 1";
             $playerId = intval(self::getUniqueValueFromDB($sql));
             if ($playerId > 0) {
                 $farmerCard = $this->getFarmerCardFromDb($this->farmerCards->pickCard('deck', $playerId));

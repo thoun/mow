@@ -295,13 +295,16 @@ class Mow implements Game {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'playerTurn':
-                if (args.canCollect) {
-                    (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
-                }
-                break;
+                    if (args.canCollect) {
+                        (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
+                    }
+                    break;
+                case 'playFarmer':
+                    (this as any).addActionButton( 'pass_button', _('Pass'), 'onPassFarmer');
+                    break;
                 case 'swapHands':
                     (this as any).addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
-                break;
+                    break;
             }
         }
     }       
@@ -430,6 +433,12 @@ class Mow implements Game {
         this.takeAction("setPlayer", {
             id
         });
+    }
+
+    public onPassFarmer() {
+        if(!(this as any).checkAction('pass'))
+        return;
+        this.takeAction("pass");
     }
 
     public onSwap() {

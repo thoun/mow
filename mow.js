@@ -590,6 +590,9 @@ var Mow = /** @class */ (function () {
                         this.addActionButton('collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                     }
                     break;
+                case 'playFarmer':
+                    this.addActionButton('pass_button', _('Pass'), 'onPassFarmer');
+                    break;
                 case 'swapHands':
                     this.addActionButton('dontSwapHands_button', _("Don't swap"), 'onDontSwap');
                     break;
@@ -698,6 +701,11 @@ var Mow = /** @class */ (function () {
         this.takeAction("setPlayer", {
             id: id
         });
+    };
+    Mow.prototype.onPassFarmer = function () {
+        if (!this.checkAction('pass'))
+            return;
+        this.takeAction("pass");
     };
     Mow.prototype.onSwap = function () {
         if (!this.checkAction('swap'))

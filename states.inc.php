@@ -128,10 +128,10 @@ $machinestates = [
     	"descriptionmyturn" => clienttranslate('${you} can play a farmer'),
     	"type" => "activeplayer",
         "args" => "argPlayFarmer",
-    	"possibleactions" => [ "playFarmer", "end" ],
+    	"possibleactions" => [ "playFarmer", "pass" ],
     	"transitions" => [ 
             "playFarmer" => ST_PLAY_AGAIN,
-            "end" => ST_NEXT_PLAYER,
+            "pass" => ST_NEXT_PLAYER,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -143,7 +143,7 @@ $machinestates = [
         "action" => "stPlayAgain",
         "transitions" => [ 
             "playAgain" => ST_PLAYER_PLAY_FARMER,
-            "nextPlayer" => ST_PLAYER_TURN,
+            "nextPlayer" => ST_NEXT_PLAYER,
         ]
     ],
 	
