@@ -143,8 +143,8 @@ class mow extends Table {
 			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
-        $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
-        //$this->cards->createCards($cards, 'deck');
+        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        $this->cards->createCards($cards, 'deck');
 
         
         $farmerCards = [];
@@ -618,18 +618,18 @@ class mow extends Table {
             $this->gamestate->nextState('playFarmer');
         } else if ($card->type == 5) {
             // TODO in 2 players, can player select row to remove ? or remove all ?
-            $this->removeHerdAndNotify(null);
+            $this->removeHerdAndNotify(null, null);
             self::setGameStateValue('cowPlayed', 0);
         } else if ($card->type == 6) {
             $this->pickFarmerCard($player_id);
             $this->pickFarmerCard($player_id);
         } else if ($card->type == 7) {
-            $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $playerId));
-            $centerCards = array_values(array_filter($player_hand, function($card) { return $card->number >= 7 && $card->number <= 9; }));
+            $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $player_id));
+            $centerCards = array_values(array_filter($player_hand, function($card) { return $card->number >= 7 && $card->number <= 9; })); // TODO should we include special 7 and 9 ?
             $number = count($centerCards);
             if ($number > 0) { // TODO should we block if card has no effect ?
                 $this->cards->moveCards(array_map(function($card) { return $card->id; }, $centerCards), 'discard');
-                $newCards = $this->getCardsFromDb($this->cards->pickCards(count($centerCards), 'hand', $playerId));
+                $newCards = $this->getCardsFromDb($this->cards->pickCards(count($centerCards), 'hand', $player_id));
 
                 self::notifyPlayer($player_id, 'replaceCards', '', [
                     'playerId' => $player_id,
@@ -696,7 +696,7 @@ class mow extends Table {
         $sql = "UPDATE player SET player_score=player_score-$collectedPoints, collected_points=collected_points-$collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
 
-        $this->removeHerdAndNotify($player_id);
+        $this->removeHerdAndNotify($player_id, $collectedPoints);
 
         self::incStat( 1, "collectedHerdsNumber" );
             
@@ -716,7 +716,7 @@ class mow extends Table {
         }
     }
 
-    function removeHerdAndNotify($player_id) {  
+    function removeHerdAndNotify($player_id, $collectedPoints) {  
         $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id );
         $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
@@ -874,9 +874,10 @@ class mow extends Table {
     }
 
     function argChooseDirection() {
+        $canPick = intval(self::getGameStateValue('canPick')) == 1 || intval(self::getGameStateValue('chooseDirectionPick')) == 1;
         return [
             'direction_clockwise' => intval(self::getGameStateValue('direction_clockwise')) == 1,
-            'canPick' => intval(self::getGameStateValue('canPick')) == 1
+            'canPick' => $canPick,
         ];  
     }
 
@@ -972,7 +973,7 @@ class mow extends Table {
     function stPlayAgain() {
         if ($this->isSimpleVersion()) {
             $this->gamestate->nextState('nextPlayer');
-        } else if (intval(self::setGameStateValue('cowPlayed')) > 0) {
+        } else if (intval(self::getGameStateValue('cowPlayed')) > 0) {
             $player_id = self::getActivePlayerId();
             $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
 

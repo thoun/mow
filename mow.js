@@ -454,7 +454,6 @@ var Mow = /** @class */ (function () {
         this.playerFarmerHand.centerItems = true;
         this.playerFarmerHand.onItemCreate = function (card_div, card_type_id) { return _this.farmerCards.setupNewCard(_this, card_div, card_type_id); };
         dojo.connect(this.playerFarmerHand, 'onChangeSelection', this, 'onPlayerFarmerHandSelectionChanged');
-        this.playerFarmerHand.image_items_per_row = 1;
         this.farmerCards.createCards([this.playerFarmerHand]);
         if (this.isSimpleVersion()) {
             dojo.style(('myfarmers'), "display", "none");

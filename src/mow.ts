@@ -136,7 +136,6 @@ class Mow implements Game {
         this.playerFarmerHand.centerItems = true;
         this.playerFarmerHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.farmerCards.setupNewCard(this, card_div, card_type_id); 
         dojo.connect( this.playerFarmerHand, 'onChangeSelection', this, 'onPlayerFarmerHandSelectionChanged' );
-        this.playerFarmerHand.image_items_per_row = 1;
         this.farmerCards.createCards([this.playerFarmerHand]);
 
         if (this.isSimpleVersion()) {
@@ -750,7 +749,7 @@ class Mow implements Game {
         }
     }
 
-    public onPlayerFarmerHandSelectionChanged() {            
+    public onPlayerFarmerHandSelectionChanged() {    
         const items = this.playerFarmerHand.getSelectedItems();
         if (items.length == 1) {
             if ((this as any).checkAction('playFarmer', true)) {
