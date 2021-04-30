@@ -181,7 +181,7 @@ $machinestates = [
     	"description" => clienttranslate('${actplayer} must give back a card to chosen opponent'),
     	"descriptionmyturn" => clienttranslate('${you} must give back a card to chosen opponent'),
     	"type" => "activeplayer",
-        "args" => "argGiveCard",
+        "action" => "stGiveCard",
     	"possibleactions" => [ "giveCard" ],
     	"transitions" => [ 
             "giveCard" => ST_PLAY_AGAIN,
@@ -215,7 +215,7 @@ $machinestates = [
         "action" => "stSelectFliesType",
         "possibleactions" => [ "choose" ],
         "transitions" => [
-            "endHand" => ST_COLLECT_HAND,
+            "endHand" => ST_END_HAND,
         ],
     ],
 

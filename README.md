@@ -32,12 +32,6 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 ## Hint
 Make sure ftp-sync.json and node_modules are in .gitignore
 
-TODO farmers cards
+# TODO questions ???
 2p mode
 pick player : can he pick himself ?
-Test farmer cards 
-1 
-2 
-3 => check why cards re-removed when give
-9 
-10

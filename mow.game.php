@@ -143,7 +143,7 @@ class mow extends Table {
 			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
-        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        //$this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );
         $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
         
@@ -155,7 +155,7 @@ class mow extends Table {
         $this->farmerCards->shuffle('deck');
 
         // TODO TEMP
-        foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(2, 'deck', $player_id); }	   
+        //foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(3, 'deck', $player_id); }	   
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -243,6 +243,10 @@ class mow extends Table {
 
     function isSimpleVersion() {
         return intval(self::getGameStateValue('simpleVersion')) === 2;
+    }
+
+    function getPlayerName(int $playerId) {
+        return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
     }
 
     function getCardFromDb(array $dbCard) {
@@ -391,6 +395,13 @@ class mow extends Table {
 
         if (!$validTime) {
             throw new BgaUserException(self::_("You can't play this farmer card at this moment"), true);
+        }
+
+        if ($card->type == 5) {
+            $herdCount = count($this->cards->getCardsInLocation('herd'));
+            if ($herdCount == 0) {
+                throw new BgaUserException(self::_("No card in the herd"), true);
+            }
         }
 
         if ($card->type == 7) {
@@ -789,7 +800,7 @@ class mow extends Table {
     function ignoreFlies(int $playerId, int $type) {
         if ($playerId > 0) {
             // TODO check remaining in hand cards are taken into account
-            $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $notifPlayerId));
+            $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId));
             $removedCards = array_values(array_filter($playerDiscard, function ($card) use ($type) { return $card->type == $type; }));
 
             $cardsValue = $this->getCardsValues($removedCards);
@@ -805,7 +816,7 @@ class mow extends Table {
     }
 
     function getFarmerCardSelectFliesType() {
-        return $this->getFarmerCardsFromDb($this->farmerCards->getCardsOfType(10)[0]);
+        return $this->getFarmerCardFromDb(array_values($this->farmerCards->getCardsOfType(10))[0]);
     }
 
     function opponentCardsViewed() {
@@ -897,35 +908,12 @@ class mow extends Table {
     }
 
     function argViewCards() {
-        $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', intval(self::getGameStateValue('lookOpponentHand'))));
+        $opponentId = intval(self::getGameStateValue('lookOpponentHand'));
+        $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $opponentId));
 
         return [
-            'cards' => $player_hand,
-        ];
-    }
-
-    function argGiveCard() {
-        $player_id = self::getActivePlayerId();
-        $opponentId = intval(self::getGameStateValue('exchangeCard'));
-
-        $cardsInHand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $opponentId));
-        $removedCard = null;
-        $cardsNumber = count($cardsInHand);
-        if ($cardsNumber > 0) {
-            $removedCard = $cardsInHand[bga_rand(1, $cardsNumber) - 1];
-            $this->cards->moveCard($removedCard->id, 'hand', $player_id);
-            $removedCards[$opponentId] = $removedCard;
-
-            self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
-                'playerId' => $opponentId,
-                'card' => $removedCard,
-                'fromPlayerId' => $player_id,
-            ]);
-        }
-
-        return [
-            'card' => $removedCard,
             'opponentId' => $opponentId,
+            'cards' => $player_hand,
         ];
     }
 
@@ -1002,6 +990,33 @@ class mow extends Table {
             }
         } else {
             $this->gamestate->nextState('playCard');
+        }
+    }
+
+    function stGiveCard() {
+        $player_id = self::getActivePlayerId();
+        $opponentId = intval(self::getGameStateValue('exchangeCard'));
+
+        $cardsInHand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $opponentId));
+        $removedCard = null;
+        $cardsNumber = count($cardsInHand);
+        if ($cardsNumber > 0) {
+            $removedCard = $cardsInHand[bga_rand(1, $cardsNumber) - 1];
+            $this->cards->moveCard($removedCard->id, 'hand', $player_id);
+            $removedCards[$opponentId] = $removedCard;
+
+            self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
+                'playerId' => $opponentId,
+                'card' => $removedCard,
+                'fromPlayerId' => $player_id,
+            ]);
+
+            self::notifyPlayer($player_id, 'newCard', 'Card was picked from ${player_name2} hand', [
+                'playerId' => $player_id,
+                'player_name2' => $this->getPlayerName($opponentId),
+                'card' => $removedCard,
+                'fromPlayerId' => $opponentId,
+            ]);
         }
     }
     

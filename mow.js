@@ -490,6 +490,9 @@ var Mow = /** @class */ (function () {
     //
     Mow.prototype.onEnteringState = function (stateName, args) {
         //console.log( 'Entering state: '+stateName );
+        if (this.isCurrentPlayerActive()) {
+            dojo.addClass("playertable-" + args.active_player, "active");
+        }
         switch (stateName) {
             case 'playerTurn':
                 var suffix = args.args.suffix;
@@ -511,7 +514,6 @@ var Mow = /** @class */ (function () {
             case 'giveCard':
                 if (this.isCurrentPlayerActive()) {
                     this.setPickCardAction('give');
-                    this.addCardToHand(args.args.card, "playertable-" + args.args.opponentId);
                 }
                 break;
         }
@@ -519,7 +521,6 @@ var Mow = /** @class */ (function () {
     Mow.prototype.onEnteringStatePlayerTurn = function (args) {
         var _this = this;
         var _a;
-        dojo.addClass("playertable-" + args.active_player, "active");
         if (this.isCurrentPlayerActive()) {
             this.setPickCardAction('play');
         }
@@ -563,8 +564,12 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.onEnteringViewCards = function (args) {
         var _this = this;
+        if (!this.isCurrentPlayerActive()) {
+            return;
+        }
         var viewCardsDialog = new ebg.popindialog();
         viewCardsDialog.create('mowViewCardsDialog');
+        console.log(args, this.gamedatas.players[args.opponentId]);
         viewCardsDialog.setTitle(dojo.string.substitute(_(" ${player_name} cards"), { player_name: this.gamedatas.players[args.opponentId].name }));
         var html = "<div id=\"opponent-hand\"></div>";
         // Show the dialog
@@ -596,10 +601,10 @@ var Mow = /** @class */ (function () {
     //                 You can use this method to perform some user interface changes at this moment.
     //
     Mow.prototype.onLeavingState = function (stateName) {
-        //console.log( 'Leaving state: '+stateName );
+        //console.log( 'Leaving state: '+stateName ); 
+        dojo.query(".playertable").removeClass("active");
         switch (stateName) {
             case 'playerTurn':
-                dojo.query(".playertable").removeClass("active");
                 break;
             case 'chooseDirection':
                 dojo.style('direction_popin', 'display', 'none');
@@ -937,7 +942,7 @@ var Mow = /** @class */ (function () {
         notif.args.newCards.forEach(function (card) { return _this.addCardToHand(card, 'remainingCards'); });
     };
     Mow.prototype.notif_removedCard = function (notif) {
-        this.playerHand.removeFromStockById('' + notif.args.card.id, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : null);
+        this.playerHand.removeFromStockById('' + notif.args.card.id, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : undefined);
     };
     ////////////////////////////////
     ////////////////////////////////

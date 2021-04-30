@@ -186,7 +186,11 @@ class Mow implements Game {
     public onEnteringState(stateName: string, args: any) {
         //console.log( 'Entering state: '+stateName );
         
-        switch( stateName ) {            
+        if((this as any).isCurrentPlayerActive()) {
+            dojo.addClass(`playertable-${args.active_player}`, "active");
+        }
+
+        switch( stateName ) {
             case 'playerTurn':
                 const suffix = args.args.suffix;
                 this.setGamestateDescription(suffix);
@@ -209,14 +213,12 @@ class Mow implements Game {
             case 'giveCard':                
                 if((this as any).isCurrentPlayerActive()) {
                     this.setPickCardAction('give');
-                    this.addCardToHand(args.args.card, `playertable-${args.args.opponentId}`);
                 }
                 break;
         }
     }
 
     private onEnteringStatePlayerTurn(args: { active_player: string | number }) {
-        dojo.addClass(`playertable-${args.active_player}`, "active");
         if((this as any).isCurrentPlayerActive()) {
             this.setPickCardAction('play');
         }
@@ -265,9 +267,12 @@ class Mow implements Game {
         }
     }
 
-    private onEnteringViewCards(args: { cards: Card[], opponentId: number }) {
+    private onEnteringViewCards(args: { cards: Card[], opponentId: number }) {        
+        if(!(this as any).isCurrentPlayerActive()) {
+            return;
+        }
         const viewCardsDialog = new ebg.popindialog();
-        viewCardsDialog.create( 'mowViewCardsDialog' );
+        viewCardsDialog.create( 'mowViewCardsDialog' );console.log(args, this.gamedatas.players[args.opponentId])
         viewCardsDialog.setTitle(dojo.string.substitute(_(" ${player_name} cards"), { player_name: this.gamedatas.players[args.opponentId].name }));
         
         var html = `<div id="opponent-hand"></div>`;
@@ -307,12 +312,12 @@ class Mow implements Game {
     //                 You can use this method to perform some user interface changes at this moment.
     //
     public onLeavingState(stateName: string) {
-        //console.log( 'Leaving state: '+stateName );
+        //console.log( 'Leaving state: '+stateName ); 
+        dojo.query(".playertable").removeClass("active");   
         
         switch( stateName ) {
         
-            case 'playerTurn':  
-                dojo.query(".playertable").removeClass("active");           
+            case 'playerTurn':         
                 break;
 
             case 'chooseDirection':    
@@ -725,7 +730,7 @@ class Mow implements Game {
     }
     
     public notif_removedCard( notif: Notif<NotifRemovedCardArgs> ) {
-        this.playerHand.removeFromStockById(''+notif.args.card.id, notif.args.fromPlayerId  ? 'playertable-'+notif.args.fromPlayerId : null);
+        this.playerHand.removeFromStockById(''+notif.args.card.id, notif.args.fromPlayerId  ? 'playertable-'+notif.args.fromPlayerId : undefined);
     }
 
     ////////////////////////////////

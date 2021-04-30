@@ -186,6 +186,11 @@
   }
 }
 
+#opponent-hand {
+  width: 660px;
+  max-width: 90vh;
+}
+
 .spectatorMode #myhand_wrap {
   display: none;
 }
