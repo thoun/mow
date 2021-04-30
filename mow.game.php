@@ -810,6 +810,27 @@ class mow extends Table {
     function opponentCardsViewed() {
         $this->gamestate->nextState('next');
     }
+
+    function giveCard( $cardId ) {
+        $player_id = self::getActivePlayerId();
+        $opponentId = intval(self::getGameStateValue('exchangeCard'));
+
+        $card = $this->getCardFromDb($this->cards->getCard($cardId));
+
+        self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card TODO was given to chosen opponent'), [
+            'playerId' => $player_id,
+            'card' => $card,
+        ]);
+
+        $this->cards->moveCard($cardId, 'hand', $opponentId);
+
+        self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card TODO'), [
+            'card' => $card,
+            'player_name' => self::getActivePlayerName(),
+        ]);
+
+        $this->gamestate->nextState('giveCard');
+    }
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments

@@ -98,6 +98,13 @@
         $this->game->opponentCardsViewed();
         self::ajaxResponse();
     }
+	
+    public function giveCard() {
+        self::setAjaxMode();     
+        $cardId = self::getArg( "id", AT_posint, true );
+        $this->game->giveCard( $cardId );
+        self::ajaxResponse();
+    }
     
     public function ignoreFlies() {
         self::setAjaxMode();

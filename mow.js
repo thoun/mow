@@ -374,6 +374,7 @@ var Mow = /** @class */ (function () {
         this.cardheight = 178;
         this.playersSelectable = false;
         this.selectedPlayerId = null;
+        this.pickCardAction = 'play';
         this.colors = [
             'forestgreen',
             'goldenrod',
@@ -500,13 +501,18 @@ var Mow = /** @class */ (function () {
                 this.onEnteringStateChooseDirection(args.args);
                 break;
             case 'swapHands':
-                this.onEnteringSelectionAction('swap');
+                this.onEnteringSelectionAction();
                 break;
             case 'selectOpponent':
-                this.onEnteringSelectionAction(args.args.lookOpponentHand ? 'look' : 'exchange');
+                this.onEnteringSelectionAction();
                 break;
             case 'viewCards':
                 this.onEnteringViewCards(args.args);
+                break;
+            case 'giveCard':
+                if (this.isCurrentPlayerActive()) {
+                    this.setPickCardAction('give');
+                }
                 break;
         }
     };
@@ -514,6 +520,9 @@ var Mow = /** @class */ (function () {
         var _this = this;
         var _a;
         dojo.addClass("playertable-" + args.active_player, "active");
+        if (this.isCurrentPlayerActive()) {
+            this.setPickCardAction('play');
+        }
         if (this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             var selectedCardId = this.playerHand.getSelectedItems()[0].id;
             if (((_a = this.allowedCardsIds) === null || _a === void 0 ? void 0 : _a.indexOf(Number(selectedCardId))) !== -1) {
@@ -543,15 +552,13 @@ var Mow = /** @class */ (function () {
             dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
         }
     };
-    Mow.prototype.onEnteringSelectionAction = function (selectionAction) {
+    Mow.prototype.onEnteringSelectionAction = function () {
         var _this = this;
         if (this.isCurrentPlayerActive()) {
             this.playersSelectable = true;
             Object.keys(this.gamedatas.players).filter(function (playerId) { return Number(playerId) !== Number(_this.player_id); }).forEach(function (playerId) {
                 return dojo.addClass("playertable-" + playerId, 'selectable');
             });
-            this.selectionAction = selectionAction;
-            // selectedPlayerId and corresponding button are added on click
         }
     };
     Mow.prototype.onEnteringViewCards = function (args) {
@@ -610,7 +617,6 @@ var Mow = /** @class */ (function () {
         Object.keys(this.gamedatas.players).forEach(function (playerId) {
             return dojo.removeClass("playertable-" + playerId, 'selectable');
         });
-        this.selectionAction = null;
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -662,6 +668,13 @@ var Mow = /** @class */ (function () {
     */
     Mow.prototype.isSimpleVersion = function () {
         return this.gamedatas.simpleVersion;
+    };
+    Mow.prototype.setPickCardAction = function (pickCardAction) {
+        if (this.pickCardAction == pickCardAction) {
+            return;
+        }
+        this.playerHand.unselectAll();
+        this.pickCardAction = pickCardAction;
     };
     Mow.prototype.setSlowpokeWeight = function (slowpokeId, slowpokeNumber) {
         var keys = Object.keys(this.theHerd.item_type).filter(function (key) { return key % 100 == slowpokeNumber; });
@@ -934,11 +947,11 @@ var Mow = /** @class */ (function () {
     Mow.prototype.onPlayerHandSelectionChanged = function () {
         var items = this.playerHand.getSelectedItems();
         if (items.length == 1) {
-            if (this.checkAction('playCard', true)) {
-                // Can play a card
-                var id = items[0].id;
-                this.takeAction("playCard", {
-                    id: id
+            var card = items[0];
+            var action = this.pickCardAction + 'Card';
+            if (this.checkAction(action, true)) {
+                this.takeAction(action, {
+                    id: card.id
                 });
                 this.playerHand.unselectAll();
             }

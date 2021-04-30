@@ -24,7 +24,7 @@ declare const ebg;
 declare const $;
 //declare const dojo: Dojo;
 
-type SelectionAction = 'swap' | 'look' | 'exchange';
+type PickCardAction = 'play' | 'give';
 
 class Mow implements Game {
 
@@ -41,7 +41,7 @@ class Mow implements Game {
     private playerNumber: number;
     private playersSelectable: boolean = false;
     private selectedPlayerId: number | null = null;
-    private selectionAction: SelectionAction;
+    private pickCardAction: PickCardAction = 'play';
     
     private colors = [
         'forestgreen',
@@ -199,19 +199,27 @@ class Mow implements Game {
                 break;
 
             case 'swapHands':  
-                this.onEnteringSelectionAction('swap');
+                this.onEnteringSelectionAction();
                 break;
             case 'selectOpponent':
-                this.onEnteringSelectionAction(args.args.lookOpponentHand ? 'look' : 'exchange');
+                this.onEnteringSelectionAction();
                 break;
             case 'viewCards':
                 this.onEnteringViewCards(args.args);
+                break;
+            case 'giveCard':                
+                if((this as any).isCurrentPlayerActive()) {
+                    this.setPickCardAction('give');
+                }
                 break;
         }
     }
 
     private onEnteringStatePlayerTurn(args: { active_player: string | number }) {
         dojo.addClass(`playertable-${args.active_player}`, "active");
+        if((this as any).isCurrentPlayerActive()) {
+            this.setPickCardAction('play');
+        }
         if((this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             const selectedCardId = this.playerHand.getSelectedItems()[0].id;
             if (this.allowedCardsIds?.indexOf(Number(selectedCardId)) !== -1) {
@@ -248,14 +256,12 @@ class Mow implements Game {
         }
     }
 
-    private onEnteringSelectionAction(selectionAction: SelectionAction) {
+    private onEnteringSelectionAction() {
         if ((this as any).isCurrentPlayerActive()) {
             this.playersSelectable = true;  
             Object.keys(this.gamedatas.players).filter(playerId => Number(playerId) !== Number((this as any).player_id)).forEach(playerId => 
                 dojo.addClass(`playertable-${playerId}`, 'selectable')
-            );  
-            this.selectionAction = selectionAction;          
-            // selectedPlayerId and corresponding button are added on click
+            );
         }
     }
 
@@ -327,8 +333,7 @@ class Mow implements Game {
         this.playersSelectable = false;    
         Object.keys(this.gamedatas.players).forEach(playerId => 
             dojo.removeClass(`playertable-${playerId}`, 'selectable')
-        ); 
-        this.selectionAction = null;
+        );
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -384,6 +389,15 @@ class Mow implements Game {
 
     private isSimpleVersion(): boolean {
         return this.gamedatas.simpleVersion;
+    }
+
+    private setPickCardAction(pickCardAction: PickCardAction) {
+        if (this.pickCardAction == pickCardAction) {
+            return;
+        }
+
+        this.playerHand.unselectAll();
+        this.pickCardAction = pickCardAction;
     }
     
     private setSlowpokeWeight(slowpokeId: number, slowpokeNumber: number) {
@@ -722,16 +736,17 @@ class Mow implements Game {
     public onPlayerHandSelectionChanged() {            
         const items = this.playerHand.getSelectedItems();
         if (items.length == 1) {
-            if ((this as any).checkAction('playCard', true)) {
-                // Can play a card
-                const id = items[0].id;
-
-                this.takeAction("playCard", { 
-                    id
+            const card = items[0];
+            const action = this.pickCardAction + 'Card';
+            
+            if ((this as any).checkAction(action, true)) {    
+                this.takeAction(action, { 
+                    id: card.id
                 });
                 
                 this.playerHand.unselectAll();
             }
+            
         }
     }
 
