@@ -35,4 +35,9 @@ Make sure ftp-sync.json and node_modules are in .gitignore
 TODO farmers cards
 2p mode
 pick player : can he pick himself ?
-Test farmer cards 1 2 3 5 9 10
+Test farmer cards 
+1 
+2 
+3 => check why cards re-removed when give
+9 
+10

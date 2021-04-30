@@ -511,6 +511,7 @@ var Mow = /** @class */ (function () {
             case 'giveCard':
                 if (this.isCurrentPlayerActive()) {
                     this.setPickCardAction('give');
+                    this.addCardToHand(args.args.card, "playertable-" + args.args.opponentId);
                 }
                 break;
         }
@@ -885,7 +886,7 @@ var Mow = /** @class */ (function () {
         var card = notif.args.card;
         setTimeout(function () {
             // timeout so new card appear after played card animation
-            _this.addCardToHand(card, 'remainingCards');
+            _this.addCardToHand(card, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : 'remainingCards');
             if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(card.id) === -1) {
                 dojo.query("#myhand_item_" + card.id).addClass("disabled");
             }
@@ -936,7 +937,7 @@ var Mow = /** @class */ (function () {
         notif.args.newCards.forEach(function (card) { return _this.addCardToHand(card, 'remainingCards'); });
     };
     Mow.prototype.notif_removedCard = function (notif) {
-        this.playerHand.removeFromStockById('' + notif.args.card.id);
+        this.playerHand.removeFromStockById('' + notif.args.card.id, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : null);
     };
     ////////////////////////////////
     ////////////////////////////////

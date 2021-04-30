@@ -209,6 +209,7 @@ class Mow implements Game {
             case 'giveCard':                
                 if((this as any).isCurrentPlayerActive()) {
                     this.setPickCardAction('give');
+                    this.addCardToHand(args.args.card, `playertable-${args.args.opponentId}`);
                 }
                 break;
         }
@@ -660,7 +661,7 @@ class Mow implements Game {
         const card = notif.args.card;
         setTimeout(() => {
             // timeout so new card appear after played card animation
-            this.addCardToHand(card, 'remainingCards');
+            this.addCardToHand(card, notif.args.fromPlayerId ? 'playertable-'+notif.args.fromPlayerId : 'remainingCards');
             if (this.allowedCardsIds && this.allowedCardsIds.indexOf(card.id) === -1) {
                 dojo.query(`#myhand_item_${card.id}`).addClass("disabled");
             }
@@ -724,7 +725,7 @@ class Mow implements Game {
     }
     
     public notif_removedCard( notif: Notif<NotifRemovedCardArgs> ) {
-        this.playerHand.removeFromStockById(''+notif.args.card.id);
+        this.playerHand.removeFromStockById(''+notif.args.card.id, notif.args.fromPlayerId  ? 'playertable-'+notif.args.fromPlayerId : null);
     }
 
     ////////////////////////////////

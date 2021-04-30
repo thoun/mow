@@ -27,7 +27,7 @@ interface Stock {
     getSelectedItems: () => Card[];
     unselectAll: () => void;
     removeAll: () => void;
-    removeFromStockById: (id: string) => void;
+    removeFromStockById: (id: string, to?: string) => void;
     removeAllTo: (to: string) => void;
     unselectItem: (id: string) => void;
 }

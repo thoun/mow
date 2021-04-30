@@ -2,7 +2,7 @@
     display: none;
 }
 
-#myhand .stockitem, #theherd .stockitem, #direction, #deck {
+#myhand .stockitem, #myfarmers .stockitem, #theherd .stockitem, #direction, #deck {
     border-radius:10px;
     margin:5px;
     border:1px solid grey;
@@ -27,32 +27,32 @@
                     border:2px solid black !important;
                     box-shadow:1px 1px 5px black, 2px 2px 4px black;
                 }
-
-                .stockitem {
-                    &:not(.disabled) {
-                        cursor:pointer;
-                    }
-
-                    &:hover {
-                        margin:4px;
-                        border:2px solid black !important;
-                    }
-
-                    &.disabled {
-                        cursor:not-allowed;
-                        opacity:0.5 !important;
-
-                        &:hover {
-                            cursor:not-allowed;
-                            margin:5px;
-                            border:1px solid gray !important;
-                        }
-                    }
-                }
             }
 
             #myfarmers {
                 flex: 1;
+            }
+
+            .stockitem {
+                &:not(.disabled) {
+                    cursor:pointer;
+                }
+
+                &:hover {
+                    margin:4px;
+                    border:2px solid black !important;
+                }
+
+                &.disabled {
+                    cursor:not-allowed;
+                    opacity:0.5 !important;
+
+                    &:hover {
+                        cursor:not-allowed;
+                        margin:5px;
+                        border:1px solid gray !important;
+                    }
+                }
             }
         }
     }

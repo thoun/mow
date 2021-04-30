@@ -145,13 +145,14 @@ class mow extends Table {
                
         //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
         $this->cards->createCards($cards, 'deck');
-
+        $this->cards->shuffle('deck');
         
         $farmerCards = [];
-        for( $value=1; $value<=10; $value++ ) { // 7,8,9 red
+        for ($value=1; $value<=10; $value++) {
 			$farmerCards[] = ['type' => $value, 'type_arg' => $this->farmers_placement[$value], 'nbr' => 1];
 		}
         $this->farmerCards->createCards($farmerCards, 'deck');
+        $this->farmerCards->shuffle('deck');
 
         // TODO TEMP
         foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(2, 'deck', $player_id); }	   
@@ -717,7 +718,7 @@ class mow extends Table {
     }
 
     function removeHerdAndNotify($player_id, $collectedPoints) {  
-        $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id );
+        $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id ? $player_id : 0);
         $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
             
@@ -820,6 +821,7 @@ class mow extends Table {
         self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card TODO was given to chosen opponent'), [
             'playerId' => $player_id,
             'card' => $card,
+            'fromPlayerId' => $opponentId,
         ]);
 
         $this->cards->moveCard($cardId, 'hand', $opponentId);
@@ -827,6 +829,7 @@ class mow extends Table {
         self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card TODO'), [
             'card' => $card,
             'player_name' => self::getActivePlayerName(),
+            'fromPlayerId' => $player_id,
         ]);
 
         $this->gamestate->nextState('giveCard');
@@ -916,11 +919,13 @@ class mow extends Table {
             self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
                 'playerId' => $opponentId,
                 'card' => $removedCard,
+                'fromPlayerId' => $player_id,
             ]);
         }
 
         return [
             'card' => $removedCard,
+            'opponentId' => $opponentId,
         ];
     }
 
