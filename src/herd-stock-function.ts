@@ -102,7 +102,7 @@ function updateDisplay(from: string) {
 
                     topDestinations[iNotAcrobatic] = topDestination;
                     leftDestinations[iNotAcrobatic] = leftDestination;
-                    zIndexes[iNotAcrobatic] = 1;
+                    zIndexes[iNotAcrobatic] = 0;
                 }
             });
         }
@@ -121,7 +121,7 @@ function updateDisplay(from: string) {
 
                     topDestinations[acrobaticNumber] = topDestination;
                     leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
-                    zIndexes[acrobaticNumber] = 0;
+                    zIndexes[acrobaticNumber] = 1;
                 }
             });
         }

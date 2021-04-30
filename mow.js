@@ -93,7 +93,7 @@ function updateDisplay(from) {
                     }
                     topDestinations[iNotAcrobatic] = topDestination;
                     leftDestinations[iNotAcrobatic] = leftDestination;
-                    zIndexes[iNotAcrobatic] = 1;
+                    zIndexes[iNotAcrobatic] = 0;
                 }
             });
         }
@@ -110,7 +110,7 @@ function updateDisplay(from) {
                     topDestination = iRow * (itemHeight + itemMargin);
                     topDestinations[acrobaticNumber] = topDestination;
                     leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
-                    zIndexes[acrobaticNumber] = 0;
+                    zIndexes[acrobaticNumber] = 1;
                 }
             });
         }
@@ -442,7 +442,7 @@ var Mow = /** @class */ (function () {
         this.theHerd.create(this, $('theherd'), this.cardwidth, this.cardheight);
         this.theHerd.setSelectionMode(0);
         this.theHerd.centerItems = true;
-        this.theHerd.acrobatic_overlap = 48;
+        this.theHerd.acrobatic_overlap = 0;
         this.theHerd.updateDisplay = function (from) { return updateDisplay.apply(_this.theHerd, [from]); };
         this.theHerd.isAcrobatic = function (stockItemId) { return isAcrobatic.apply(_this.theHerd, [stockItemId]); };
         this.mowCards.createCards([this.theHerd, this.playerHand]);

@@ -143,7 +143,7 @@ class mow extends Table {
 			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
-        //$this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );
+        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
         $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
         

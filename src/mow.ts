@@ -122,7 +122,7 @@ class Mow implements Game {
         this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
         this.theHerd.setSelectionMode(0);            
         this.theHerd.centerItems = true;
-        this.theHerd.acrobatic_overlap = 48;
+        this.theHerd.acrobatic_overlap = 0;
         this.theHerd.updateDisplay = (from: string) => updateDisplay.apply(this.theHerd, [from]);
         this.theHerd.isAcrobatic = (stockItemId: number) => isAcrobatic.apply(this.theHerd, [stockItemId]);
 
