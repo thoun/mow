@@ -563,18 +563,13 @@ class mow extends Table {
         }
 
         // And notify
-        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${displayedNumber_rec}${precision}'), [
-            'card_id' => intval($card_id),
+        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${card}'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'number' => $card->number,
-            'displayedNumber' => $displayedNumber, // The substitution will be done in JS format_string_recursive function
-            'displayedNumber_rec'=> ['log'=>'${displayedNumber}', 'args'=> ['displayedNumber'=>$displayedNumber, 'displayedColor'=>$card->type ]],
-            'color' => $card->type,
-            'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
             'slowpokeNumber' => $slowpokeNumber,
             'row' => $this->getActiveRow(),
+            'card' => $card,
         ]);
 
         // get new card if possible
@@ -720,7 +715,7 @@ class mow extends Table {
             }
 
             foreach( $removedCards as $opponentId => $removedCard ) {
-                self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
+                self::notifyPlayer($opponentId, 'removedCard', 'Card ${card} was removed from your hand', [
                     'playerId' => $opponentId,
                     'card' => $removedCard,
                 ]);
@@ -894,7 +889,7 @@ class mow extends Table {
 
         $card = $this->getCardFromDb($this->cards->getCard($cardId));
 
-        self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card TODO was given to chosen opponent'), [
+        self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card ${card} was given to chosen opponent'), [
             'playerId' => $player_id,
             'card' => $card,
             'fromPlayerId' => $opponentId,
@@ -902,7 +897,7 @@ class mow extends Table {
 
         $this->cards->moveCard($cardId, 'hand', $opponentId);
 
-        self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card TODO'), [
+        self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card ${card}'), [
             'card' => $card,
             'player_name' => self::getActivePlayerName(),
             'fromPlayerId' => $player_id,
@@ -1070,13 +1065,13 @@ class mow extends Table {
             $this->cards->moveCard($removedCard->id, 'hand', $player_id);
             $removedCards[$opponentId] = $removedCard;
 
-            self::notifyPlayer($opponentId, 'removedCard', 'Card TODO was removed from your hand', [
+            self::notifyPlayer($opponentId, 'removedCard', 'Card ${card} was removed from your hand', [
                 'playerId' => $opponentId,
                 'card' => $removedCard,
                 'fromPlayerId' => $player_id,
             ]);
 
-            self::notifyPlayer($player_id, 'newCard', 'Card was picked from ${player_name2} hand', [
+            self::notifyPlayer($player_id, 'newCard', 'Card ${card} was picked from ${player_name2} hand', [
                 'playerId' => $player_id,
                 'player_name2' => $this->getPlayerName($opponentId),
                 'card' => $removedCard,

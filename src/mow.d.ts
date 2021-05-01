@@ -53,11 +53,10 @@ interface NotifNewHandArgs {
 }
 
 interface NotifCardPlayedArgs {
-    player_id: string; 
-    color: number; 
-    number: number; 
-    card_id: number; 
+    card: Card;
     slowpokeNumber: number;
+    player_id: string;
+    card_id: number; 
     remainingCards: number;
     row: number;
 }

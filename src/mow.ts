@@ -427,7 +427,7 @@ class Mow implements Game {
         }
     }
 
-    private playCardOnTable(playerId: string, card: Partial<Card>, row: number, slowpokeNumber: number) {
+    private playCardOnTable(playerId: string, card: Card, row: number, slowpokeNumber: number) {
         if (slowpokeNumber != -1) {
             this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.number), slowpokeNumber);
         }
@@ -662,11 +662,7 @@ class Mow implements Game {
         
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         
-        this.playCardOnTable(notif.args.player_id, {
-            id: notif.args.card_id,
-            type: notif.args.color,
-            number: notif.args.number
-        }, notif.args.row, notif.args.slowpokeNumber);
+        this.playCardOnTable(notif.args.player_id, notif.args.card, notif.args.row, notif.args.slowpokeNumber);
 
         this.setRemainingCards(notif.args.remainingCards);
     }
@@ -838,17 +834,26 @@ class Mow implements Game {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                // Representation of the color of a card
-                if (args.displayedColor !== undefined) {
-                    args.displayedColor = this.colors[Number(args.displayedColor)];
-                    args.displayedNumber = dojo.string.substitute("<strong style='color: ${displayedColor}'>${displayedNumber}</strong>", {'displayedColor' : args.displayedColor, 'displayedNumber' : args.displayedNumber});
-                }
-                // symbol for special cards
-                if (args.precision && args.precision !== '') {
-                    if (args.precision === 'slowpoke') {
-                        args.precision = '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
-                    } else if (args.precision === 'acrobatic') {
-                        args.precision = '<span class="log-arrow rotate180"></span>';
+                console.log(args);
+                if (typeof args.card !== 'string') {
+                    const card: Card = args.card;
+
+                    let displayedNumber: number | string = card.number;
+                    let precision = null;
+                    if (displayedNumber == 21 || displayedNumber == 22) {
+                        displayedNumber = '';
+                        precision = 'slowpoke';
+                    } else if (displayedNumber == 70 || displayedNumber == 90) {
+                        displayedNumber /= 10;
+                        precision = 'acrobatic';
+                    }
+
+                    args.card = `<strong style='color: ${this.colors[Number(card.type)]}'>${displayedNumber}</strong>`;
+                    
+                    if (precision === 'slowpoke') {
+                        args.card += '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
+                    } else if (precision === 'acrobatic') {
+                        args.card += '<span class="log-arrow rotate180"></span>';
                     }
                 }
             }
