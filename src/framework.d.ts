@@ -23,7 +23,7 @@ interface Notif<T> {
 
 /* TODO repace Function by (..params) => void */
 interface Dojo {
-    place: Function;
+    place: (html: string, nodeId: string, action?: string) => void;
     style: Function;
     hitch: Function;
     addClass: (nodeId: string, className: string) => {};
@@ -37,6 +37,8 @@ interface Dojo {
     marginBox: Function;
     fadeIn: Function;
     trim: Function;
+    stopEvent: (evt) => void;
+    destroy: (nodeId: string) => void;
 }
 
 type Gamestate = any;

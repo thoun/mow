@@ -39,6 +39,8 @@ class mow extends Table {
                 "canPick" => 12,
                 "gotoPlayer" => 13,
                 'cowPlayed' => 14,
+                'activeRow' => 15,
+                'rowNumber' => 16,
 
                 // farmer cards constants
                 'cantPlaySpecial' => 50,
@@ -99,6 +101,8 @@ class mow extends Table {
         self::setGameStateInitialValue( 'canPick', 0 );
         self::setGameStateInitialValue( 'gotoPlayer', 0 );
         self::setGameStateInitialValue( 'cowPlayed', 0 );
+        self::setGameStateInitialValue( 'activeRow', 0 );
+        self::setGameStateInitialValue( 'rowNumber', !$this->isSimpleVersion() && count(array_keys($players)) == 2 ? 3 : 1 );
         self::setGameStateInitialValue( 'cantPlaySpecial', 0 );
         self::setGameStateInitialValue( 'chooseDirectionPick', 0 );
         self::setGameStateInitialValue( 'lookOpponentHand', 0 );
@@ -217,6 +221,7 @@ class mow extends Table {
             }
         }
         $result['herds'] = $herds;
+        $result['activeRow'] = intval(self::getGameStateValue('activeRow'));
         
         // Remaining cards on deck
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
@@ -255,7 +260,7 @@ class mow extends Table {
     }
 
     function getHerdNumber() {
-        return !$this->isSimpleVersion() && count(array_keys(self::loadPlayersBasicInfos())) == 2 ? 3 : 1;
+        return intval(self::getGameStateValue('rowNumber'));
     }
 
     function getPlayerName(int $playerId) {
@@ -563,6 +568,7 @@ class mow extends Table {
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
             'slowpokeNumber' => $slowpokeNumber,
+            'row' => intal(self::getGameStateValue('activeRow')),
         ]);
 
         // get new card if possible
@@ -585,9 +591,26 @@ class mow extends Table {
         }
         
         // changing direction is useless with 2 players
-        $canChooseDirection = $card->type === 5 && self::getPlayersNumber() > 2;
+        $canChooseDirection = $card->type === 5 && (self::getPlayersNumber() > 2 || !$this->isSimpleVersion());
         if ($canChooseDirection) {
             self::setGameStateValue('canPick', ($displayedNumber == 0 || $displayedNumber == 16) ? 1 : 0);
+        } else {
+            $rowNumber = $this->getHerdNumber();
+            if ($rowNumber > 1) {
+                $down = intval(self::getGameStateValue( 'direction_clockwise' )) == 1 ? 0 : 1;
+                $activeRow = intval(self::getGameStateValue( 'activeRow' ));
+
+                if ($down) {
+                    $activeRow = ($activeRow + 1) % $rowNumber;
+                } else {
+                    $activeRow = ($activeRow + $rowNumber - 1) % $rowNumber;
+                }
+                self::setGameStateValue('activeRow', $activeRow);
+
+                self::notifyAllPlayers('activeRowChanged', '', [
+                    'activeRow' => $activeRow,
+                ]);
+            }
         }
         // Next player
         $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
@@ -699,13 +722,25 @@ class mow extends Table {
     }
 
     function setPlayer(int $playerId) {
-        self::setGameStateValue('gotoPlayer', $playerId);
+        if ($this->getHerdNumber() > 1) {
 
-        if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
-            self::setGameStateValue('chooseDirectionPick', 0);
+            $activeRow = $playerId;
+            self::setGameStateValue('activeRow', $activeRow);
+
+            self::notifyAllPlayers('activeRowChanged', '', [
+                'activeRow' => $activeRow,
+            ]);
+            
             $this->gamestate->nextState('nextPlayer');
         } else {
-            $this->gamestate->nextState('setPlayer');
+            self::setGameStateValue('gotoPlayer', $playerId);
+
+            if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
+                self::setGameStateValue('chooseDirectionPick', 0);
+                $this->gamestate->nextState('nextPlayer');
+            } else {
+                $this->gamestate->nextState('setPlayer');
+            }
         }
     }
 
@@ -729,7 +764,8 @@ class mow extends Table {
         self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'points' => $collectedPoints
+            'points' => $collectedPoints,
+            'row' => intal(self::getGameStateValue('activeRow')),
         ]);
 
         self::setGameStateValue('cantPlaySpecial', 0);

@@ -8,7 +8,7 @@ Cards images are not definitive, waiting for official images
     <div id="playertables">
         <div id="toprowplayers" class="players-row"></div>
 
-        <div id="theherd"></div>
+        <div id="theherds"></div>
 
         <div id="bottomrowplayers" class="players-row"></div>
     </div>

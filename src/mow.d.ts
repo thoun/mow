@@ -31,6 +31,7 @@ interface MowGamedatas {
     farmerHand: FarmerCard[];
     herdNumber: number;
     herds: Card[][];
+    activeRow: number;
     neutralized_player_id: string;
     next_players_id: { [playerId: number]: number };
     notifications: {last_packet_id: string, move_nbr: string}
@@ -58,6 +59,7 @@ interface NotifCardPlayedArgs {
     card_id: number; 
     slowpokeNumber: number;
     remainingCards: number;
+    row: number;
 }
 
 interface NotifFarmerCardPlayedArgs {
@@ -88,7 +90,10 @@ interface NotifCollectedArgs {
 }
 
 type NotifHandCollectedArgs = NotifCollectedArgs;
-type NotifHerdCollectedArgs = NotifCollectedArgs;
+
+interface NotifHerdCollectedArgs extends NotifCollectedArgs {
+    row: number;
+}
 
 interface NotifAllTopFliesArgs {
     playerId: number;
@@ -105,4 +110,8 @@ interface NotifRemovedCardArgs {
     playerId: number;
     card: Card;
     fromPlayerId?: number;
+}
+
+interface NotifActiveRowChangedArgs {
+    activeRow: number;
 }

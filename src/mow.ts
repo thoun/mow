@@ -31,7 +31,7 @@ class Mow implements Game {
     private gamedatas: MowGamedatas;
     private playerHand: Stock = null;
     private playerFarmerHand: Stock = null;
-    private theHerd: MowHerdStock = null;
+    private theHerds: MowHerdStock[] = [];
     private allowedCardsIds: number[];
     private player_id: string;
 
@@ -118,15 +118,18 @@ class Mow implements Game {
         this.playerHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
         dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
-        this.theHerd = new ebg.stock() as MowHerdStock;
-        this.theHerd.create( this, $('theherd'), this.cardwidth, this.cardheight );
-        this.theHerd.setSelectionMode(0);            
-        this.theHerd.centerItems = true;
-        this.theHerd.acrobatic_overlap = 0;
-        this.theHerd.updateDisplay = (from: string) => updateDisplay.apply(this.theHerd, [from]);
-        this.theHerd.isAcrobatic = (stockItemId: number) => isAcrobatic.apply(this.theHerd, [stockItemId]);
+        for (let iHerd=0; iHerd<gamedatas.herdNumber; iHerd++) {
+            dojo.place(`<div id="herd${iHerd}" class="herd"></div>`, 'theherds');
+            this.theHerds[iHerd] = new ebg.stock() as MowHerdStock;
+            this.theHerds[iHerd].create( this, $(`herd${iHerd}`), this.cardwidth, this.cardheight );
+            this.theHerds[iHerd].setSelectionMode(0);            
+            this.theHerds[iHerd].centerItems = true;
+            this.theHerds[iHerd].acrobatic_overlap = 0;
+            this.theHerds[iHerd].updateDisplay = (from: string) => updateDisplay.apply(this.theHerds[iHerd], [from]);
+            this.theHerds[iHerd].isAcrobatic = (stockItemId: number) => isAcrobatic.apply(this.theHerds[iHerd], [stockItemId]);
+        }
 
-        this.mowCards.createCards([this.theHerd, this.playerHand]);
+        this.mowCards.createCards([...this.theHerds, this.playerHand]);
 
         this.playerFarmerHand = new ebg.stock() as Stock;
         this.playerFarmerHand.create( this, $('myfarmers'), this.cardwidth, this.cardheight );
@@ -139,24 +142,25 @@ class Mow implements Game {
         this.farmerCards.createCards([this.playerFarmerHand]);
 
         if (this.isSimpleVersion()) {
-           dojo.style(('myfarmers'), "display", "none");
-        
+           dojo.style(('myfarmers'), "display", "none");        
         }
         
-        //console.log('this.gamedatas', this.gamedatas);
+        console.log('gamedatas', this.gamedatas);
         
         // Cards in player's hand
         this.gamedatas.hand.forEach((card: Card) => this.addCardToHand(card));
         this.gamedatas.farmerHand.forEach((card: FarmerCard) => this.addFarmerCardToHand(card));
         
         // Cards played on table
-        this.gamedatas.herds[0].forEach((card: Card) => {
-            const cardUniqueId = this.mowCards.getCardUniqueId(card.type, card.number);
-            if (card.slowpokeNumber) {
-                this.setSlowpokeWeight(cardUniqueId, card.slowpokeNumber);
-            }            
-            this.addCardToHerd(card);
-        });
+        for (let iHerd=0; iHerd<gamedatas.herdNumber; iHerd++) {
+            this.gamedatas.herds[iHerd].forEach((card: Card) => {
+                const cardUniqueId = this.mowCards.getCardUniqueId(card.type, card.number);
+                if (card.slowpokeNumber) {
+                    this.setSlowpokeWeight(cardUniqueId, card.slowpokeNumber);
+                }            
+                this.addCardToHerd(card, iHerd);
+            });
+        }
 
         this.setRemainingCards(this.gamedatas.remainingCards);
         this.enableAllowedCards(this.gamedatas.allowedCardsIds);
@@ -213,6 +217,11 @@ class Mow implements Game {
             case 'giveCard':                
                 if((this as any).isCurrentPlayerActive()) {
                     this.setPickCardAction('give');
+                }
+                break;
+            case 'endHand':
+                for (let iHerd=0; iHerd<this.gamedatas.herdNumber; iHerd++) {
+                    this.theHerds[iHerd].removeAllTo('topbar');
                 }
                 break;
         }
@@ -406,13 +415,15 @@ class Mow implements Game {
     }
     
     private setSlowpokeWeight(slowpokeId: number, slowpokeNumber: number) {
-        const keys = Object.keys(this.theHerd.item_type).filter((key) => (key as any as number) % 100 == slowpokeNumber);
-        const lastKey = keys[keys.length-1];
-        let lastKeyItemWeight = this.theHerd.item_type[lastKey].weight;
-        this.theHerd.item_type[slowpokeId].weight = lastKeyItemWeight + 1;
+        for (let iHerd=0; iHerd<this.gamedatas.herdNumber; iHerd++) {
+            const keys = Object.keys(this.theHerds[iHerd].item_type).filter((key) => (key as any as number) % 100 == slowpokeNumber);
+            const lastKey = keys[keys.length-1];
+            let lastKeyItemWeight = this.theHerds[iHerd].item_type[lastKey].weight;
+            this.theHerds[iHerd].item_type[slowpokeId].weight = lastKeyItemWeight + 1;
+        }
     }
 
-    private playCardOnTable(playerId: string, card: Partial<Card>, slowpokeNumber: number) {
+    private playCardOnTable(playerId: string, card: Partial<Card>, row: number, slowpokeNumber: number) {
         if (slowpokeNumber != -1) {
             this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.number), slowpokeNumber);
         }
@@ -420,10 +431,10 @@ class Mow implements Game {
         if( playerId != this.player_id ) {
             // Some opponent played a card
             // Move card from player panel
-            this.addCardToHerd(card, 'playertable-'+playerId);
+            this.addCardToHerd(card, row, 'playertable-'+playerId);
         } else {
             // You played a card. Move card from the hand and remove corresponding item
-            this.addCardToHerd(card, 'myhand_item_'+card.id);
+            this.addCardToHerd(card, row, 'myhand_item_'+card.id);
             this.playerHand.removeFromStockById(''+card.id);
         }
 
@@ -435,11 +446,15 @@ class Mow implements Game {
         document.getElementById('pickBlock').innerHTML = '';
 
         if (canPick) {
-            const ids: number[] = this.gamedatas.playerorder.map(id => Number(id));
+            const rowPick = this.gamedatas.herdNumber > 1;
+            const ids: number[] = rowPick ? [0, 1, 2] : this.gamedatas.playerorder.map(id => Number(id));
 
             let html = '';
             ids.forEach(id => {
-                const player = this.gamedatas.players[id];
+                const player = rowPick ? {
+                    color: 'transparent',
+                    name: dojo.string.substitute(_("Herd ${number}"), {'number' : id }),
+                } : this.gamedatas.players[id];
                 html += `<button id="pickBtn${id}" class="bgabutton bgabutton_blue pickButton" style="border: 3px solid #${player.color}">${player.name}</button>`;
             });
 
@@ -617,6 +632,7 @@ class Mow implements Game {
         dojo.subscribe( 'allTopFlies', this, "notif_allTopFlies" );
         dojo.subscribe( 'replaceCards', this, "notif_replaceCards" );
         dojo.subscribe( 'removedCard', this, "notif_removedCard" );
+        dojo.subscribe( 'activeRowChanged', this, "notif_activeRowChanged" );
 
         (this as any).notifqueue.setSynchronous( 'herdCollected', 2000 );
         (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
@@ -646,7 +662,7 @@ class Mow implements Game {
             id: notif.args.card_id,
             type: notif.args.color,
             number: notif.args.number
-        }, notif.args.slowpokeNumber);
+        }, notif.args.row, notif.args.slowpokeNumber);
 
         this.setRemainingCards(notif.args.remainingCards);
     }
@@ -698,9 +714,9 @@ class Mow implements Game {
             (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
             (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
-            this.theHerd.removeAllTo( 'player_board_'+notif.args.player_id );
+            this.theHerds[notif.args.row].removeAllTo( 'player_board_'+notif.args.player_id );
         } else {
-            this.theHerd.removeAllTo('topbar');
+            this.theHerds[notif.args.row].removeAllTo('topbar');
         }
         dojo.query("#myhand .stockitem").removeClass("disabled");
         this.allowedCardsIds = null; 
@@ -731,6 +747,11 @@ class Mow implements Game {
     
     public notif_removedCard( notif: Notif<NotifRemovedCardArgs> ) {
         this.playerHand.removeFromStockById(''+notif.args.card.id, notif.args.fromPlayerId  ? 'playertable-'+notif.args.fromPlayerId : undefined);
+    }
+    
+    public notif_activeRowChanged( notif: Notif<NotifActiveRowChangedArgs> ) {
+        this.gamedatas.activeRow = notif.args.activeRow;
+        // TODO show arrow on activeRow
     }
 
     ////////////////////////////////
@@ -852,8 +873,8 @@ class Mow implements Game {
         this.addCardToStock(this.playerHand, card, from);
     }
 
-    private addCardToHerd(card: Partial<Card>, from?: string) {
-        this.addCardToStock(this.theHerd, card, from);
+    private addCardToHerd(card: Partial<Card>, row: number, from?: string) {
+        this.addCardToStock(this.theHerds[row], card, from);
     }
 
     private addFarmerCardToStock(stock: Stock, card: Partial<FarmerCard>, from?: string) {
