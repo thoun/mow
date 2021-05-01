@@ -222,7 +222,7 @@ class mow extends Table {
             }
         }
         $result['herds'] = $herds;
-        $result['activeRow'] = intval(self::getGameStateValue('activeRow'));
+        $result['activeRow'] = $this->getActiveRow();
         
         // Remaining cards on deck
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
@@ -258,6 +258,10 @@ class mow extends Table {
 
     function isSimpleVersion() {
         return intval(self::getGameStateValue('simpleVersion')) === 2;
+    }
+
+    function getActiveRow() {
+        return intval(self::getGameStateValue('activeRow'));
     }
 
     function getHerdNumber() {
@@ -333,7 +337,7 @@ class mow extends Table {
             throw new BgaUserException(self::_("You can't play a special cow because of a farmer card"), true);
         }
 
-        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', 0));
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', $this->getActiveRow()));
 
         //self::dump('herdCards', json_encode($herdCards));
         $herdDisplayedNumbers = array_filter(
@@ -418,7 +422,7 @@ class mow extends Table {
         }
 
         if ($card->type == 5) {
-            $herdCount = count($this->cards->getCardsInLocation('herd', 0));
+            $herdCount = count($this->cards->getCardsInLocation('herd', $this->getActiveRow()));
             if ($herdCount == 0) {
                 throw new BgaUserException(self::_("No card in the herd"), true);
             }
@@ -438,7 +442,7 @@ class mow extends Table {
 
     function getPlacesForSlowpoke() {
         $places = [];
-        $herd = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', 0));
+        $herd = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', $this->getActiveRow()));
         $herdWithoutSlowpokes = array_values(array_filter($herd, function($card) { return $card->number != 21 && $card->number != 22; }));
 
         usort($herdWithoutSlowpokes, function ($a, $b) { return $a->number - $b->number; });
@@ -543,7 +547,7 @@ class mow extends Table {
         }
         
         // Checks are done! now we can play our card
-        $this->cards->moveCard($card_id, 'herd', 0);
+        $this->cards->moveCard($card_id, 'herd', $this->getActiveRow());
 
         self::setGameStateValue('cowPlayed', 1);
         self::setGameStateValue('cantPlaySpecial', 0);
@@ -570,7 +574,7 @@ class mow extends Table {
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
             'slowpokeNumber' => $slowpokeNumber,
-            'row' => intval(self::getGameStateValue('activeRow')),
+            'row' => $this->getActiveRow(),
         ]);
 
         // get new card if possible
@@ -607,8 +611,9 @@ class mow extends Table {
     }
 
     function setNextActiveRow() {
+        $rowNumber = $this->getHerdNumber();
         $down = intval(self::getGameStateValue( 'direction_clockwise' )) == 1;
-        $activeRow = intval(self::getGameStateValue( 'activeRow' ));
+        $activeRow = $this->getActiveRow();
 
         if ($down) {
             $activeRow = ($activeRow + 1) % $rowNumber;
@@ -760,7 +765,7 @@ class mow extends Table {
         
         $player_id = self::getActivePlayerId();
 
-        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation("herd", 0));
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation("herd", $this->getActiveRow()));
         $collectedPoints = $this->getCardsValues($herdCards);
         $this->collectedCardsStats($herdCards, $player_id);
 
@@ -776,7 +781,7 @@ class mow extends Table {
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'points' => $collectedPoints,
-            'row' => intval(self::getGameStateValue('activeRow')),
+            'row' => $this->getActiveRow(),
         ]);
 
         self::setGameStateValue('cantPlaySpecial', 0);
@@ -789,7 +794,7 @@ class mow extends Table {
     }
 
     function removeHerdAndNotify($player_id, $collectedPoints) {  
-        $this->cards->moveAllCardsInLocation( "herd", "discard", 0, $player_id ? $player_id : 0);
+        $this->cards->moveAllCardsInLocation( "herd", "discard", $this->getActiveRow(), $player_id ? $player_id : 0);
         $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
             
@@ -920,7 +925,7 @@ class mow extends Table {
         $player_id = self::getActivePlayerId();
 
         // check if player can collect
-        $herd = $this->cards->getCardsInLocation('herd', 0);
+        $herd = $this->cards->getCardsInLocation('herd', $this->getActiveRow());
         $canCollect = count($herd) > 0;
 
         // check if player can play
