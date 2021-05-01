@@ -33,6 +33,6 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 Make sure ftp-sync.json and node_modules are in .gitignore
 
 # TODO questions ???
-2p mode
+Test 2p mode
 show on table : TOP points on hand, 6 black cows flag, effect of 10th farmer
 pick player : can he pick himself ? and so play another card

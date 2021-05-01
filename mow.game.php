@@ -199,6 +199,7 @@ class mow extends Table {
         
         // Cards played on the table
         $result['herdNumber'] = $herdNumber;
+        $herds = [];
 
         for ($iHerd=0; $iHerd<$herdNumber; $iHerd++) {
             $herds[$iHerd] = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', $iHerd));
@@ -260,6 +261,7 @@ class mow extends Table {
     }
 
     function getHerdNumber() {
+        self::debug('row number='.json_encode(self::getGameStateValue('rowNumber')));
         return intval(self::getGameStateValue('rowNumber'));
     }
 
@@ -568,7 +570,7 @@ class mow extends Table {
             'precision' => $precision, // The substitution will be done in JS format_string_recursive function,
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
             'slowpokeNumber' => $slowpokeNumber,
-            'row' => intal(self::getGameStateValue('activeRow')),
+            'row' => intval(self::getGameStateValue('activeRow')),
         ]);
 
         // get new card if possible
@@ -597,23 +599,27 @@ class mow extends Table {
         } else {
             $rowNumber = $this->getHerdNumber();
             if ($rowNumber > 1) {
-                $down = intval(self::getGameStateValue( 'direction_clockwise' )) == 1 ? 0 : 1;
-                $activeRow = intval(self::getGameStateValue( 'activeRow' ));
-
-                if ($down) {
-                    $activeRow = ($activeRow + 1) % $rowNumber;
-                } else {
-                    $activeRow = ($activeRow + $rowNumber - 1) % $rowNumber;
-                }
-                self::setGameStateValue('activeRow', $activeRow);
-
-                self::notifyAllPlayers('activeRowChanged', '', [
-                    'activeRow' => $activeRow,
-                ]);
+                $this->setNextActiveRow();
             }
         }
         // Next player
         $this->gamestate->nextState($canChooseDirection ? 'chooseDirection' : 'playCard');
+    }
+
+    function setNextActiveRow() {
+        $down = intval(self::getGameStateValue( 'direction_clockwise' )) == 1;
+        $activeRow = intval(self::getGameStateValue( 'activeRow' ));
+
+        if ($down) {
+            $activeRow = ($activeRow + 1) % $rowNumber;
+        } else {
+            $activeRow = ($activeRow + $rowNumber - 1) % $rowNumber;
+        }
+        self::setGameStateValue('activeRow', $activeRow);
+
+        self::notifyAllPlayers('activeRowChanged', '', [
+            'activeRow' => $activeRow,
+        ]);
     }
 
     function setDirection(bool $change) {
@@ -630,6 +636,11 @@ class mow extends Table {
             self::incStat( 1, "changeDirectionNumber" );
         } else {
             self::incStat( 1, "keepDirectionNumber" );
+        }
+
+        $rowNumber = $this->getHerdNumber();
+        if ($rowNumber > 1) {
+            $this->setNextActiveRow();
         }
 
         if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
@@ -765,7 +776,7 @@ class mow extends Table {
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'points' => $collectedPoints,
-            'row' => intal(self::getGameStateValue('activeRow')),
+            'row' => intval(self::getGameStateValue('activeRow')),
         ]);
 
         self::setGameStateValue('cantPlaySpecial', 0);
