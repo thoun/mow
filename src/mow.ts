@@ -202,11 +202,19 @@ class Mow implements Game {
             case 'playerTurn':
                 const suffix = args.args.suffix;
                 this.setGamestateDescription(suffix);
-                this.onEnteringStatePlayerTurn(args);                    
+                this.onEnteringStatePlayerTurn(args);  
+                if((this as any).isCurrentPlayerActive()) {
+                    this.disableFarmerCards(args.args.allowedFarmerCardIds);   
+                }
                 break;
 
             case 'chooseDirection':    
                 this.onEnteringStateChooseDirection(args.args);     
+                break;
+            case 'playFarmer':
+                if((this as any).isCurrentPlayerActive()) {
+                    this.disableFarmerCards(args.args.allowedFarmerCardIds);   
+                }
                 break;
 
             case 'swapHands':  
@@ -330,12 +338,21 @@ class Mow implements Game {
         
         switch( stateName ) {
         
-            case 'playerTurn':         
+            case 'playerTurn':                 
+                if((this as any).isCurrentPlayerActive()) {
+                    this.enableFarmerCards();   
+                }               
                 break;
 
             case 'chooseDirection':    
                 dojo.style( 'direction_popin', 'display', 'none' );
                 break;   
+        
+            case 'playFarmer':                 
+                if((this as any).isCurrentPlayerActive()) {
+                    this.enableFarmerCards();   
+                }               
+                break;
 
             case 'swapHands':  
             case 'selectOpponent':
@@ -466,6 +483,22 @@ class Mow implements Game {
 
             ids.forEach(id => document.getElementById(`pickBtn${id}`).addEventListener('click', () => this.pickPlayer(id)));
         }
+    }
+
+    private disableFarmerCards(allowedFarmerCardIds: number[]) {
+        this.playerFarmerHand.items.map(item => Number(item.id)).forEach((id: number) => {
+            try {
+                dojo.toggleClass('myfarmers_item_' + id, 'disabled', allowedFarmerCardIds.indexOf(id) === -1);
+            } catch(e) {}
+        });
+    }
+
+    private enableFarmerCards() {
+        this.playerFarmerHand.items.map(item => Number(item.id)).forEach((id: number) => {
+            try {
+                dojo.removeClass('myfarmers_item_' + id, 'disabled');
+            } catch(e) {}
+        });
     }
     
     ///////////////////////////////////////////////////
@@ -834,8 +867,7 @@ class Mow implements Game {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                console.log(args);
-                if (typeof args.card !== 'string') {
+                if (args.card && typeof args.card !== 'string') {
                     const card: Card = args.card;
 
                     let displayedNumber: number | string = card.number;

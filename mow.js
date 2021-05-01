@@ -521,9 +521,17 @@ var Mow = /** @class */ (function () {
                 var suffix = args.args.suffix;
                 this.setGamestateDescription(suffix);
                 this.onEnteringStatePlayerTurn(args);
+                if (this.isCurrentPlayerActive()) {
+                    this.disableFarmerCards(args.args.allowedFarmerCardIds);
+                }
                 break;
             case 'chooseDirection':
                 this.onEnteringStateChooseDirection(args.args);
+                break;
+            case 'playFarmer':
+                if (this.isCurrentPlayerActive()) {
+                    this.disableFarmerCards(args.args.allowedFarmerCardIds);
+                }
                 break;
             case 'swapHands':
                 this.onEnteringSelectionAction();
@@ -633,9 +641,17 @@ var Mow = /** @class */ (function () {
         dojo.query(".playertable").removeClass("active");
         switch (stateName) {
             case 'playerTurn':
+                if (this.isCurrentPlayerActive()) {
+                    this.enableFarmerCards();
+                }
                 break;
             case 'chooseDirection':
                 dojo.style('direction_popin', 'display', 'none');
+                break;
+            case 'playFarmer':
+                if (this.isCurrentPlayerActive()) {
+                    this.enableFarmerCards();
+                }
                 break;
             case 'swapHands':
             case 'selectOpponent':
@@ -750,6 +766,22 @@ var Mow = /** @class */ (function () {
             document.getElementById('pickBlock').innerHTML = html_1;
             ids.forEach(function (id) { return document.getElementById("pickBtn" + id).addEventListener('click', function () { return _this.pickPlayer(id); }); });
         }
+    };
+    Mow.prototype.disableFarmerCards = function (allowedFarmerCardIds) {
+        this.playerFarmerHand.items.map(function (item) { return Number(item.id); }).forEach(function (id) {
+            try {
+                dojo.toggleClass('myfarmers_item_' + id, 'disabled', allowedFarmerCardIds.indexOf(id) === -1);
+            }
+            catch (e) { }
+        });
+    };
+    Mow.prototype.enableFarmerCards = function () {
+        this.playerFarmerHand.items.map(function (item) { return Number(item.id); }).forEach(function (id) {
+            try {
+                dojo.removeClass('myfarmers_item_' + id, 'disabled');
+            }
+            catch (e) { }
+        });
     };
     ///////////////////////////////////////////////////
     //// Player's action
@@ -1048,8 +1080,7 @@ var Mow = /** @class */ (function () {
     Mow.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                console.log(args);
-                if (typeof args.card !== 'string') {
+                if (args.card && typeof args.card !== 'string') {
                     var card = args.card;
                     var displayedNumber = card.number;
                     var precision = null;

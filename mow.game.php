@@ -159,7 +159,7 @@ class mow extends Table {
         $this->farmerCards->shuffle('deck');
 
         // TODO TEMP
-        //foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(3, 'deck', $player_id); }	   
+        foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(3, 'deck', $player_id); }	   
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -723,10 +723,11 @@ class mow extends Table {
         }
 
         // And notify
-        self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays farmer card TODO'), [
+        self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays farmer card ${farmer_card_name}'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'card' => $card,
+            'farmer_card_name' => 'TODO',
         ]);
 
         $this->gamestate->nextState($nextState);
@@ -859,7 +860,6 @@ class mow extends Table {
 
     function ignoreFlies(int $playerId, int $type) {
         if ($playerId > 0) {
-            // TODO check remaining in hand cards are taken into account
             $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId));
             $removedCards = array_values(array_filter($playerDiscard, function ($card) use ($type) { return $card->type == $type; }));
 
@@ -905,6 +905,22 @@ class mow extends Table {
 
         $this->gamestate->nextState('giveCard');
     }
+
+    function getAllowedFarmerCardsId() {
+        $player_id = self::getActivePlayerId();
+        
+        $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
+
+        $allowedCardIds = [];
+        foreach($farmerCardsInHand as $card) {
+            try {
+                $this->controlFarmerCardPlayable($card, $player_id);
+                $allowedCardIds[] = $card->id;
+            } catch (Exception $e) {}
+        }
+
+        return $allowedCardIds; 
+    }
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -944,6 +960,7 @@ class mow extends Table {
         return [
             'canCollect' => $canCollect,
             'suffix' => $suffix,
+            'allowedFarmerCardIds' => $this->getAllowedFarmerCardsId(),
         ];
     }
 
@@ -956,8 +973,9 @@ class mow extends Table {
     }
 
     function argPlayFarmer() {
-        $player_id = self::getActivePlayerId();
-        // TODO
+        return [
+            'allowedFarmerCardIds' => $this->getAllowedFarmerCardsId(),
+        ]; 
     }
 
     function argSelectOpponent() {
