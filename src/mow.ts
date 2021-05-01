@@ -119,7 +119,7 @@ class Mow implements Game {
         dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
         for (let iHerd=0; iHerd<gamedatas.herdNumber; iHerd++) {
-            dojo.place(`<div id="herd${iHerd}" class="herd"></div>`, 'theherds');
+            dojo.place(`<div class="row">${gamedatas.herdNumber > 1 ? `<div id="rowIndicatorWrapper${iHerd}" class="rowIndicatorWrapper"></div>` : ''}<div id="herd${iHerd}" class="herd"></div></div>`, 'theherds');
             this.theHerds[iHerd] = new ebg.stock() as MowHerdStock;
             this.theHerds[iHerd].create( this, $(`herd${iHerd}`), this.cardwidth, this.cardheight );
             this.theHerds[iHerd].setSelectionMode(0);            
@@ -173,6 +173,10 @@ class Mow implements Game {
 
         
         Object.keys(gamedatas.players).forEach(playerId => dojo.connect($(`playertable-${playerId}`), 'onclick', this, 'onPlayerSelection'));
+
+        if (gamedatas.herdNumber > 1) {
+            dojo.place(`<div id="rowIndicator"><div id="rowIndicatorBackground" class="${!this.gamedatas.direction_clockwise ? 'inverse' : ''}"></div></div>`, `rowIndicatorWrapper0`);
+        }
 
         // Setup game notifications to handle (see "setupNotifications" method below)
         //console.log('setupNotifications');
@@ -704,6 +708,11 @@ class Mow implements Game {
 
         dojo.removeClass("direction-animation-symbol");
         dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
+
+        const background = document.getElementById('rowIndicatorBackground');
+        if (background) {
+            dojo.toggleClass('rowIndicatorBackground', 'inverse', this.gamedatas.direction_clockwise);
+        }
     }
     
     public notif_herdCollected( notif: Notif<NotifHerdCollectedArgs> ) {
@@ -751,7 +760,7 @@ class Mow implements Game {
     
     public notif_activeRowChanged( notif: Notif<NotifActiveRowChangedArgs> ) {
         this.gamedatas.activeRow = notif.args.activeRow;
-        // TODO show arrow on activeRow
+        (this as any).slideToObject('rowIndicator', `rowIndicatorWrapper${notif.args.activeRow}`);
     }
 
     ////////////////////////////////

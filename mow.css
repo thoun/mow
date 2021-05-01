@@ -71,8 +71,29 @@
   animation: none;
   box-shadow: 0 0 5px 5px red;
 }
-#gamezone #playertables .herd {
+#gamezone #playertables .row {
+  display: flex;
   min-height: 183px;
+}
+#gamezone #playertables .row .rowIndicatorWrapper {
+  width: 121px;
+}
+#gamezone #playertables .row .rowIndicatorWrapper #rowIndicator {
+  width: 121px;
+  height: 178px;
+  overflow: hidden;
+}
+#gamezone #playertables .row .rowIndicatorWrapper #rowIndicator #rowIndicatorBackground {
+  background-image: url("img/direction.jpg");
+  width: 178px;
+  height: 121px;
+  transform: rotate(90deg);
+}
+#gamezone #playertables .row .rowIndicatorWrapper #rowIndicator #rowIndicatorBackground.inverse {
+  transform: rotate(-90deg);
+}
+#gamezone #playertables .row .herd {
+  flex: 1;
 }
 #gamezone .direction-symbol {
   font-size: 400%;
@@ -195,7 +216,7 @@
   display: none;
 }
 
-#myhand .stockitem, #myfarmers .stockitem, #theherds .stockitem, #direction, #deck {
+#myhand .stockitem, #myfarmers .stockitem, #theherds .stockitem, #direction, #deck, #rowIndicatorBackground {
   border-radius: 10px;
   margin: 5px;
   border: 1px solid grey;

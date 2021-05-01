@@ -56,10 +56,37 @@
                     box-shadow: 0 0 5px 5px red;
                 }
             }
+             
         }
 
-        .herd {
+        .row {
+            display: flex;
             min-height: 183px;
+
+            .rowIndicatorWrapper {
+                width: $cardWidth;
+
+                #rowIndicator {
+                    width: $cardWidth;
+                    height: $cardHeight;
+                    overflow: hidden;
+
+                    #rowIndicatorBackground {
+                        background-image: url('img/direction.jpg');
+                        width: $cardHeight;
+                        height: $cardWidth;
+                        transform: rotate(90deg);
+
+                        &.inverse {
+                            transform: rotate(-90deg);
+                        }
+                    }
+                }
+            }
+
+            .herd {
+                flex: 1;
+            }
         }
     }
 

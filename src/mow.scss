@@ -2,6 +2,9 @@
 
 /********* You can start writing your CSS below this line: **********/
 
+$cardWidth: 121px;
+$cardHeight: 178px;
+
 .direction-anticlockwise {
     transform: scaleX(-1);
 }
