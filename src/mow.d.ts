@@ -29,7 +29,8 @@ interface MowGamedatas {
     gamestates: { [gamestateId: number]: Gamestate };
     hand: Card[];
     farmerHand: FarmerCard[];
-    herd: Card[];
+    herdNumber: number;
+    herds: Card[][];
     neutralized_player_id: string;
     next_players_id: { [playerId: number]: number };
     notifications: {last_packet_id: string, move_nbr: string}

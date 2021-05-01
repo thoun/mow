@@ -463,7 +463,7 @@ var Mow = /** @class */ (function () {
         this.gamedatas.hand.forEach(function (card) { return _this.addCardToHand(card); });
         this.gamedatas.farmerHand.forEach(function (card) { return _this.addFarmerCardToHand(card); });
         // Cards played on table
-        this.gamedatas.herd.forEach(function (card) {
+        this.gamedatas.herds[0].forEach(function (card) {
             var cardUniqueId = _this.mowCards.getCardUniqueId(card.type, card.number);
             if (card.slowpokeNumber) {
                 _this.setSlowpokeWeight(cardUniqueId, card.slowpokeNumber);

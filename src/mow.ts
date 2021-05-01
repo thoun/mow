@@ -150,7 +150,7 @@ class Mow implements Game {
         this.gamedatas.farmerHand.forEach((card: FarmerCard) => this.addFarmerCardToHand(card));
         
         // Cards played on table
-        this.gamedatas.herd.forEach((card: Card) => {
+        this.gamedatas.herds[0].forEach((card: Card) => {
             const cardUniqueId = this.mowCards.getCardUniqueId(card.type, card.number);
             if (card.slowpokeNumber) {
                 this.setSlowpokeWeight(cardUniqueId, card.slowpokeNumber);

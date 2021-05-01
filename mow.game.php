@@ -190,11 +190,17 @@ class mow extends Table {
 		// Cards in player hand      
         $result['hand'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'hand', $current_player_id ));
         $result['farmerHand'] = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation( 'hand', $current_player_id ));
+
+        $herdNumber = $this->getHerdNumber();
         
         // Cards played on the table
-        $result['herd'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'herd' ));
+        $result['herdNumber'] = $herdNumber;
+
+        for ($iHerd=0; $iHerd<$herdNumber; $iHerd++) {
+            $herds[$iHerd] = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', $iHerd));
+        }
         
-        $sql = "SELECT card_id id, card_slowpoke_type_arg slowpoke_type_arg FROM cow WHERE card_type_arg=21 OR card_type_arg=22 and card_slowpoke_type_arg is not null";
+        $sql = "SELECT card_id id, card_slowpoke_type_arg slowpoke_type_arg FROM cow WHERE card_type_arg in (21, 22) and card_slowpoke_type_arg is not null";
         $slowpokes = array_map(function($db) { 
             $slowpoke = new stdClass();
             $slowpoke->id = intval($db['id']);
@@ -202,12 +208,15 @@ class mow extends Table {
             return $slowpoke;
         }, array_values(self::getCollectionFromDb($sql)));
         foreach($slowpokes as $slowpoke) {
-            foreach($result['herd'] as &$herdCard) {
-                if ($herdCard->id == $slowpoke->id) {
-                    $herdCard->slowpokeNumber = $slowpoke->slowpokeNumber;
+            for ($iHerd=0; $iHerd<$herdNumber; $iHerd++) {
+                foreach($herds[$iHerd] as &$herdCard) {
+                    if ($herdCard->id == $slowpoke->id) {
+                        $herdCard->slowpokeNumber = $slowpoke->slowpokeNumber;
+                    }
                 }
             }
         }
+        $result['herds'] = $herds;
         
         // Remaining cards on deck
         $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
@@ -243,6 +252,10 @@ class mow extends Table {
 
     function isSimpleVersion() {
         return intval(self::getGameStateValue('simpleVersion')) === 2;
+    }
+
+    function getHerdNumber() {
+        return !$this->isSimpleVersion() && count(array_keys(self::loadPlayersBasicInfos())) == 2 ? 3 : 1;
     }
 
     function getPlayerName(int $playerId) {
@@ -313,7 +326,7 @@ class mow extends Table {
             throw new BgaUserException(self::_("You can't play a special cow because of a farmer card"), true);
         }
 
-        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd'));
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', 0));
 
         //self::dump('herdCards', json_encode($herdCards));
         $herdDisplayedNumbers = array_filter(
@@ -398,7 +411,7 @@ class mow extends Table {
         }
 
         if ($card->type == 5) {
-            $herdCount = count($this->cards->getCardsInLocation('herd'));
+            $herdCount = count($this->cards->getCardsInLocation('herd', 0));
             if ($herdCount == 0) {
                 throw new BgaUserException(self::_("No card in the herd"), true);
             }
@@ -418,7 +431,7 @@ class mow extends Table {
 
     function getPlacesForSlowpoke() {
         $places = [];
-        $herd = $this->getCardsFromDb($this->cards->getCardsInLocation('herd'));
+        $herd = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', 0));
         $herdWithoutSlowpokes = array_values(array_filter($herd, function($card) { return $card->number != 21 && $card->number != 22; }));
 
         usort($herdWithoutSlowpokes, function ($a, $b) { return $a->number - $b->number; });
@@ -523,7 +536,7 @@ class mow extends Table {
         }
         
         // Checks are done! now we can play our card
-        $this->cards->moveCard( $card_id, 'herd');
+        $this->cards->moveCard($card_id, 'herd', 0);
 
         self::setGameStateValue('cowPlayed', 1);
         self::setGameStateValue('cantPlaySpecial', 0);
@@ -701,7 +714,7 @@ class mow extends Table {
         
         $player_id = self::getActivePlayerId();
 
-        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation( "herd"));
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation("herd", 0));
         $collectedPoints = $this->getCardsValues($herdCards);
         $this->collectedCardsStats($herdCards, $player_id);
 
@@ -729,7 +742,7 @@ class mow extends Table {
     }
 
     function removeHerdAndNotify($player_id, $collectedPoints) {  
-        $this->cards->moveAllCardsInLocation( "herd", "discard", null, $player_id ? $player_id : 0);
+        $this->cards->moveAllCardsInLocation( "herd", "discard", 0, $player_id ? $player_id : 0);
         $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
             
@@ -860,7 +873,7 @@ class mow extends Table {
         $player_id = self::getActivePlayerId();
 
         // check if player can collect
-        $herd = $this->cards->getCardsInLocation('herd');
+        $herd = $this->cards->getCardsInLocation('herd', 0);
         $canCollect = count($herd) > 0;
 
         // check if player can play
