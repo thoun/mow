@@ -36,9 +36,7 @@ Make sure ftp-sync.json and node_modules are in .gitignore
 show on table : TOP points on hand, 6 black cows flag, effect of 10th farmer
 pick player : can he pick himself ? and so play another card
 change log colors
-in 2 players, can player select row to remove ? or remove all ? with farmer 5
-should we include special 7 and 9 ? with farmer 7
-should we block if card has no effect ? with farmer 7
+should we include acrobatic 7 and 9 with farmer "remove 7,8,9"
+can farmer "remove 7,8,9" be played if card has no effect ?
 swap : what if some players have same lowest score ?
-TODO 2p mode & select player : remove player selection
 TODO 2p mode : set disabled cards only on playCard state

@@ -691,7 +691,7 @@ class Mow implements Game {
     }
     
     public notif_cardPlayed( notif: Notif<NotifCardPlayedArgs> ) {
-        //console.log( 'notif_cardPlayed', notif );
+        console.log( 'notif_cardPlayed', notif );
         
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         
@@ -867,7 +867,7 @@ class Mow implements Game {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                if (args.card && typeof args.card !== 'string') {
+                if (args.card && typeof args.card_display !== 'string') {
                     const card: Card = args.card;
 
                     let displayedNumber: number | string = card.number;
@@ -880,12 +880,12 @@ class Mow implements Game {
                         precision = 'acrobatic';
                     }
 
-                    args.card = `<strong style='color: ${this.colors[Number(card.type)]}'>${displayedNumber}</strong>`;
+                    args.card_display = `<strong style='color: ${this.colors[Number(card.type)]}'>${displayedNumber}</strong>`;
                     
                     if (precision === 'slowpoke') {
-                        args.card += '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
+                        args.card_display += '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
                     } else if (precision === 'acrobatic') {
-                        args.card += '<span class="log-arrow rotate180"></span>';
+                        args.card_display += '<span class="log-arrow rotate180"></span>';
                     }
                 }
             }

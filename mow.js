@@ -936,7 +936,7 @@ var Mow = /** @class */ (function () {
         }
     };
     Mow.prototype.notif_cardPlayed = function (notif) {
-        //console.log( 'notif_cardPlayed', notif );
+        console.log('notif_cardPlayed', notif);
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         this.playCardOnTable(notif.args.player_id, notif.args.card, notif.args.row, notif.args.slowpokeNumber);
         this.setRemainingCards(notif.args.remainingCards);
@@ -1080,7 +1080,7 @@ var Mow = /** @class */ (function () {
     Mow.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                if (args.card && typeof args.card !== 'string') {
+                if (args.card && typeof args.card_display !== 'string') {
                     var card = args.card;
                     var displayedNumber = card.number;
                     var precision = null;
@@ -1092,12 +1092,12 @@ var Mow = /** @class */ (function () {
                         displayedNumber /= 10;
                         precision = 'acrobatic';
                     }
-                    args.card = "<strong style='color: " + this.colors[Number(card.type)] + "'>" + displayedNumber + "</strong>";
+                    args.card_display = "<strong style='color: " + this.colors[Number(card.type)] + "'>" + displayedNumber + "</strong>";
                     if (precision === 'slowpoke') {
-                        args.card += '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
+                        args.card_display += '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
                     }
                     else if (precision === 'acrobatic') {
-                        args.card += '<span class="log-arrow rotate180"></span>';
+                        args.card_display += '<span class="log-arrow rotate180"></span>';
                     }
                 }
             }

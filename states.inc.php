@@ -156,6 +156,7 @@ $machinestates = [
     	"description" => clienttranslate('${actplayer} must select an opponent for played farmer card'),
     	"descriptionmyturn" => clienttranslate('${you} must select an opponent for played farmer card'),
     	"type" => "activeplayer",
+        "action" => "stSelectOpponent",
         "args" => "argSelectOpponent",
     	"possibleactions" => [ "viewCards", "exchangeCard" ],
     	"transitions" => [ 

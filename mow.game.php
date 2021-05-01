@@ -563,7 +563,7 @@ class mow extends Table {
         }
 
         // And notify
-        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${card}'), [
+        self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${card_display}'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
@@ -676,7 +676,6 @@ class mow extends Table {
             self::setGameStateValue('cowPlayed', 1);
             $this->gamestate->nextState('playFarmer');
         } else if ($card->type == 5) {
-            // TODO in 2 players, can player select row to remove ? or remove all ?
             $this->removeHerdAndNotify(null, null);
             self::setGameStateValue('cowPlayed', 0);
         } else if ($card->type == 6) {
@@ -715,7 +714,7 @@ class mow extends Table {
             }
 
             foreach( $removedCards as $opponentId => $removedCard ) {
-                self::notifyPlayer($opponentId, 'removedCard', 'Card ${card} was removed from your hand', [
+                self::notifyPlayer($opponentId, 'removedCard', 'Card ${card_display} was removed from your hand', [
                     'playerId' => $opponentId,
                     'card' => $removedCard,
                 ]);
@@ -889,7 +888,7 @@ class mow extends Table {
 
         $card = $this->getCardFromDb($this->cards->getCard($cardId));
 
-        self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card ${card} was given to chosen opponent'), [
+        self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card ${card_display} was given to chosen opponent'), [
             'playerId' => $player_id,
             'card' => $card,
             'fromPlayerId' => $opponentId,
@@ -897,7 +896,7 @@ class mow extends Table {
 
         $this->cards->moveCard($cardId, 'hand', $opponentId);
 
-        self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card ${card}'), [
+        self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card ${card_display}'), [
             'card' => $card,
             'player_name' => self::getActivePlayerName(),
             'fromPlayerId' => $player_id,
@@ -1071,6 +1070,28 @@ class mow extends Table {
         }
     }
 
+    
+
+    function stSelectOpponent() {
+        $player_id = self::getActivePlayerId();
+        $playersIds = array_keys(self::loadPlayersBasicInfos());
+
+        if (count($playersIds) == 2) {
+            $opponentId = intval(array_values(array_filter($playersIds, function($id) use ($player_id) { return $player_id != $id; }))[0]);
+            if (intval(self::getGameStateValue('lookOpponentHand')) == 1) {
+                self::setGameStateValue('lookOpponentHand', $opponentId);
+                $this->gamestate->nextState('viewCards');
+            } else if (intval(self::getGameStateValue('exchangeCard')) == 1) {
+                self::setGameStateValue('exchangeCard', $opponentId);
+                $this->gamestate->nextState('exchangeCard');
+            }
+        }
+        return [
+            'lookOpponentHand' => intval(self::getGameStateValue('lookOpponentHand')) == 1,
+            'exchangeCard' => intval(self::getGameStateValue('exchangeCard')) == 1,
+        ];
+    }
+
     function stGiveCard() {
         $player_id = self::getActivePlayerId();
         $opponentId = intval(self::getGameStateValue('exchangeCard'));
@@ -1083,13 +1104,13 @@ class mow extends Table {
             $this->cards->moveCard($removedCard->id, 'hand', $player_id);
             $removedCards[$opponentId] = $removedCard;
 
-            self::notifyPlayer($opponentId, 'removedCard', 'Card ${card} was removed from your hand', [
+            self::notifyPlayer($opponentId, 'removedCard', 'Card ${card_display} was removed from your hand', [
                 'playerId' => $opponentId,
                 'card' => $removedCard,
                 'fromPlayerId' => $player_id,
             ]);
 
-            self::notifyPlayer($player_id, 'newCard', 'Card ${card} was picked from ${player_name2} hand', [
+            self::notifyPlayer($player_id, 'newCard', 'Card ${card_display} was picked from ${player_name2} hand', [
                 'playerId' => $player_id,
                 'player_name2' => $this->getPlayerName($opponentId),
                 'card' => $removedCard,
