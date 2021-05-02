@@ -42,6 +42,9 @@ class mow extends Table {
                 'activeRow' => 15,
                 'rowNumber' => 16,
 
+                'savedWithFarmerCard' => 20,
+                'savedWithFarmerCardPlayerId' => 21,
+
                 // farmer cards constants
                 'cantPlaySpecial' => 50,
                 'chooseDirectionPick' => 51,
@@ -106,8 +109,10 @@ class mow extends Table {
         self::setGameStateInitialValue( 'cantPlaySpecial', 0 );
         self::setGameStateInitialValue( 'chooseDirectionPick', 0 );
         self::setGameStateInitialValue( 'lookOpponentHand', 0 );
-        self::setGameStateInitialValue( 'exchangeCard', 0 );
-        
+        self::setGameStateInitialValue( 'exchangeCard', 0 );        
+        self::setGameStateInitialValue( 'savedWithFarmerCard', 0 );
+        self::setGameStateInitialValue( 'savedWithFarmerCardPlayerId', 0 );
+
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         self::initStat( 'table', 'collectedHerdsNumber', 0 );    // Init a table statistics
@@ -858,6 +863,9 @@ class mow extends Table {
             $removedCards = array_values(array_filter($playerDiscard, function ($card) use ($type) { return $card->type == $type; }));
 
             $cardsValue = $this->getCardsValues($removedCards);
+            
+            self::setGameStateValue('savedWithFarmerCard', $cardsValue);
+            self::setGameStateValue('savedWithFarmerCardPlayerId', $playerId);
 
             if ($cardsValue > 0) {
                 $sql = "UPDATE player SET player_score = player_score - $cardsValue, hand_points = hand_points - $cardsValue WHERE player_id = $player_id";
@@ -1021,7 +1029,8 @@ class mow extends Table {
         $this->cards->shuffle( 'deck' );
     
 	    self::DbQuery("UPDATE player SET hand_points = 0, collected_points = 0 WHERE 1");
-        //self::notifyAllPlayers('cleanUp');
+        self::setGameStateValue('savedWithFarmerCard', 0);
+        self::setGameStateValue('savedWithFarmerCardPlayerId', 0);
 
         $players = self::loadPlayersBasicInfos();
         $remainingCards = count($this->cards->getCardsInLocation( 'deck' )) - (5 * count($players));
@@ -1185,27 +1194,33 @@ class mow extends Table {
     }
 
     function stEndHand() {
+        $resetPoints = 0;
+        $resetPointsPlayerId = 0;
+        $topPlayerId = 0;
         if (!$this->isSimpleVersion()) {
-            // TODO what if one of this cards is in players hand at the end ?
             // we reset player's points to 0 for this hand if he got the 6 5-flies cards
             $sql = "SELECT card_location_arg FROM `cow` where card_location = 'discard' and card_type = 5 group by card_location_arg having count(*) >= 6";
-            $playerId = intval(self::getUniqueValueFromDB($sql));
+            $resetPointsPlayerId = intval(self::getUniqueValueFromDB($sql));
 
-            if ($playerId > 0) {
-                $sql = "UPDATE player SET player_score = player_score - (hand_points + collected_points), hand_points = 0, collected_points = 0 WHERE player_id = $playerId";
+            if ($resetPointsPlayerId > 0) {
+                $sql = "SELECT (hand_points + collected_points) FROM `player` WHERE player_id = $resetPointsPlayerId";
+                $resetPoints = intval(self::getUniqueValueFromDB($sql));
+
+                $sql = "UPDATE player SET player_score = player_score - (hand_points + collected_points), hand_points = 0, collected_points = 0 WHERE player_id = $resetPointsPlayerId";
                 self::DbQuery($sql);
+            
 
                 self::notifyAllPlayers('allTopFlies', clienttranslate('${player_name} got all 5 flies cards, his points in this hand are erased'), [
-                    'playerId' => $playerId,
-                    'player_name' => self::getUniqueValueFromDB("SELECT player_name FROM player where player_id = $playerId"),
-                    'points' => intval(self::getUniqueValueFromDB("SELECT player_score FROM player where player_id = $playerId")),
+                    'playerId' => $resetPointsPlayerId,
+                    'player_name' => self::getUniqueValueFromDB("SELECT player_name FROM player where player_id = $resetPointsPlayerId"),
+                    'points' => intval(self::getUniqueValueFromDB("SELECT player_score FROM player where player_id = $resetPointsPlayerId")),
                 ]);
             }
 
             $sql = "SELECT player_id FROM `player` WHERE (hand_points + collected_points) < 0 order by (hand_points + collected_points) asc limit 1";
-            $playerId = intval(self::getUniqueValueFromDB($sql));
-            if ($playerId > 0) {
-                $this->pickFarmerCard($playerId);
+            $topPlayerId = intval(self::getUniqueValueFromDB($sql));
+            if ($topPlayerId > 0) {
+                $this->pickFarmerCard($topPlayerId);
             }
         }
 
@@ -1230,7 +1245,18 @@ class mow extends Table {
 
             $collectedPoints[] = $playerCollectedPoints;
             $remainingPoints[] = $playerRemainingPoints;
-            $handPoints[] = $playerCollectedPoints + $playerRemainingPoints;
+
+            $handPointsCount = ($playerCollectedPoints + $playerRemainingPoints);
+            $handPointStr = null;
+            if ($playerId == $resetPointsPlayerId) {
+                $handPointStr = "<strike>$resetPoints</strike> $handPointsCount";
+            } else if ($playerId == intval(self::getGameStateValue('savedWithFarmerCardPlayerId'))) {
+                $handPointStr = "<strike>".($handPointsCount + intval(self::getGameStateValue('savedWithFarmerCard')))."</strike> $handPointsCount";
+            } else {
+                $handPointStr = "$handPointsCount";
+            }
+            $handPointStr .= $playerId == $topPlayerId ? '<span class="tooltip-fly-img"></span>' : '';
+            $handPoints[] = $handPointStr;
             $totalPoints[] = $player['player_score'];
 
             self::incStat($playerCollectedPoints, 'collectedPoints');
@@ -1252,7 +1278,7 @@ class mow extends Table {
             "closing" => $end ? clienttranslate("End of game") : clienttranslate("Next hand")
         ]);
         
-        $sql = "SELECT player_id  FROM player where player_score=(select min(player_score) from player) limit 1";
+        $sql = "SELECT player_id FROM player where player_score=(select min(player_score) from player) limit 1";
         $minscore_player_id = self::getUniqueValueFromDB( $sql );
 
         $this->gamestate->changeActivePlayer( $minscore_player_id );

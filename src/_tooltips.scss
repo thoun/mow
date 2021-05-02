@@ -1,11 +1,12 @@
 .tooltip-fly {
     white-space: nowrap;
     min-width: 40px;
+}
 
-    .tooltip-fly-img {
-        display: inline-block;
-        width: 20px;
-        height: 18px;
-        background-image: url('img/fly.png'); 
-    }
+/* class also used on score table */
+.tooltip-fly-img {
+    display: inline-block;
+    width: 20px;
+    height: 18px;
+    background-image: url('img/fly.png'); 
 }

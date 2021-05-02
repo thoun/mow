@@ -358,7 +358,9 @@
   white-space: nowrap;
   min-width: 40px;
 }
-.tooltip-fly .tooltip-fly-img {
+
+/* class also used on score table */
+.tooltip-fly-img {
   display: inline-block;
   width: 20px;
   height: 18px;
