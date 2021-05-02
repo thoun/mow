@@ -770,14 +770,6 @@ class mow extends Table {
         $this->removeHerdAndNotify($player_id, $collectedPoints);
 
         self::incStat( 1, "collectedHerdsNumber" );
-            
-        // And notify
-        self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), [
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'points' => $collectedPoints,
-            'row' => $this->getActiveRow(),
-        ]);
 
         self::setGameStateValue('cantPlaySpecial', 0);
 
@@ -798,11 +790,13 @@ class mow extends Table {
             self::notifyAllPlayers('herdCollected', clienttranslate('${player_name} collects herd'), [
                 'player_id' => $player_id,
                 'player_name' => self::getActivePlayerName(),
-                'points' => $collectedPoints
+                'points' => $collectedPoints,
+                'row' => $this->getActiveRow(),
             ]);
         } else {
             self::notifyAllPlayers('herdCollected', clienttranslate('Herd removed'), [
                 'player_id' => 0,
+                'row' => $this->getActiveRow(),
             ]);
         }
     }
