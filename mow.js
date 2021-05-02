@@ -1,3 +1,21 @@
+function slideToObjectAndAttach(game, object, destinationId, posX, posY) {
+    var destination = document.getElementById(destinationId);
+    if (destination.contains(object)) {
+        return;
+    }
+    object.style.zIndex = '10';
+    var animation = (posX || posY) ?
+        game.slideToObjectPos(object, destinationId, posX, posY) :
+        game.slideToObject(object, destinationId);
+    dojo.connect(animation, 'onEnd', dojo.hitch(this, function () {
+        object.style.top = 'unset';
+        object.style.left = 'unset';
+        object.style.position = 'relative';
+        object.style.zIndex = 'unset';
+        destination.appendChild(object);
+    }));
+    animation.play();
+}
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -501,7 +519,7 @@ var Mow = /** @class */ (function () {
         dojo.connect($('changeDirectionButton'), 'onclick', this, 'onChangeDirection');
         Object.keys(gamedatas.players).forEach(function (playerId) { return dojo.connect($("playertable-" + playerId), 'onclick', _this, 'onPlayerSelection'); });
         if (gamedatas.herdNumber > 1) {
-            dojo.place("<div id=\"rowIndicator\"><div id=\"rowIndicatorBackground\" class=\"" + (!this.gamedatas.direction_clockwise ? 'inverse' : '') + "\"></div></div>", "rowIndicatorWrapper0");
+            dojo.place("<div id=\"rowIndicator\"><div id=\"rowIndicatorBackground\" class=\"" + (!this.gamedatas.direction_clockwise ? 'inverse' : '') + "\"></div></div>", "rowIndicatorWrapper" + gamedatas.activeRow);
         }
         // Setup game notifications to handle (see "setupNotifications" method below)
         //console.log('setupNotifications');
@@ -1037,7 +1055,7 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.notif_activeRowChanged = function (notif) {
         this.gamedatas.activeRow = notif.args.activeRow;
-        this.slideToObject('rowIndicator', "rowIndicatorWrapper" + notif.args.activeRow);
+        slideToObjectAndAttach(this, $('rowIndicator'), "rowIndicatorWrapper" + notif.args.activeRow);
     };
     ////////////////////////////////
     ////////////////////////////////

@@ -12,6 +12,7 @@
         "src/framework.d.ts",
         "src/stock.d.ts",
         "src/mow.d.ts",
+        "src/slide-utils.ts",
         "src/herd-stock-function.ts",
         "src/mow-cards.ts",
         "src/farmer-cards.ts",

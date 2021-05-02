@@ -177,7 +177,7 @@ class Mow implements Game {
         Object.keys(gamedatas.players).forEach(playerId => dojo.connect($(`playertable-${playerId}`), 'onclick', this, 'onPlayerSelection'));
 
         if (gamedatas.herdNumber > 1) {
-            dojo.place(`<div id="rowIndicator"><div id="rowIndicatorBackground" class="${!this.gamedatas.direction_clockwise ? 'inverse' : ''}"></div></div>`, `rowIndicatorWrapper0`);
+            dojo.place(`<div id="rowIndicator"><div id="rowIndicatorBackground" class="${!this.gamedatas.direction_clockwise ? 'inverse' : ''}"></div></div>`, `rowIndicatorWrapper${gamedatas.activeRow}`);
         }
 
         // Setup game notifications to handle (see "setupNotifications" method below)
@@ -816,7 +816,7 @@ class Mow implements Game {
     
     public notif_activeRowChanged( notif: Notif<NotifActiveRowChangedArgs> ) {
         this.gamedatas.activeRow = notif.args.activeRow;
-        (this as any).slideToObject('rowIndicator', `rowIndicatorWrapper${notif.args.activeRow}`);
+        slideToObjectAndAttach(this, $('rowIndicator'), `rowIndicatorWrapper${notif.args.activeRow}`);
     }
 
     ////////////////////////////////
