@@ -1042,7 +1042,7 @@ class mow extends Table {
         if (!$this->isSimpleVersion()) {
             $sql = "SELECT min(player_score) FROM player  ";
             $players = self::getObjectListFromDB("SELECT player_id, player_score FROM player where player_score < 0 order by player_score ASC");
-            if (count($players) >= 1) { // TODO what if some players have same lowest score ?
+            if (count($players) >= 1) {
                 $swapPlayerId = intval($players[0]['player_id']);
                 self::setGameStateValue('swapping_player', $swapPlayerId);
             }
@@ -1202,8 +1202,7 @@ class mow extends Table {
                 ]);
             }
 
-            // TODO can a player getting top flies with all black cards also get farmer card ?
-            $sql = "SELECT player_id FROM `player` WHERE (hand_points + collected_points) > 0 order by (hand_points + collected_points) desc limit 1";
+            $sql = "SELECT player_id FROM `player` WHERE (hand_points + collected_points) < 0 order by (hand_points + collected_points) asc limit 1";
             $playerId = intval(self::getUniqueValueFromDB($sql));
             if ($playerId > 0) {
                 $this->pickFarmerCard($playerId);
