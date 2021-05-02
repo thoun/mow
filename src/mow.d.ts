@@ -73,6 +73,7 @@ interface NotifAllowedCardsArgs {
 interface NotifNewCardArgs {
     card: Card;
     fromPlayerId?: number;
+    allowedCardsIds: number[];
 }
 
 interface NotifNewFarmerCardArgs {

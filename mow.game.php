@@ -153,8 +153,8 @@ class mow extends Table {
         }
                
         // TODO TEMP
-        $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
-        //$this->cards->createCards($cards, 'deck');
+        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
         
         $farmerCards = [];
@@ -582,15 +582,17 @@ class mow extends Table {
         $dbCard = $this->cards->pickCard('deck', $player_id);
         if ($dbCard) {
             $newCard = $this->getCardFromDb($dbCard);
+            $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($player_id) : null;
             self::notifyPlayer( $player_id, 'newCard', '', [
-                'card' => $newCard
+                'card' => $newCard,
+                'allowedCardsIds' => $allowedCardsIds
             ]);
         }
 
         // notify all players
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $pId => $player) {
-            $allowedCardsIds = $this->getAllowedCardsIds($pId);
+            $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($pId) : null;
 
             self::notifyPlayer( $pId, 'allowedCards', '', [
                 'allowedCardsIds' => $allowedCardsIds
@@ -898,11 +900,13 @@ class mow extends Table {
         ]);
 
         $this->cards->moveCard($cardId, 'hand', $opponentId);
+        $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($opponentId) : null;
 
         self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card ${card_display}'), [
             'card' => $card,
             'player_name' => self::getActivePlayerName(),
             'fromPlayerId' => $player_id,
+            'allowedCardsIds' => $allowedCardsIds
         ]);
 
         $this->gamestate->nextState('giveCard');
@@ -1130,11 +1134,13 @@ class mow extends Table {
                 'fromPlayerId' => $player_id,
             ]);
 
+            $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($player_id) : null;
             self::notifyPlayer($player_id, 'newCard', 'Card ${card_display} was picked from ${player_name2} hand', [
                 'playerId' => $player_id,
                 'player_name2' => $this->getPlayerName($opponentId),
                 'card' => $removedCard,
                 'fromPlayerId' => $opponentId,
+                'allowedCardsIds' => $allowedCardsIds,
             ]);
         }
     }

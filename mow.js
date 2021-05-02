@@ -1003,7 +1003,7 @@ var Mow = /** @class */ (function () {
         setTimeout(function () {
             // timeout so new card appear after played card animation
             _this.addCardToHand(card, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : 'remainingCards');
-            if (_this.allowedCardsIds && _this.allowedCardsIds.indexOf(card.id) === -1) {
+            if (notif.args.allowedCardsIds && notif.args.allowedCardsIds.indexOf(card.id) === -1) {
                 dojo.query("#myhand_item_" + card.id).addClass("disabled");
             }
         }, 1000);
