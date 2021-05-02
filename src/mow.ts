@@ -44,12 +44,12 @@ class Mow implements Game {
     private pickCardAction: PickCardAction = 'play';
     
     private colors = [
-        'forestgreen',
-        'goldenrod',
-        'lightsalmon',
-        'crimson',
+        '#b5b5b5',
+        '#a4d6e3',
+        '#e98023',
+        '#2c6c7a',
         null,
-        'teal'
+        '#000000'
     ];
 
     private remainingCardsColors = [
@@ -920,7 +920,7 @@ class Mow implements Game {
                     if (precision === 'slowpoke') {
                         args.card_display += '<span class="log-arrow rotate270"></span><span class="log-arrow rotate90"></span>';
                     } else if (precision === 'acrobatic') {
-                        args.card_display += '<span class="log-arrow rotate180"></span>';
+                        args.card_display += '<span class="log-arrow"></span>';
                     }
                 }
             }

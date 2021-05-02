@@ -34,8 +34,7 @@ Make sure ftp-sync.json and node_modules are in .gitignore
 
 # TODO & questions
 show on table : TOP points on hand, 6 black cows flag, effect of 10th farmer
+change change direction animation for 2p mode
 pick player : can he pick himself ? and so play another card
-change log colors
-should we include acrobatic 7 and 9 with farmer "remove 7,8,9"
+should we include acrobatic 7 and 9 with farmer "remove 7,8,9" ?
 can farmer "remove 7,8,9" be played if card has no effect ?
-swap : what if some players have same lowest score ?
