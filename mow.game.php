@@ -1249,21 +1249,21 @@ class mow extends Table {
             $playerCollectedPoints = intval($player['collected_points']);
             $playerRemainingPoints = intval($player['hand_points']);
 
-            $collectedPoints[] = $playerCollectedPoints;
-            $remainingPoints[] = $playerRemainingPoints;
+            $collectedPoints[] = -$playerCollectedPoints;
+            $remainingPoints[] = -$playerRemainingPoints;
 
-            $handPointsCount = ($playerCollectedPoints + $playerRemainingPoints);
+            $handPointsCount = -($playerCollectedPoints + $playerRemainingPoints);
             $handPointStr = null;
             if ($playerId == $resetPointsPlayerId) {
-                $handPointStr = "<strike>$resetPoints</strike> $handPointsCount";
+                $handPointStr = "<strike>".(-$resetPoints)."</strike> ".(-$handPointsCount);
             } else if ($playerId == intval(self::getGameStateValue('savedWithFarmerCardPlayerId'))) {
-                $handPointStr = "<strike>".($handPointsCount + intval(self::getGameStateValue('savedWithFarmerCard')))."</strike> $handPointsCount";
+                $handPointStr = "<strike>".(-$handPointsCount + intval(self::getGameStateValue('savedWithFarmerCard')))."</strike> ".(-$handPointsCount);
             } else {
-                $handPointStr = "$handPointsCount";
+                $handPointStr = -$handPointsCount;
             }
             $handPointStr .= $playerId == $topPlayerId ? '<span class="tooltip-fly-img"></span>' : '';
             $handPoints[] = $handPointStr;
-            $totalPoints[] = $player['player_score'];
+            $totalPoints[] = -$player['player_score'];
 
             self::incStat($playerCollectedPoints, 'collectedPoints');
             self::incStat($playerCollectedPoints, 'collectedPoints', $playerId);

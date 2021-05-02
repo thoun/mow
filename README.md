@@ -33,7 +33,6 @@ Also add one auto-FTP upload extension (for example https://marketplace.visualst
 Make sure ftp-sync.json and node_modules are in .gitignore
 
 # TODO & questions
-change change direction animation for 2p mode
 pick player : can he pick himself ? and so play another card
 should we include acrobatic 7 and 9 with farmer "remove 7,8,9" ?
 can farmer "remove 7,8,9" be played if card has no effect ?
