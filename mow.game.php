@@ -147,8 +147,9 @@ class mow extends Table {
 			$cards[] = ['type' => 5, 'type_arg' => $value, 'nbr' => 1, 'id' => 500 + $value];
         }
                
-        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
-        $this->cards->createCards($cards, 'deck');
+        // TODO TEMP
+        $this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        //$this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
         
         $farmerCards = [];
@@ -159,7 +160,7 @@ class mow extends Table {
         $this->farmerCards->shuffle('deck');
 
         // TODO TEMP
-        foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(3, 'deck', $player_id); }	   
+        //foreach( $players as $player_id => $player ){ $this->farmerCards->pickCards(3, 'deck', $player_id); }	   
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -986,6 +987,21 @@ class mow extends Table {
         return [
             'opponentId' => $opponentId,
             'cards' => $player_hand,
+        ];
+    }
+
+    function argSwapHands() {
+        $player_id = self::getActivePlayerId();
+        $playersIds = array_keys(self::loadPlayersBasicInfos());
+
+        if (count($playersIds) == 2) {
+            $opponentId = intval(array_values(array_filter($playersIds, function($id) use ($player_id) { return $player_id != $id; }))[0]);
+            return [
+                'opponentId' => $opponentId,
+            ];
+        }
+        return [
+            'opponentId' => null,
         ];
     }
 

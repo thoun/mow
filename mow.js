@@ -555,6 +555,9 @@ var Mow = /** @class */ (function () {
                 break;
             case 'swapHands':
                 this.onEnteringSelectionAction();
+                if (this.isCurrentPlayerActive() && args.args.opponentId) {
+                    this.selectPlayer(args.args.opponentId);
+                }
                 break;
             case 'selectOpponent':
                 this.onEnteringSelectionAction();
@@ -844,6 +847,9 @@ var Mow = /** @class */ (function () {
         if (playerId === this.player_id) {
             return;
         }
+        this.selectPlayer(playerId);
+    };
+    Mow.prototype.selectPlayer = function (playerId) {
         if (this.selectedPlayerId) {
             dojo.removeClass("playertable-" + this.selectedPlayerId, 'selected');
         }
@@ -1009,12 +1015,22 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.notif_directionChanged = function (notif) {
         //console.log( 'notif_directionChanged', notif );
-        dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
+        if (this.gamedatas.herdNumber > 1) {
+            document.getElementById('direction-animation-symbol').innerHTML = '🠗';
+            dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
+        }
+        else {
+            dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
+        }
         dojo.removeClass("direction-animation-symbol");
-        dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
-        var background = document.getElementById('rowIndicatorBackground');
-        if (background) {
-            dojo.toggleClass('rowIndicatorBackground', 'inverse', this.gamedatas.direction_clockwise);
+        if (this.gamedatas.herdNumber > 1) {
+            dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "upToDown" : "downToUp");
+        }
+        else {
+            dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
+        }
+        if (this.gamedatas.herdNumber > 1) {
+            dojo.toggleClass('rowIndicatorBackground', 'inverse', !notif.args.direction_clockwise);
         }
     };
     Mow.prototype.notif_herdCollected = function (notif) {

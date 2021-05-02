@@ -221,6 +221,9 @@ class Mow implements Game {
 
             case 'swapHands':  
                 this.onEnteringSelectionAction();
+                if((this as any).isCurrentPlayerActive() && args.args.opponentId) {
+                    this.selectPlayer(args.args.opponentId);
+                }
                 break;
             case 'selectOpponent':
                 this.onEnteringSelectionAction();
@@ -553,6 +556,10 @@ class Mow implements Game {
             return;
         }
 
+        this.selectPlayer(playerId);
+    }
+
+    private selectPlayer(playerId: number) {
         if (this.selectedPlayerId) {
             dojo.removeClass(`playertable-${this.selectedPlayerId}`, 'selected');
         } else {
@@ -760,14 +767,22 @@ class Mow implements Game {
     public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
         //console.log( 'notif_directionChanged', notif );
 
-        dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
+        if (this.gamedatas.herdNumber > 1) {
+            document.getElementById('direction-animation-symbol').innerHTML = '🠗';
+            dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
+        } else {            
+            dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
+        }
 
         dojo.removeClass("direction-animation-symbol");
-        dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
+        if (this.gamedatas.herdNumber > 1) {
+            dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "upToDown" : "downToUp");
+        } else {
+            dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");
+        }
 
-        const background = document.getElementById('rowIndicatorBackground');
-        if (background) {
-            dojo.toggleClass('rowIndicatorBackground', 'inverse', this.gamedatas.direction_clockwise);
+        if (this.gamedatas.herdNumber > 1) {
+            dojo.toggleClass('rowIndicatorBackground', 'inverse', !notif.args.direction_clockwise);
         }
     }
     

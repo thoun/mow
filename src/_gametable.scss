@@ -220,6 +220,56 @@
             transform: scale3d(0.3, 0.3, 0.3);
         }
     } 
+
+    .downToUp {
+        animation-name: downToUp;
+        animation-duration: 3s;
+        animation-fill-mode: both;
+    }
+
+    @keyframes downToUp {
+        0% {
+            opacity: 0;
+            transform: scale3d(0.3, 0.3, 0.3);
+        }
+        30% {
+            opacity: 1;
+            transform: scale3d(1, 1, 1);
+        }
+        70% {
+            opacity: 1;
+            transform: scale3d(1, -1, 1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale3d(0.3, -0.3, 0.3);
+        }
+    } 
+
+    .upToDown {
+        animation-name: upToDown;
+        animation-duration: 3s;
+        animation-fill-mode: both;
+    }
+
+    @keyframes upToDown {
+        0% {
+            opacity: 0;
+            transform: scale3d(0.3, -0.3, 0.3);
+        }
+        30% {
+            opacity: 1;
+            transform: scale3d(1, -1, 1);
+        }
+        70% {
+            opacity: 1;
+            transform: scale3d(1, 1, 1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale3d(0.3, 0.3, 0.3);
+        }
+    } 
 }
 
 #opponent-hand {
