@@ -491,7 +491,9 @@ var Mow = /** @class */ (function () {
             _loop_2(iHerd);
         }
         this.setRemainingCards(this.gamedatas.remainingCards);
-        this.enableAllowedCards(this.gamedatas.allowedCardsIds);
+        if (this.gamedatas.herdNumber == 1) {
+            this.enableAllowedCards(this.gamedatas.allowedCardsIds);
+        }
         if (!this.gamedatas.direction_clockwise) {
             dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
         }
@@ -559,6 +561,7 @@ var Mow = /** @class */ (function () {
         var _a;
         if (this.isCurrentPlayerActive()) {
             this.setPickCardAction('play');
+            this.enableAllowedCards(args.args.allowedCardIds);
         }
         if (this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             var selectedCardId = this.playerHand.getSelectedItems()[0].id;
@@ -576,15 +579,31 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.onEnteringStateChooseDirection = function (args) {
         if (this.isCurrentPlayerActive()) {
+            var herdSelector = this.gamedatas.herdNumber > 1;
             dojo.toggleClass('keepDirectionSymbol', 'direction-anticlockwise', !args.direction_clockwise);
             dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
-            var keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-            var changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
             this.setPick(args.canPick);
-            $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
-            $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
-            dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
-            dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
+            if (herdSelector) {
+                Array.from(document.getElementsByClassName('label-next-player')).forEach(function (span) { return span.innerHTML = _('Next herd'); });
+                var downRow = (this.gamedatas.activeRow + 1) % this.gamedatas.herdNumber;
+                var upRow = (this.gamedatas.activeRow + this.gamedatas.herdNumber - 1) % this.gamedatas.herdNumber;
+                var keepDirectionRow = args.direction_clockwise ? downRow : upRow;
+                var changeDirectionRow = args.direction_clockwise ? upRow : downRow;
+                $("keepDirectionNextPlayer").innerHTML = dojo.string.substitute(_("Herd ${number}"), { 'number': keepDirectionRow + 1 });
+                $("changeDirectionNextPlayer").innerHTML = dojo.string.substitute(_("Herd ${number}"), { 'number': changeDirectionRow + 1 });
+                document.getElementById('keepDirectionSymbol').innerHTML = '🠗';
+                document.getElementById('changeDirectionSymbol').innerHTML = '🠗';
+                dojo.toggleClass('keepDirectionSymbol', 'reverse-arrow', !args.direction_clockwise);
+                dojo.toggleClass('changeDirectionSymbol', 'reverse-arrow', args.direction_clockwise);
+            }
+            else {
+                var keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+                var changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+                $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
+                $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
+                dojo.style('keepDirectionNextPlayer', 'color', '#' + keepDirectionNextPlayer.color);
+                dojo.style('changeDirectionNextPlayer', 'color', '#' + changeDirectionNextPlayer.color);
+            }
             dojo.style('direction_popin', 'display', 'flex');
             dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
         }
@@ -643,6 +662,9 @@ var Mow = /** @class */ (function () {
             case 'playerTurn':
                 if (this.isCurrentPlayerActive()) {
                     this.enableFarmerCards();
+                    if (this.gamedatas.herdNumber > 1) {
+                        this.resetAllowedCards();
+                    }
                 }
                 break;
             case 'chooseDirection':
@@ -759,7 +781,7 @@ var Mow = /** @class */ (function () {
             ids.forEach(function (id) {
                 var player = rowPick_1 ? {
                     color: 'transparent',
-                    name: dojo.string.substitute(_("Herd ${number}"), { 'number': id }),
+                    name: dojo.string.substitute(_("Herd ${number}"), { 'number': id + 1 }),
                 } : _this.gamedatas.players[id];
                 html_1 += "<button id=\"pickBtn" + id + "\" class=\"bgabutton bgabutton_blue pickButton\" style=\"border: 3px solid #" + player.color + "\">" + player.name + "</button>";
             });
@@ -945,8 +967,10 @@ var Mow = /** @class */ (function () {
         this.playerFarmerHand.removeFromStockById('' + notif.args.card.id);
     };
     Mow.prototype.notif_allowedCards = function (notif) {
-        // console.log( 'notif_allowedCards', notif );            
-        this.enableAllowedCards(notif.args.allowedCardsIds);
+        // console.log( 'notif_allowedCards', notif );        
+        if (this.gamedatas.herdNumber == 1) {
+            this.enableAllowedCards(notif.args.allowedCardsIds);
+        }
     };
     Mow.prototype.notif_newCard = function (notif) {
         //console.log( 'notif_newCard', notif );
@@ -1071,6 +1095,15 @@ var Mow = /** @class */ (function () {
                 if (disallowed) {
                     _this.playerHand.unselectItem('' + id);
                 }
+            }
+            catch (e) { }
+        });
+    };
+    Mow.prototype.resetAllowedCards = function () {
+        this.allowedCardsIds = null;
+        this.playerHand.items.map(function (item) { return Number(item.id); }).forEach(function (id) {
+            try {
+                dojo.toggleClass('myhand_item_' + id, 'disabled', false);
             }
             catch (e) { }
         });

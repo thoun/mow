@@ -76,9 +76,11 @@
                         width: $cardHeight;
                         height: $cardWidth;
                         transform: rotate(90deg);
+                        transform-origin: 61px 55px;
 
                         &.inverse {
                             transform: rotate(-90deg);
+                            transform-origin: 84px 90px;
                         }
                     }
                 }

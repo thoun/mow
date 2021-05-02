@@ -21,7 +21,7 @@ Cards images are not definitive, waiting for official images
                         {KEEP_DIRECTION}
                         <div id="keepDirectionSymbol" class="direction-symbol">↻</div>
                     </div>
-                    {NEXT_PLAYER} : <div id="keepDirectionNextPlayer" class="next-player"></div>
+                    <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="keepDirectionNextPlayer" class="next-player"></div>
                 </div>
 
                 <div>
@@ -29,7 +29,7 @@ Cards images are not definitive, waiting for official images
                         {CHANGE_DIRECTION}
                         <div id="changeDirectionSymbol" class="direction-symbol">↻</div>
                     </div>
-                    {NEXT_PLAYER} : <div id="changeDirectionNextPlayer" class="next-player"></div>
+                    <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="changeDirectionNextPlayer" class="next-player"></div>
                 </div>
             </div>
             <div id="pickBlock"></div>

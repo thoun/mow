@@ -163,7 +163,9 @@ class Mow implements Game {
         }
 
         this.setRemainingCards(this.gamedatas.remainingCards);
-        this.enableAllowedCards(this.gamedatas.allowedCardsIds);
+        if (this.gamedatas.herdNumber == 1) {
+            this.enableAllowedCards(this.gamedatas.allowedCardsIds);
+        }
         if (!this.gamedatas.direction_clockwise) {
             dojo.addClass('direction-play-symbol', 'direction-anticlockwise');
         }
@@ -239,9 +241,10 @@ class Mow implements Game {
         }
     }
 
-    private onEnteringStatePlayerTurn(args: { active_player: string | number }) {
+    private onEnteringStatePlayerTurn(args: { active_player: string | number, args: { allowedCardIds: number[] } }) {
         if((this as any).isCurrentPlayerActive()) {
             this.setPickCardAction('play');
+            this.enableAllowedCards(args.args.allowedCardIds);
         }
         if((this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             const selectedCardId = this.playerHand.getSelectedItems()[0].id;
@@ -260,18 +263,37 @@ class Mow implements Game {
 
     private onEnteringStateChooseDirection(args: { direction_clockwise: boolean, canPick: boolean }) {
         if ((this as any).isCurrentPlayerActive()) {
+            const herdSelector = this.gamedatas.herdNumber > 1;
             dojo.toggleClass('keepDirectionSymbol', 'direction-anticlockwise', !args.direction_clockwise);
             dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
 
-            const keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
-            const changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
-
             this.setPick(args.canPick);
 
-            $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
-            $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
-            dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
-            dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
+            if (herdSelector) {
+                Array.from(document.getElementsByClassName('label-next-player')).forEach((span: HTMLSpanElement) => span.innerHTML = _('Next herd'));
+
+                const downRow = (this.gamedatas.activeRow + 1) % this.gamedatas.herdNumber;
+                const upRow = (this.gamedatas.activeRow + this.gamedatas.herdNumber - 1) % this.gamedatas.herdNumber;
+
+                const keepDirectionRow = args.direction_clockwise ? downRow : upRow;
+                const changeDirectionRow = args.direction_clockwise ? upRow : downRow;
+
+                $("keepDirectionNextPlayer").innerHTML = dojo.string.substitute(_("Herd ${number}"), {'number' : keepDirectionRow+1 });
+                $("changeDirectionNextPlayer").innerHTML = dojo.string.substitute(_("Herd ${number}"), {'number' : changeDirectionRow+1 });
+
+                document.getElementById('keepDirectionSymbol').innerHTML = '🠗';
+                document.getElementById('changeDirectionSymbol').innerHTML = '🠗';
+                dojo.toggleClass('keepDirectionSymbol', 'reverse-arrow', !args.direction_clockwise);
+                dojo.toggleClass('changeDirectionSymbol', 'reverse-arrow', args.direction_clockwise);
+            } else {
+                const keepDirectionNextPlayer = args.direction_clockwise ? this.getPreviousPlayer() : this.getNextPlayer();
+                const changeDirectionNextPlayer = args.direction_clockwise ? this.getNextPlayer() : this.getPreviousPlayer();
+
+                $("keepDirectionNextPlayer").innerHTML = keepDirectionNextPlayer.name;
+                $("changeDirectionNextPlayer").innerHTML = changeDirectionNextPlayer.name;
+                dojo.style( 'keepDirectionNextPlayer', 'color', '#'+keepDirectionNextPlayer.color );
+                dojo.style( 'changeDirectionNextPlayer', 'color', '#'+changeDirectionNextPlayer.color );
+            }
 
             dojo.style( 'direction_popin', 'display', 'flex' );
             dojo.toggleClass('direction_popin', 'swap', !args.direction_clockwise);
@@ -340,7 +362,10 @@ class Mow implements Game {
         
             case 'playerTurn':                 
                 if((this as any).isCurrentPlayerActive()) {
-                    this.enableFarmerCards();   
+                    this.enableFarmerCards();
+                    if (this.gamedatas.herdNumber > 1) {
+                        this.resetAllowedCards();
+                    }
                 }               
                 break;
 
@@ -474,7 +499,7 @@ class Mow implements Game {
             ids.forEach(id => {
                 const player = rowPick ? {
                     color: 'transparent',
-                    name: dojo.string.substitute(_("Herd ${number}"), {'number' : id }),
+                    name: dojo.string.substitute(_("Herd ${number}"), {'number' : id+1 }),
                 } : this.gamedatas.players[id];
                 html += `<button id="pickBtn${id}" class="bgabutton bgabutton_blue pickButton" style="border: 3px solid #${player.color}">${player.name}</button>`;
             });
@@ -705,8 +730,10 @@ class Mow implements Game {
     }
     
     public notif_allowedCards( notif: Notif<NotifAllowedCardsArgs> ) {
-        // console.log( 'notif_allowedCards', notif );            
-        this.enableAllowedCards(notif.args.allowedCardsIds);
+        // console.log( 'notif_allowedCards', notif );        
+        if (this.gamedatas.herdNumber == 1) {
+            this.enableAllowedCards(notif.args.allowedCardsIds);
+        }
     }
     
     public notif_newCard( notif: Notif<NotifNewCardArgs> ) {
@@ -858,8 +885,16 @@ class Mow implements Game {
                     this.playerHand.unselectItem(''+id);
                 }
             } catch(e) {}
-        })
-        
+        });        
+    }
+
+    private resetAllowedCards() {
+        this.allowedCardsIds = null;
+        this.playerHand.items.map(item => Number(item.id)).forEach((id: number) => {
+            try {
+                dojo.toggleClass('myhand_item_' + id, 'disabled', false);
+            } catch(e) {}
+        });
     }
     
     /* This enable to inject translatable styled things to logs or action bar */

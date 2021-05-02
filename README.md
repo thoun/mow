@@ -39,4 +39,3 @@ change log colors
 should we include acrobatic 7 and 9 with farmer "remove 7,8,9"
 can farmer "remove 7,8,9" be played if card has no effect ?
 swap : what if some players have same lowest score ?
-TODO 2p mode : set disabled cards only on playCard state

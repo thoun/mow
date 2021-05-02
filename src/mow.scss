@@ -8,6 +8,9 @@ $cardHeight: 178px;
 .direction-anticlockwise {
     transform: scaleX(-1);
 }
+.reverse-arrow {
+    transform: scaleY(-1);
+}
 
 #direction-text {
     text-align: right;

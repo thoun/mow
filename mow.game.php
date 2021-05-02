@@ -959,6 +959,7 @@ class mow extends Table {
         return [
             'canCollect' => $canCollect,
             'suffix' => $suffix,
+            'allowedCardIds' => $this->getAllowedCardsIds($player_id),
             'allowedFarmerCardIds' => $this->getAllowedFarmerCardsId(),
         ];
     }

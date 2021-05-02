@@ -6,6 +6,10 @@
   transform: scaleX(-1);
 }
 
+.reverse-arrow {
+  transform: scaleY(-1);
+}
+
 #direction-text {
   text-align: right;
   font-size: 110%;
@@ -88,9 +92,11 @@
   width: 178px;
   height: 121px;
   transform: rotate(90deg);
+  transform-origin: 61px 55px;
 }
 #gamezone #playertables .row .rowIndicatorWrapper #rowIndicator #rowIndicatorBackground.inverse {
   transform: rotate(-90deg);
+  transform-origin: 84px 90px;
 }
 #gamezone #playertables .row .herd {
   flex: 1;
