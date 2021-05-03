@@ -797,7 +797,7 @@ var Mow = /** @class */ (function () {
         document.getElementById('pickBlock').innerHTML = '';
         if (canPick) {
             var rowPick_1 = this.gamedatas.herdNumber > 1;
-            var ids = rowPick_1 ? [0, 1, 2] : this.gamedatas.playerorder.map(function (id) { return Number(id); });
+            var ids = rowPick_1 ? [0, 1, 2] : this.gamedatas.playerorder.map(function (id) { return Number(id); }).filter(function (id) { return id != Number(_this.player_id); });
             var html_1 = '';
             ids.forEach(function (id) {
                 var player = rowPick_1 ? {

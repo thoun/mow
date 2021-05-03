@@ -153,7 +153,7 @@ class mow extends Table {
         }
                
         // TODO TEMP
-        //$this->cards->createCards( array_slice($cards, count($cards) - 10, 10), 'deck' );
+        //$this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );
         $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
         
@@ -691,9 +691,9 @@ class mow extends Table {
             $this->pickFarmerCard($player_id);
         } else if ($card->type == 7) {
             $player_hand = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $player_id));
-            $centerCards = array_values(array_filter($player_hand, function($card) { return $card->number >= 7 && $card->number <= 9; })); // TODO should we include special 7 and 9 ?
+            $centerCards = array_values(array_filter($player_hand, function($card) { return $card->number >= 7 && $card->number <= 9; })); // acrobatic 7 and 9 are not included
             $number = count($centerCards);
-            if ($number > 0) { // TODO should we block if card has no effect ?
+            if ($number > 0) {
                 $this->cards->moveCards(array_map(function($card) { return $card->id; }, $centerCards), 'discard');
                 $newCards = $this->getCardsFromDb($this->cards->pickCards(count($centerCards), 'hand', $player_id));
 
