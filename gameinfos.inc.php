@@ -71,8 +71,18 @@ $gameinfos = array(
 'strategy' => 1,    
 
 // Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-'diplomacy' => 0,    
+'diplomacy' => 0,  
 
+// Colors attributed to players
+'player_colors' => ['ff0000', '008000', '0000ff', 'ffa500', '000000', 'e94190', '982fff', '72c3b1', 'f07f16', 'bdd002', '7b7b7b'],
+
+// Favorite colors support : if set to "true", support attribution of favorite colors based on player's preferences (see reattributeColorsBasedOnPreferences PHP method)
+// NB: this parameter is used only to flag games supporting this feature; you must use (or not use) reattributeColorsBasedOnPreferences PHP method to actually enable or disable the feature.
+'favorite_colors_support' => true,
+
+// When doing a rematch, the player order is swapped using a "rotation" so the starting player is not the same
+// If you want to disable this, set this to true
+'disable_player_order_swap_on_rematch' => false, 
 
 // Games categories
 //  You can attribute any number of "tags" to your game.

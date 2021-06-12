@@ -80,8 +80,8 @@ class mow extends Table {
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the game
-        $default_colors = ["ff0000", "008000", "0000ff", "ffa500", "773300"];
-
+        $gameinfos = self::getGameinfos();
+        $default_colors = $gameinfos['player_colors'];
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
@@ -94,6 +94,7 @@ class mow extends Table {
         }
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
+        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
