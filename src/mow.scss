@@ -1,9 +1,5 @@
-@import url(../../../css/csslayer.css); /* Note: you must not use any @import directive other than this one */
-
-/********* You can start writing your CSS below this line: **********/
-
 $cardWidth: 121px;
-$cardHeight: 178px;
+$cardHeight: 188px;
 
 .direction-anticlockwise {
     transform: scaleX(-1);
@@ -20,6 +16,7 @@ $cardHeight: 178px;
     #direction-play-symbol {
         display: inline-block;
         transition: transform 500ms ease-in-out;
+        font-weight: bold;
     }
 }
 

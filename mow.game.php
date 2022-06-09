@@ -73,9 +73,9 @@ class mow extends Table {
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame( $players, $options = [] ) {    
+    protected function setupNewGame($players, $options = []) {    
         $sql = "DELETE FROM player WHERE 1 ";
-        self::DbQuery( $sql ); 
+        self::DbQuery($sql); 
 
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
@@ -92,8 +92,8 @@ class mow extends Table {
             $color = array_shift( $default_colors );
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
         }
-        $sql .= implode( $values, ',' );
-        self::DbQuery( $sql );
+        $sql .= implode(',', $values);
+        self::DbQuery($sql);
         self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
         
@@ -853,6 +853,8 @@ class mow extends Table {
                     'cards' => $cards
                 ]);
             }
+
+            // TODO remove farmer
             
             self::setGameStateValue('swapping_player', 0);
         }
@@ -877,6 +879,8 @@ class mow extends Table {
 
             $this->cards->moveCards(array_map(function($card) { return $card->id; }, $removedCards), "discard");            
         }
+
+        // TODO remove farmer
         $this->gamestate->setPlayerNonMultiactive($playerId, "endHand");
     }
 
@@ -885,6 +889,8 @@ class mow extends Table {
     }
 
     function opponentCardsViewed() {
+
+        // TODO remove farmer
         $this->gamestate->nextState('next');
     }
 
@@ -909,6 +915,8 @@ class mow extends Table {
             'fromPlayerId' => $player_id,
             'allowedCardsIds' => $allowedCardsIds
         ]);
+
+        // TODO remove farmer
 
         $this->gamestate->nextState('giveCard');
     }
@@ -1129,14 +1137,14 @@ class mow extends Table {
             $this->cards->moveCard($removedCard->id, 'hand', $player_id);
             $removedCards[$opponentId] = $removedCard;
 
-            self::notifyPlayer($opponentId, 'removedCard', 'Card ${card_display} was removed from your hand', [
+            self::notifyPlayer($opponentId, 'removedCard', clienttranslate('Card ${card_display} was removed from your hand'), [
                 'playerId' => $opponentId,
                 'card' => $removedCard,
                 'fromPlayerId' => $player_id,
             ]);
 
             $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($player_id) : null;
-            self::notifyPlayer($player_id, 'newCard', 'Card ${card_display} was picked from ${player_name2} hand', [
+            self::notifyPlayer($player_id, 'newCard', clienttranslate('Card ${card_display} was picked from ${player_name2} hand'), [
                 'playerId' => $player_id,
                 'player_name2' => $this->getPlayerName($opponentId),
                 'card' => $removedCard,
@@ -1262,7 +1270,7 @@ class mow extends Table {
             } else {
                 $handPointStr = -$handPointsCount;
             }
-            $handPointStr .= $playerId == $topPlayerId ? '<span class="tooltip-fly-img"></span>' : '';
+            $handPointStr = $playerId == $topPlayerId ? '<span class="tooltip-fly-img"></span>' . $handPointStr . '<span class="tooltip-fly-img"></span>' : $handPointStr;
             $handPoints[] = $handPointStr;
             $totalPoints[] = -$player['player_score'];
 

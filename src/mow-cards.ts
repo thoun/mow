@@ -52,21 +52,20 @@ class MowCards {
         return displayedNumber * 100 + color;
     }
 
-    getTooltip(cardTypeId: number)
-    {
+    public getTooltip(cardTypeId: number) {
         let tooltip = `<div class="tooltip-fly"><span class="tooltip-fly-img"></span> : ${Math.floor(cardTypeId / 100)}</div>`;
-        switch( cardTypeId ) {
+        switch (cardTypeId) {
             case 500:
             case 516:
-                tooltip += _("Blocker: Play this cow to close off one end of the line.");
+                tooltip += _("<strong>Blocker:</strong> Play this cow to close off one end of the line.");
                 break;    
             case 570:
             case 590:
-                tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
+                tooltip += _("<strong>Acrobatic cow:</strong> Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
                 break;            
             case 521:
             case 522:
-                tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
+                tooltip += _("<strong>Slowpoke:</strong> Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
                 break;
         }
         return tooltip;

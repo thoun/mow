@@ -5,7 +5,7 @@
 #myhand .stockitem, #myfarmers .stockitem, #theherds .stockitem, #direction, #deck, #rowIndicatorBackground {
     border-radius:10px;
     margin:5px;
-    border:1px solid grey;
+    box-shadow:1px 1px 3px 1px rgba(0, 0, 0, 0.5);
 }
  
 #handdeck {
@@ -23,9 +23,9 @@
                 flex: 3;
                 .stockitem_selected {
                     margin:3px;
-                    transform:scale(1.02);
-                    border:2px solid black !important;
-                    box-shadow:1px 1px 5px black, 2px 2px 4px black;
+                    //transform:scale(1.02);
+                    border:2px solid green !important;
+                    box-shadow:1px 1px 5px green, 2px 2px 4px green;
                 }
             }
 
@@ -39,8 +39,8 @@
                 }
 
                 &:hover {
-                    margin:4px;
-                    border:2px solid black !important;
+                    margin:3px;
+                    border:2px solid green !important;
                 }
 
                 &.disabled {
@@ -49,8 +49,8 @@
 
                     &:hover {
                         cursor:not-allowed;
-                        margin:5px;
-                        border:1px solid gray !important;
+                        margin:3px;
+                        border:2px solid red !important;
                     }
                 }
             }

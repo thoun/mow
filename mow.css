@@ -1,7 +1,4 @@
 @charset "UTF-8";
-@import url(../../../css/csslayer.css);
-/* Note: you must not use any @import directive other than this one */
-/********* You can start writing your CSS below this line: **********/
 .direction-anticlockwise {
   transform: scaleX(-1);
 }
@@ -18,6 +15,7 @@
 #direction-text #direction-play-symbol {
   display: inline-block;
   transition: transform 500ms ease-in-out;
+  font-weight: bold;
 }
 
 #gamezone {
@@ -30,7 +28,7 @@
 }
 #gamezone #playertables {
   position: relative;
-  background-color: #35714a;
+  background-color: #78ad2c;
   border-radius: 30px;
   box-shadow: 2px 2px 5px black;
   border: 1px solid #193b27;
@@ -56,9 +54,11 @@
   min-width: 120px;
 }
 #gamezone #playertables .playertable.active {
-  border: 2px solid orange;
+  border: 1px solid orange;
+  box-shadow: 0 0 3px 2px orange;
 }
 #gamezone #playertables .playertable .playertablename {
+  user-select: none;
   font-weight: bold;
 }
 #gamezone #playertables .playertable.selectable {
@@ -84,12 +84,12 @@
 }
 #gamezone #playertables .row .rowIndicatorWrapper #rowIndicator {
   width: 121px;
-  height: 178px;
+  height: 188px;
   overflow: hidden;
 }
 #gamezone #playertables .row .rowIndicatorWrapper #rowIndicator #rowIndicatorBackground {
   background-image: url("img/direction.jpg");
-  width: 178px;
+  width: 188px;
   height: 121px;
   transform: rotate(90deg);
   transform-origin: 61px 55px;
@@ -100,6 +100,27 @@
 }
 #gamezone #playertables .row .herd {
   flex: 1;
+}
+#gamezone #playertables .illustration {
+  position: absolute;
+  bottom: 0;
+  height: 150px;
+  background-position: bottom center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+#gamezone #playertables .illustration.left {
+  left: 0;
+  width: 126px;
+  background-image: url("img/illustration-left.png");
+  border-radius: 0 0 0 30px;
+}
+#gamezone #playertables .illustration.right {
+  right: 0;
+  width: 119px;
+  background-image: url("img/illustration-right.png");
+  border-radius: 0 0 30px 0;
 }
 #gamezone .direction-symbol {
   font-size: 400%;
@@ -271,7 +292,7 @@
 #myhand .stockitem, #myfarmers .stockitem, #theherds .stockitem, #direction, #deck, #rowIndicatorBackground {
   border-radius: 10px;
   margin: 5px;
-  border: 1px solid grey;
+  box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.5);
 }
 
 #handdeck {
@@ -291,9 +312,8 @@
 }
 #handdeck #myhand_wrap #cows-and-farmers #myhand .stockitem_selected {
   margin: 3px;
-  transform: scale(1.02);
-  border: 2px solid black !important;
-  box-shadow: 1px 1px 5px black, 2px 2px 4px black;
+  border: 2px solid green !important;
+  box-shadow: 1px 1px 5px green, 2px 2px 4px green;
 }
 #handdeck #myhand_wrap #cows-and-farmers #myfarmers {
   flex: 1;
@@ -302,8 +322,8 @@
   cursor: pointer;
 }
 #handdeck #myhand_wrap #cows-and-farmers .stockitem:hover {
-  margin: 4px;
-  border: 2px solid black !important;
+  margin: 3px;
+  border: 2px solid green !important;
 }
 #handdeck #myhand_wrap #cows-and-farmers .stockitem.disabled {
   cursor: not-allowed;
@@ -311,8 +331,8 @@
 }
 #handdeck #myhand_wrap #cows-and-farmers .stockitem.disabled:hover {
   cursor: not-allowed;
-  margin: 5px;
-  border: 1px solid gray !important;
+  margin: 3px;
+  border: 2px solid red !important;
 }
 #handdeck #myhand.bounce {
   animation-name: handBounce;
@@ -363,8 +383,9 @@
 .tooltip-fly-img {
   display: inline-block;
   width: 20px;
-  height: 18px;
+  height: 20px;
   background-image: url("img/fly.png");
+  vertical-align: middle;
 }
 
 .log-arrow:before {

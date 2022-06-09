@@ -111,7 +111,7 @@ function updateDisplay(from) {
                     }
                     topDestinations[iNotAcrobatic] = topDestination;
                     leftDestinations[iNotAcrobatic] = leftDestination;
-                    zIndexes[iNotAcrobatic] = 0;
+                    zIndexes[iNotAcrobatic] = 1;
                 }
             });
         }
@@ -128,7 +128,7 @@ function updateDisplay(from) {
                     topDestination = iRow * (itemHeight + itemMargin);
                     topDestinations[acrobaticNumber] = topDestination;
                     leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
-                    zIndexes[acrobaticNumber] = 1;
+                    zIndexes[acrobaticNumber] = 0;
                 }
             });
         }
@@ -297,15 +297,15 @@ var MowCards = /** @class */ (function () {
         switch (cardTypeId) {
             case 500:
             case 516:
-                tooltip += _("Blocker: Play this cow to close off one end of the line.");
+                tooltip += _("<strong>Blocker:</strong> Play this cow to close off one end of the line.");
                 break;
             case 570:
             case 590:
-                tooltip += _("Acrobatic cow: Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
+                tooltip += _("<strong>Acrobatic cow:</strong> Play this cow on another cow with the same number, no matter where it is in the line (this card cannot be played unless the requisite cow has been played previously).");
                 break;
             case 521:
             case 522:
-                tooltip += _("Slowpoke: Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
+                tooltip += _("<strong>Slowpoke:</strong> Insert this cow into the line in place of a missing number (this card cannot be placed if there are no gaps in the line numbering).");
                 break;
         }
         return tooltip;
@@ -396,7 +396,7 @@ var Mow = /** @class */ (function () {
         this.playerFarmerHand = null;
         this.theHerds = [];
         this.cardwidth = 121;
-        this.cardheight = 178;
+        this.cardheight = 188;
         this.playersSelectable = false;
         this.selectedPlayerId = null;
         this.pickCardAction = 'play';
@@ -404,7 +404,7 @@ var Mow = /** @class */ (function () {
             '#b5b5b5',
             '#a4d6e3',
             '#e98023',
-            '#2c6c7a',
+            '#0096d9',
             null,
             '#000000'
         ];
@@ -469,7 +469,8 @@ var Mow = /** @class */ (function () {
             this_1.theHerds[iHerd].create(this_1, $("herd" + iHerd), this_1.cardwidth, this_1.cardheight);
             this_1.theHerds[iHerd].setSelectionMode(0);
             this_1.theHerds[iHerd].centerItems = true;
-            this_1.theHerds[iHerd].acrobatic_overlap = 0;
+            this_1.theHerds[iHerd].onItemCreate = function (card_div, card_type_id) { return _this.mowCards.setupNewCard(_this, card_div, card_type_id); };
+            this_1.theHerds[iHerd].acrobatic_overlap = 45;
             this_1.theHerds[iHerd].updateDisplay = function (from) { return updateDisplay.apply(_this.theHerds[iHerd], [from]); };
             this_1.theHerds[iHerd].isAcrobatic = function (stockItemId) { return isAcrobatic.apply(_this.theHerds[iHerd], [stockItemId]); };
         };

@@ -36,7 +36,7 @@ class Mow implements Game {
     private player_id: string;
 
     private cardwidth: number = 121;
-    private cardheight: number = 178;
+    private cardheight: number = 188;
     private players: { [playerId: number]: Player };
     private playerNumber: number;
     private playersSelectable: boolean = false;
@@ -47,7 +47,7 @@ class Mow implements Game {
         '#b5b5b5',
         '#a4d6e3',
         '#e98023',
-        '#2c6c7a',
+        '#0096d9',
         null,
         '#000000'
     ];
@@ -124,7 +124,8 @@ class Mow implements Game {
             this.theHerds[iHerd].create( this, $(`herd${iHerd}`), this.cardwidth, this.cardheight );
             this.theHerds[iHerd].setSelectionMode(0);            
             this.theHerds[iHerd].centerItems = true;
-            this.theHerds[iHerd].acrobatic_overlap = 0;
+            this.theHerds[iHerd].onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
+            this.theHerds[iHerd].acrobatic_overlap = 45;
             this.theHerds[iHerd].updateDisplay = (from: string) => updateDisplay.apply(this.theHerds[iHerd], [from]);
             this.theHerds[iHerd].isAcrobatic = (stockItemId: number) => isAcrobatic.apply(this.theHerds[iHerd], [stockItemId]);
         }

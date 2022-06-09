@@ -8,7 +8,7 @@
 
     #playertables {
         position: relative;
-        background-color: #35714a;
+        background-color: #78ad2c;
         border-radius: 30px;
         box-shadow: 2px 2px 5px black;
         border: 1px solid #193b27;
@@ -36,10 +36,12 @@
             min-width: 120px;
     
             &.active {
-                border:2px solid orange;
+                border:1px solid orange;
+                box-shadow: 0 0 3px 2px orange;
             }
     
             .playertablename {
+                user-select: none;
                 font-weight: bold;
             }
 
@@ -88,6 +90,29 @@
 
             .herd {
                 flex: 1;
+            }
+        }
+
+        .illustration {
+            position: absolute;
+            bottom: 0;
+            height: 150px;
+            background-position: bottom center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+
+            &.left {
+                left: 0;
+                width: 126px;
+                background-image: url('img/illustration-left.png');
+                border-radius: 0 0 0 30px;
+            }
+            &.right {
+                right: 0;
+                width: 119px;
+                background-image: url('img/illustration-right.png');
+                border-radius: 0 0 30px 0;
             }
         }
     }

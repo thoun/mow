@@ -1,11 +1,13 @@
 {OVERALL_GAME_HEADER}
 
-Cards images are not definitive, waiting for official images
 <div id="direction-text">
     Direction of play : <span id="direction-play-symbol">↻</span>
 </div>
 <div id="gamezone">
     <div id="playertables">
+        <div class="illustration left"></div>
+        <div class="illustration right"></div>
+
         <div id="toprowplayers" class="players-row"></div>
 
         <div id="theherds"></div>

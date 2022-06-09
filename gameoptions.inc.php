@@ -34,7 +34,7 @@ $game_options = [
             ],
             2 => [
                 'name' => totranslate('Yes'), 
-                'description' => totranslate('No farmer, no card swap, no special rule if all 5 flies card are collected'), // TODO check translation for this rule
+                'description' => totranslate('No farmer, no card swap, no special rule when all special cows are collected'),
                 'tmdisplay' => totranslate('Simple version (2008 edition)'),
             ],
         ],
