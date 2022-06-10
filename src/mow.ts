@@ -318,6 +318,7 @@ class Mow implements Game {
         if(!(this as any).isCurrentPlayerActive()) {
             return;
         }
+        // TODO reprendre Noé
         const viewCardsDialog = new ebg.popindialog();
         viewCardsDialog.create( 'mowViewCardsDialog' );console.log(args, this.gamedatas.players[args.opponentId])
         viewCardsDialog.setTitle(dojo.string.substitute(_(" ${player_name} cards"), { player_name: this.gamedatas.players[args.opponentId].name }));
@@ -938,6 +939,10 @@ class Mow implements Game {
                     } else if (precision === 'acrobatic') {
                         args.card_display += '<span class="log-arrow"></span>';
                     }
+                }
+
+                if (args.farmerCardType && typeof args.farmerCardType !== 'string') {
+                    args.farmerCardType = `<div class="log-farmer-card" data-type="${args.farmerCardType}"></div>`;
                 }
             }
         } catch (e) {

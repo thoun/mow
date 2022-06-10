@@ -9,3 +9,16 @@
 .rotate270:before {
     transform: rotate(270deg);
 }
+
+.log-farmer-card {
+    width: 121px;
+    height: 188px;
+    background: url('img/farmers.jpg');
+    background-size: auto 100%;
+
+    @for $type from 1 through 10 {
+        &[data-type="#{$type}"] { 
+            background-position-x: #{($type - 1) * 100% / 9};
+        }
+    }
+}

@@ -47,7 +47,7 @@
                             method).
 */
 
-require_once("modules/constants.inc.php");
+require_once("modules/php/constants.inc.php");
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
@@ -83,6 +83,7 @@ $machinestates = [
     	"possibleactions" => [ "swap", "dontSwap" ],
     	"transitions" => [ 
             "playerTurn" => ST_PLAYER_TURN,
+            "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
 
@@ -162,6 +163,7 @@ $machinestates = [
     	"transitions" => [ 
             "viewCards" => ST_PLAYER_VIEW_CARDS,
             "exchangeCard" => ST_PLAYER_GIVE_CARD,
+            "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
 
@@ -174,6 +176,7 @@ $machinestates = [
     	"possibleactions" => [ "next" ],
     	"transitions" => [ 
             "next" => ST_PLAY_AGAIN,
+            "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
 
@@ -186,6 +189,7 @@ $machinestates = [
     	"possibleactions" => [ "giveCard" ],
     	"transitions" => [ 
             "giveCard" => ST_PLAY_AGAIN,
+            "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
 	

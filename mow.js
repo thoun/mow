@@ -644,6 +644,7 @@ var Mow = /** @class */ (function () {
         if (!this.isCurrentPlayerActive()) {
             return;
         }
+        // TODO reprendre Noé
         var viewCardsDialog = new ebg.popindialog();
         viewCardsDialog.create('mowViewCardsDialog');
         console.log(args, this.gamedatas.players[args.opponentId]);
@@ -1167,6 +1168,9 @@ var Mow = /** @class */ (function () {
                     else if (precision === 'acrobatic') {
                         args.card_display += '<span class="log-arrow"></span>';
                     }
+                }
+                if (args.farmerCardType && typeof args.farmerCardType !== 'string') {
+                    args.farmerCardType = "<div class=\"log-farmer-card\" data-type=\"" + args.farmerCardType + "\"></div>";
                 }
             }
         }
