@@ -211,12 +211,7 @@ trait ActionTrait {
         }
 
         // And notify
-        self::notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays farmer card ${farmerCardType}'), [
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card' => $card,
-            'farmerCardType' => $card->type,
-        ]);
+        $this->farmerCardPlayed($player_id, $card);
 
         $this->gamestate->nextState($nextState);
     }
@@ -294,7 +289,7 @@ trait ActionTrait {
         $this->gamestate->nextState('pass');
     }
 
-    function pickFarmerCard($playerId) {
+    function pickFarmerCard(int $playerId) {
         $farmerCard = $this->getFarmerCardFromDb($this->farmerCards->pickCard('deck', $playerId));
         if ($farmerCard) {
             self::notifyPlayer($playerId, 'newFarmerCard', '', [
@@ -358,7 +353,10 @@ trait ActionTrait {
             $this->cards->moveCards(array_map(fn($card) => $card->id, $removedCards), "discard");            
         }
 
-        // TODO remove farmer
+        // And notify
+        $farmerCard = $this->getFarmerCardByType($playerId, 10);
+        $this->farmerCardPlayed($playerId, $farmerCard);
+
         $this->gamestate->setPlayerNonMultiactive($playerId, "endHand");
     }
 
@@ -367,19 +365,19 @@ trait ActionTrait {
     }
 
     function opponentCardsViewed() {
+        // card cleared when played
 
-        // TODO remove farmer
         $this->gamestate->nextState('next');
     }
 
-    function giveCard( $cardId ) {
-        $player_id = self::getActivePlayerId();
+    function giveCard(int $cardId) {
+        $playerId = self::getActivePlayerId();
         $opponentId = intval(self::getGameStateValue('exchangeCard'));
 
         $card = $this->getCardFromDb($this->cards->getCard($cardId));
 
-        self::notifyPlayer($player_id, 'removedCard', clienttranslate('Card ${card_display} was given to chosen opponent'), [
-            'playerId' => $player_id,
+        self::notifyPlayer($playerId, 'removedCard', clienttranslate('Card ${card_display} was given to chosen opponent'), [
+            'playerId' => $playerId,
             'card' => $card,
             'fromPlayerId' => $opponentId,
         ]);
@@ -389,12 +387,12 @@ trait ActionTrait {
 
         self::notifyPlayer( $opponentId, 'newCard', clienttranslate('${player_name} gives you card ${card_display}'), [
             'card' => $card,
-            'player_name' => self::getActivePlayerName(),
-            'fromPlayerId' => $player_id,
+            'player_name' => $this->getPlayerName($playerId),
+            'fromPlayerId' => $playerId,
             'allowedCardsIds' => $allowedCardsIds
         ]);
 
-        // TODO remove farmer
+        // card cleared when played
 
         $this->gamestate->nextState('giveCard');
     }

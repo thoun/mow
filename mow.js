@@ -330,34 +330,34 @@ var FarmerCards = /** @class */ (function () {
         var tooltip = '';
         switch (cardTypeId) {
             case 1:
-                tooltip += _("Le joueur suivant ne peut pas jouer de carte Vache Spéciale !");
+                tooltip += _("The next player cannot play a special cow.");
                 break;
             case 2:
-                tooltip += _("Prenez connaissance des cartes de l’adversaire de votre choix.");
+                tooltip += _("Pick an opponent and look at their cards.");
                 break;
             case 3:
-                tooltip += _("Piochez une carte dans la main d’un adversaire et rendez-lui la carte de votre choix (vous pouvez lui rendre la carte piochée).");
+                tooltip += _("Randomly pick a card from an opponent’s hand and then give them any card from your hand (or return their original card).");
                 break;
             case 4:
-                tooltip += _("Passez votre tour.");
+                tooltip += _("Skip your turn.");
                 break;
             case 5:
-                tooltip += _("Défaussez le troupeau en cours. Personne ne l’accueille dans son étable. Commencez un nouveau troupeau.");
+                tooltip += _("Discard the current herd without adding it to anyone’s cowshed. Begin a new herd.");
                 break;
             case 6:
-                tooltip += _("Piochez 2 cartes Fermier");
+                tooltip += _("Draw 2 Farmer cards.");
                 break;
             case 7:
-                tooltip += _("Défaussez de votre main les vaches de valeur 7, 8 et 9. Remplacez-les par autant de cartes de la pioche. (action impossible s’il ne reste pas assez de cartes dans la pioche).");
+                tooltip += _("Discard any cows with the values 7, 8 and 9 from your hand. Draw the same number of cards from the draw pile to replace them. (You cannot perform this action if there are not enough cards in the draw pile).");
                 break;
             case 8:
-                tooltip += _("A la fin de votre tour, changez le sens du jeu OU passez la main à l’adversaire de votre choix");
+                tooltip += _("At the end of your turn, either switch the direction of play OR choose which opponent plays next.");
                 break;
             case 9:
-                tooltip += _("Piochez une carte Vache au hasard dans la main de chaque adversaire et défaussez-la sans en prendre connaissance.");
+                tooltip += _("Randomly pick a Cow card from each opponent’s hand and discard it without looking at it. Your opponents must play with one less card until the end of the round.");
                 break;
             case 10:
-                tooltip += _("EXCEPTION, CETTE CARTE SE JOUE AU MOMENT DU CALCUL DU SCORE DE LA MANCHE : choisissez une catégorie de vache. Vous ne totalisez pas les mouches de cette catégorie de vaches.");
+                tooltip += "<strong>" + _("EXCEPTIONALLY, THIS CARD IS PLAYED WHEN CALCULATING THE SCORE FOR THE ROUND:") + "</strong> " + _("Pick a cow category (for example, «flankers»). Ignore all flies in that category when scoring.");
                 break;
         }
         return tooltip;
@@ -564,7 +564,7 @@ var Mow = /** @class */ (function () {
                 this.onEnteringSelectionAction();
                 break;
             case 'viewCards':
-                this.onEnteringViewCards(args.args);
+                this.onEnteringViewCards(args.args, this.isCurrentPlayerActive());
                 break;
             case 'giveCard':
                 if (this.isCurrentPlayerActive()) {
@@ -639,34 +639,32 @@ var Mow = /** @class */ (function () {
             });
         }
     };
-    Mow.prototype.onEnteringViewCards = function (args) {
+    Mow.prototype.onEnteringViewCards = function (args, isActivePlayer) {
         var _this = this;
-        if (!this.isCurrentPlayerActive()) {
-            return;
+        var opponent = this.getPlayer(args.opponentId);
+        var opponentCardsDiv = document.getElementById('opponent-animals');
+        opponentCardsDiv.innerHTML = '';
+        document.getElementById('opponent-hand-label').innerHTML = dojo.string.substitute(_("${player_name} cards"), { player_name: "<span style=\"color: #" + opponent.color + "\">" + opponent.name + "</span>" });
+        var opponentHandWrap = document.getElementById('opponent-hand-wrap');
+        opponentHandWrap.classList.remove('hidden');
+        opponentHandWrap.style.boxShadow = "0 0 3px 3px #" + opponent.color;
+        opponentCardsDiv.classList.toggle('text', !isActivePlayer);
+        if (isActivePlayer) {
+            var opponentHand_1 = new ebg.stock();
+            opponentHand_1.create(this, $('opponent-animals'), this.cardwidth, this.cardheight);
+            opponentHand_1.setSelectionMode(0);
+            opponentHand_1.centerItems = true;
+            opponentHand_1.onItemCreate = function (cardDiv, type) { return _this.mowCards.setupNewCard(_this, cardDiv, type); };
+            this.mowCards.createCards([opponentHand_1]);
+            args.cards.forEach(function (card) { return _this.addCardToStock(opponentHand_1, card); });
         }
-        // TODO reprendre Noé
-        var viewCardsDialog = new ebg.popindialog();
-        viewCardsDialog.create('mowViewCardsDialog');
-        console.log(args, this.gamedatas.players[args.opponentId]);
-        viewCardsDialog.setTitle(dojo.string.substitute(_(" ${player_name} cards"), { player_name: this.gamedatas.players[args.opponentId].name }));
-        var html = "<div id=\"opponent-hand\"></div>";
-        // Show the dialog
-        viewCardsDialog.setContent(html);
-        var opponentHand = new ebg.stock();
-        opponentHand.create(this, $('opponent-hand'), this.cardwidth, this.cardheight);
-        opponentHand.setSelectionMode(0);
-        opponentHand.centerItems = true;
-        opponentHand.onItemCreate = function (card_div, card_type_id) { return _this.mowCards.setupNewCard(_this, card_div, card_type_id); };
-        this.mowCards.createCards([opponentHand]);
-        args.cards.forEach(function (card) { return _this.addCardToStock(opponentHand, card); });
-        viewCardsDialog.show();
-        // Replace the function call when it's clicked
-        viewCardsDialog.replaceCloseCallback(function () {
-            if (!_this.checkAction('next'))
-                return;
-            _this.takeAction("next");
-            viewCardsDialog.destroy();
-        });
+        else {
+            var active = this.getPlayer(Number(this.getActivePlayerId()));
+            document.getElementById('opponent-animals').innerHTML = '<div>' + dojo.string.substitute(_("${active_player_name} is looking at ${player_name} cards"), {
+                active_player_name: "<span style=\"color: #" + active.color + "\">" + active.name + "</span>",
+                player_name: "<span style=\"color: #" + opponent.color + "\">" + opponent.name + "</span>"
+            }) + '</div>';
+        }
     };
     Mow.prototype.setGamestateDescription = function (suffix) {
         if (suffix === void 0) { suffix = ''; }
@@ -702,8 +700,8 @@ var Mow = /** @class */ (function () {
             case 'selectOpponent':
                 this.onLeavingSelectionAction();
                 break;
-            case 'dummmy':
-                break;
+            case 'viewCards':
+                this.onLeavingStateViewCards();
         }
     };
     Mow.prototype.onLeavingSelectionAction = function () {
@@ -712,10 +710,17 @@ var Mow = /** @class */ (function () {
             return dojo.removeClass("playertable-" + playerId, 'selectable');
         });
     };
+    Mow.prototype.onLeavingStateViewCards = function () {
+        var giraffeHandWrap = document.getElementById('opponent-hand-wrap');
+        giraffeHandWrap.classList.add('hidden');
+        giraffeHandWrap.style.boxShadow = '';
+        document.getElementById('opponent-animals').innerHTML = '';
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //        
     Mow.prototype.onUpdateActionButtons = function (stateName, args) {
+        var _this = this;
         //console.log( 'onUpdateActionButtons: '+stateName );
         this.removeActionButtons();
         if (this.isCurrentPlayerActive()) {
@@ -749,6 +754,9 @@ var Mow = /** @class */ (function () {
                     this.addActionButton('flyType5_button', _("5 flies"), 'onSelectFlyType5');
                     this.addActionButton('flyTypeIgnore_button', _("Ignore"), 'onSelectNoFlyType', null, false, 'red');
                     break;
+                case 'viewCards':
+                    this.addActionButton('seen-button', _('Seen'), function () { return _this.next(); });
+                    break;
             }
         }
     };
@@ -762,6 +770,9 @@ var Mow = /** @class */ (function () {
     */
     Mow.prototype.isSimpleVersion = function () {
         return this.gamedatas.simpleVersion;
+    };
+    Mow.prototype.getPlayer = function (playerId) {
+        return Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) == playerId; });
     };
     Mow.prototype.setPickCardAction = function (pickCardAction) {
         if (this.pickCardAction == pickCardAction) {
@@ -921,6 +932,11 @@ var Mow = /** @class */ (function () {
         this.takeAction("exchangeCard", {
             playerId: this.selectedPlayerId
         });
+    };
+    Mow.prototype.next = function () {
+        if (!this.checkAction('next'))
+            return;
+        this.takeAction("next");
     };
     Mow.prototype.onSelectFlyType1 = function () {
         this.selectFlieType(1);

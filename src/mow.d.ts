@@ -47,6 +47,11 @@ interface MowHerdStock extends Stock {
     isAcrobatic: (stockItemId: number) => boolean;
 }
 
+interface EnteringLookCardsArgs {
+    opponentId: number;
+    cards: Card[];
+}
+
 interface NotifNewHandArgs {
     cards: Card[];
     remainingCards: number;

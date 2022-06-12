@@ -6,6 +6,15 @@ trait UtilTrait {
     //////////// Utility functions
     ////////////
 
+    function array_find(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if($fn($value)) {
+                return $value;
+            }
+        }
+        return null;
+    }
+
     function isSimpleVersion() {
         return intval(self::getGameStateValue('simpleVersion')) === 2;
     }
@@ -42,7 +51,11 @@ trait UtilTrait {
         return array_map(fn($dbCard) => $this->getCardFromDb($dbCard), array_values($dbCards));
     }
 
-    function getFarmerCardFromDb(array $dbCard) {
+    function getFarmerCardFromDb(/*array|null*/ $dbCard) {
+        if ($dbCard == null) {
+            return null;
+        }
+
         if (!$dbCard || !array_key_exists('id', $dbCard)) {
             throw new Error('farmer card doesn\'t exists '.json_encode($dbCard));
         }
@@ -150,7 +163,7 @@ trait UtilTrait {
     }
 
     function controlFarmerCardPlayable(object $card, int $playerId, bool $endHand = false) {
-        $validTime;
+        $validTime = false;
         if ($card->time == 9) {
             $validTime = $endHand;
         } else if ($card->time == 2) {
@@ -259,5 +272,21 @@ trait UtilTrait {
                     break;
             }
         }
+    }
+
+    function getFarmerCardByType(int $playerId, int $type) {
+        $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $playerId));
+
+        return $this->array_find($farmerCardsInHand, fn($card) => $card->type == $type);
+    }
+
+    function farmerCardPlayed(int $playerId, FarmerCard $card) {
+        // And notify
+        $this->notifyAllPlayers('farmerCardPlayed', clienttranslate('${player_name} plays farmer card ${farmerCardType}'), [
+            'player_id' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'card' => $card,
+            'farmerCardType' => $card->type,
+        ]);
     }
 }

@@ -51,6 +51,11 @@ var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable"
 
 </script>
 
+<div id="opponent-hand-wrap" class="whiteblock hand-wrap hidden">
+    <div class="hand-label"><h3 id="opponent-hand-label"></h3></div>
+    <div id="opponent-animals" class="animals"></div>
+</div>
+
 <div id="handdeck">
     <div id="myhand_wrap" class="whiteblock">
         <h3>{MY_HAND}</h3>

@@ -230,7 +230,7 @@ class Mow implements Game {
                 this.onEnteringSelectionAction();
                 break;
             case 'viewCards':
-                this.onEnteringViewCards(args.args);
+                this.onEnteringViewCards(args.args, (this as any).isCurrentPlayerActive());
                 break;
             case 'giveCard':                
                 if((this as any).isCurrentPlayerActive()) {
@@ -314,39 +314,32 @@ class Mow implements Game {
         }
     }
 
-    private onEnteringViewCards(args: { cards: Card[], opponentId: number }) {        
-        if(!(this as any).isCurrentPlayerActive()) {
-            return;
+    private onEnteringViewCards(args: EnteringLookCardsArgs, isActivePlayer: boolean) {
+        const opponent = this.getPlayer(args.opponentId);
+        const opponentCardsDiv = document.getElementById('opponent-animals');
+        opponentCardsDiv.innerHTML = '';
+        document.getElementById('opponent-hand-label').innerHTML = dojo.string.substitute(_("${player_name} cards"), { player_name: `<span style="color: #${opponent.color}">${opponent.name}</span>` });
+        
+        const opponentHandWrap = document.getElementById('opponent-hand-wrap');
+        opponentHandWrap.classList.remove('hidden');
+        opponentHandWrap.style.boxShadow = `0 0 3px 3px #${opponent.color}`;
+        
+        opponentCardsDiv.classList.toggle('text', !isActivePlayer);
+        if (isActivePlayer) {
+            const opponentHand = new ebg.stock() as Stock;
+            opponentHand.create( this, $('opponent-animals'), this.cardwidth, this.cardheight);
+            opponentHand.setSelectionMode(0);
+            opponentHand.centerItems = true;
+            opponentHand.onItemCreate = (cardDiv: HTMLDivElement, type: number) => this.mowCards.setupNewCard(this, cardDiv, type);
+            this.mowCards.createCards([opponentHand]);
+            args.cards.forEach(card=> this.addCardToStock(opponentHand, card));
+        } else {
+            const active = this.getPlayer(Number((this as any).getActivePlayerId()));
+            document.getElementById('opponent-animals').innerHTML = '<div>' + dojo.string.substitute(_("${active_player_name} is looking at ${player_name} cards"), { 
+                active_player_name: `<span style="color: #${active.color}">${active.name}</span>`,
+                player_name: `<span style="color: #${opponent.color}">${opponent.name}</span>` 
+            }) + '</div>';
         }
-        // TODO reprendre Noé
-        const viewCardsDialog = new ebg.popindialog();
-        viewCardsDialog.create( 'mowViewCardsDialog' );console.log(args, this.gamedatas.players[args.opponentId])
-        viewCardsDialog.setTitle(dojo.string.substitute(_(" ${player_name} cards"), { player_name: this.gamedatas.players[args.opponentId].name }));
-        
-        var html = `<div id="opponent-hand"></div>`;
-        
-        // Show the dialog
-        viewCardsDialog.setContent(html);
-
-        const opponentHand = new ebg.stock() as Stock;
-        opponentHand.create( this, $('opponent-hand'), this.cardwidth, this.cardheight );
-        opponentHand.setSelectionMode(0);
-        opponentHand.centerItems = true;
-        opponentHand.onItemCreate = (card_div: HTMLDivElement, card_type_id: number) => this.mowCards.setupNewCard(this, card_div, card_type_id); 
-        this.mowCards.createCards([opponentHand]);
-        args.cards.forEach(card=> this.addCardToStock(opponentHand, card));
-
-        viewCardsDialog.show();
-
-        // Replace the function call when it's clicked
-        viewCardsDialog.replaceCloseCallback(() => {
-            if(!(this as any).checkAction('next'))
-            return;
-        
-            this.takeAction("next");
-
-            viewCardsDialog.destroy();
-        });
     }
 
     private setGamestateDescription(suffix: string = '') {
@@ -387,10 +380,9 @@ class Mow implements Game {
             case 'swapHands':  
             case 'selectOpponent':
                 this.onLeavingSelectionAction(); 
-                break;   
-        
-            case 'dummmy':
-                break;
+                break;  
+            case 'viewCards':
+                this.onLeavingStateViewCards(); 
         }               
     }
 
@@ -399,6 +391,13 @@ class Mow implements Game {
         Object.keys(this.gamedatas.players).forEach(playerId => 
             dojo.removeClass(`playertable-${playerId}`, 'selectable')
         );
+    }
+
+    onLeavingStateViewCards() {
+        const giraffeHandWrap = document.getElementById('opponent-hand-wrap');
+        giraffeHandWrap.classList.add('hidden');
+        giraffeHandWrap.style.boxShadow = '';
+        document.getElementById('opponent-animals').innerHTML = '';
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -438,6 +437,9 @@ class Mow implements Game {
                     (this as any).addActionButton( 'flyType5_button', _(`5 flies`), 'onSelectFlyType5');
                     (this as any).addActionButton( 'flyTypeIgnore_button', _(`Ignore`), 'onSelectNoFlyType', null, false, 'red');
                     break;
+                case 'viewCards':
+                    (this as any).addActionButton('seen-button', _('Seen'), () => this.next());
+                    break;
             }
         }
     }       
@@ -454,6 +456,10 @@ class Mow implements Game {
 
     private isSimpleVersion(): boolean {
         return this.gamedatas.simpleVersion;
+    }
+
+    private getPlayer(playerId: number): Player {
+        return Object.values(this.gamedatas.players).find(player => Number(player.id) == playerId);
     }
 
     private setPickCardAction(pickCardAction: PickCardAction) {
@@ -647,6 +653,13 @@ class Mow implements Game {
          this.takeAction("exchangeCard", {
             playerId: this.selectedPlayerId
         });
+    }
+
+    public next() {
+         if (!(this as any).checkAction('next'))
+         return;
+     
+         this.takeAction("next");
     }
 
     public onSelectFlyType1() {
