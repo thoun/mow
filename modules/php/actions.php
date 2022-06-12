@@ -37,7 +37,11 @@ trait ActionTrait {
         $this->cards->moveCard($card_id, 'herd', $this->getActiveRow());
 
         self::setGameStateValue('cowPlayed', 1);
-        self::setGameStateValue('cantPlaySpecial', 0);
+
+        $cantPlaySpecial = intval(self::getGameStateValue('cantPlaySpecial'));
+        if ($cantPlaySpecial > 0 && intval($player_id) != $cantPlaySpecial) {
+            self::setGameStateValue('cantPlaySpecial', 0);
+        }
             
         $displayedNumber = $card->number;
         $precision = '';
@@ -154,7 +158,7 @@ trait ActionTrait {
 
         $nextState = 'playFarmer';
         if ($card->type == 1) {
-            self::setGameStateValue('cantPlaySpecial', 1);
+            self::setGameStateValue('cantPlaySpecial', $player_id);
         } else if ($card->type == 2) {
             $nextState = 'playFarmerWithOpponentSelection';
             self::setGameStateValue('lookOpponentHand', 1);
@@ -255,7 +259,10 @@ trait ActionTrait {
 
         self::incStat( 1, "collectedHerdsNumber" );
 
-        self::setGameStateValue('cantPlaySpecial', 0);
+        $cantPlaySpecial = intval(self::getGameStateValue('cantPlaySpecial'));
+        if ($cantPlaySpecial > 0 && intval($player_id) != $cantPlaySpecial) {
+            self::setGameStateValue('cantPlaySpecial', 0);
+        }
 
         if (count($this->cards->getCardsInLocation( "deck" )) > 0) {
             $this->gamestate->nextState('collectHerd');
@@ -286,7 +293,11 @@ trait ActionTrait {
     }
 
     function passFarmer() {
-        $this->gamestate->nextState('pass');
+        if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
+            $this->gamestate->nextState('chooseDirectionPick');
+        } else {
+            $this->gamestate->nextState('pass');
+        }
     }
 
     function pickFarmerCard(int $playerId) {
@@ -336,7 +347,7 @@ trait ActionTrait {
     }
 
     function ignoreFlies(int $playerId, int $type) {
-        if ($playerId > 0) {
+        if ($playerId > 0 && $type > 0) {
             $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId));
             $removedCards = array_values(array_filter($playerDiscard, fn($card) => $card->type == $type));
 
@@ -350,12 +361,12 @@ trait ActionTrait {
                 self::DbQuery($sql);
             }
 
-            $this->cards->moveCards(array_map(fn($card) => $card->id, $removedCards), "discard");            
-        }
+            $this->cards->moveCards(array_map(fn($card) => $card->id, $removedCards), "discard");  
 
-        // And notify
-        $farmerCard = $this->getFarmerCardByType($playerId, 10);
-        $this->farmerCardPlayed($playerId, $farmerCard);
+            // And notify
+            $farmerCard = $this->getFarmerCardByType($playerId, 10);
+            $this->farmerCardPlayed($playerId, $farmerCard);          
+        }
 
         $this->gamestate->setPlayerNonMultiactive($playerId, "endHand");
     }

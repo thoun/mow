@@ -101,8 +101,11 @@ trait UtilTrait {
     }
 
     function controlCardPlayable(object $card) {
-        if ($card->type == 5 && intval(self::getGameStateValue('cantPlaySpecial')) > 0) {
-            throw new BgaUserException(self::_("You can't play a special cow because of a farmer card"), true);
+        if ($card->type == 5) {
+            $cantPlaySpecial = intval(self::getGameStateValue('cantPlaySpecial'));
+            if ($cantPlaySpecial > 0 && intval($this->getActivePlayerId()) != $cantPlaySpecial) {
+                throw new BgaUserException(self::_("You can't play a special cow because of a farmer card"), true);
+            }
         }
 
         $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation('herd', $this->getActiveRow()));

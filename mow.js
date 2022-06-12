@@ -748,17 +748,21 @@ var Mow = /** @class */ (function () {
                     dojo.addClass('selectionAction_button', 'disabled');
                     break;
                 case 'selectFliesType':
-                    this.addActionButton('flyType1_button', _("1 fly"), 'onSelectFlyType1');
-                    this.addActionButton('flyType2_button', _("2 flies"), 'onSelectFlyType2');
-                    this.addActionButton('flyType3_button', _("3 flies"), 'onSelectFlyType3');
-                    this.addActionButton('flyType5_button', _("5 flies"), 'onSelectFlyType5');
-                    this.addActionButton('flyTypeIgnore_button', _("Ignore"), 'onSelectNoFlyType', null, false, 'red');
+                    var selectFliesTypeArgs_1 = args;
+                    [1, 2, 3, 5].forEach(function (type) {
+                        return _this.addActionButton("flyType" + type + "_button", _this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs_1), function () { return _this.selectFlieType(type); });
+                    });
+                    this.addActionButton('flyTypeIgnore_button', _("Ignore"), function () { return _this.selectFlieType(0); }, null, false, 'red');
                     break;
                 case 'viewCards':
                     this.addActionButton('seen-button', _('Seen'), function () { return _this.next(); });
                     break;
             }
         }
+    };
+    Mow.prototype.getSelectFlyTypeDetailsLabel = function (type, selectFliesTypeArgs) {
+        var details = selectFliesTypeArgs.counts[type];
+        return (type > 1 ? _('${number} flies').replace('${number}', type) : _('1 fly')) + ' (' + _('${number} card(s), ${points} point(s)').replace('${number}', details.number).replace('${points}', details.points) + ')';
     };
     ///////////////////////////////////////////////////
     //// Utility methods
@@ -938,21 +942,6 @@ var Mow = /** @class */ (function () {
             return;
         this.takeAction("next");
     };
-    Mow.prototype.onSelectFlyType1 = function () {
-        this.selectFlieType(1);
-    };
-    Mow.prototype.onSelectFlyType2 = function () {
-        this.selectFlieType(2);
-    };
-    Mow.prototype.onSelectFlyType3 = function () {
-        this.selectFlieType(3);
-    };
-    Mow.prototype.onSelectFlyType5 = function () {
-        this.selectFlieType(5);
-    };
-    Mow.prototype.onSelectNoFlyType = function () {
-        this.selectFlieType(null);
-    };
     Mow.prototype.selectFlieType = function (type) {
         this.takeAction("ignoreFlies", {
             playerId: type === null ? 0 : this.player_id,
@@ -1067,14 +1056,18 @@ var Mow = /** @class */ (function () {
         this.playerHand.unselectAll();
     };
     Mow.prototype.notif_handCollected = function (notif) {
-        // console.log( 'notif_handCollected', notif );
-        // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-        this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-        if (this.player_id == notif.args.player_id) {
-            dojo.query("#myhand").removeClass("bounce");
-            dojo.query("#myhand").addClass("bounce");
+        var _this = this;
+        if (notif.args.points > 0) {
+            this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+            if (this.player_id == notif.args.player_id) {
+                dojo.query("#myhand").removeClass("bounce");
+                dojo.query("#myhand").addClass("bounce");
+            }
+            this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         }
-        this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+        if (this.player_id == notif.args.player_id) {
+            setTimeout(function () { return _this.playerHand.removeAll(); }, 1450);
+        }
     };
     Mow.prototype.notif_allTopFlies = function (notif) {
         this.scoreCtrl[notif.args.playerId].toValue(notif.args.points);

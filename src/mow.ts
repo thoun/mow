@@ -431,18 +431,23 @@ class Mow implements Game {
                     dojo.addClass('selectionAction_button', 'disabled');
                     break;
                 case 'selectFliesType':
-                    (this as any).addActionButton( 'flyType1_button', _(`1 fly`), 'onSelectFlyType1');
-                    (this as any).addActionButton( 'flyType2_button', _(`2 flies`), 'onSelectFlyType2');
-                    (this as any).addActionButton( 'flyType3_button', _(`3 flies`), 'onSelectFlyType3');
-                    (this as any).addActionButton( 'flyType5_button', _(`5 flies`), 'onSelectFlyType5');
-                    (this as any).addActionButton( 'flyTypeIgnore_button', _(`Ignore`), 'onSelectNoFlyType', null, false, 'red');
+                    const selectFliesTypeArgs = args as EnteringSelectFliesTypeArgs;
+                    [1, 2, 3, 5].forEach(type => 
+                        (this as any).addActionButton(`flyType${type}_button`, this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs), () => this.selectFlieType(type))
+                    );
+                    (this as any).addActionButton( 'flyTypeIgnore_button', _(`Ignore`), () => this.selectFlieType(0), null, false, 'red');
                     break;
                 case 'viewCards':
                     (this as any).addActionButton('seen-button', _('Seen'), () => this.next());
                     break;
             }
         }
-    }       
+    }
+    
+    private getSelectFlyTypeDetailsLabel(type: number, selectFliesTypeArgs: EnteringSelectFliesTypeArgs): string {
+        const details: SelectFliesTypeCount = selectFliesTypeArgs.counts[type];
+        return (type > 1 ? _('${number} flies').replace('${number}', type) : _('1 fly')) + ' (' + _('${number} card(s), ${points} point(s)').replace('${number}', details.number).replace('${points}', details.points) + ')';
+    }
 
     ///////////////////////////////////////////////////
     //// Utility methods
@@ -662,27 +667,7 @@ class Mow implements Game {
          this.takeAction("next");
     }
 
-    public onSelectFlyType1() {
-         this.selectFlieType(1);
-    }
-
-    public onSelectFlyType2() {
-         this.selectFlieType(2);
-    }
-
-    public onSelectFlyType3() {
-         this.selectFlieType(3);
-    }
-
-    public onSelectFlyType5() {
-         this.selectFlieType(5);
-    }
-
-    public onSelectNoFlyType() {
-         this.selectFlieType(null);
-    }
-
-    public selectFlieType(type: number | null) {
+    public selectFlieType(type: number) {
          this.takeAction("ignoreFlies", {
             playerId: type === null ? 0 : (this as any).player_id,
             type
@@ -819,16 +804,18 @@ class Mow implements Game {
     }
     
     public notif_handCollected( notif: Notif<NotifHandCollectedArgs> ) {
-        // console.log( 'notif_handCollected', notif );
-        
-        // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-        (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-        if (this.player_id == notif.args.player_id) {
-            dojo.query("#myhand").removeClass("bounce");
-            dojo.query("#myhand").addClass("bounce");
+        if (notif.args.points > 0) {
+            (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+            if (this.player_id == notif.args.player_id) {
+                dojo.query("#myhand").removeClass("bounce");
+                dojo.query("#myhand").addClass("bounce");
+            }
+            
+            (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         }
-        
-        (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+        if (this.player_id == notif.args.player_id) {
+            setTimeout(() => this.playerHand.removeAll(), 1450);
+        }
     }
     
     public notif_allTopFlies( notif: Notif<NotifAllTopFliesArgs> ) {

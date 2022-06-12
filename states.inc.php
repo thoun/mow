@@ -135,6 +135,7 @@ $machinestates = [
             "playFarmer" => ST_PLAY_AGAIN,
             "playFarmerWithOpponentSelection" => ST_PLAYER_SELECT_OPPONENT,
             "pass" => ST_NEXT_PLAYER,
+            "chooseDirectionPick" => ST_CHOOSE_DIRECTION,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
     ],
@@ -218,6 +219,7 @@ $machinestates = [
         "descriptionmyturn" => clienttranslate('${you} can choose flies to ignore'),
         "type" => "multipleactiveplayer",
         "action" => "stSelectFliesType",
+        "args" => "argSelectFliesType",
         "possibleactions" => [ "choose" ],
         "transitions" => [
             "endHand" => ST_END_HAND,

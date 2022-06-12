@@ -52,6 +52,15 @@ interface EnteringLookCardsArgs {
     cards: Card[];
 }
 
+interface SelectFliesTypeCount {
+    number: number;
+    points: Number;
+}
+
+interface EnteringSelectFliesTypeArgs {
+    counts: { [type: number]: SelectFliesTypeCount};
+}
+
 interface NotifNewHandArgs {
     cards: Card[];
     remainingCards: number;

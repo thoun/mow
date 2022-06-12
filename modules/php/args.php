@@ -89,4 +89,28 @@ trait ArgsTrait {
             'opponentId' => null,
         ];
     }
+
+    function argSelectFliesType() {
+        $farmerCard = $this->getFarmerCardsFromDb($this->farmerCards->getCardsOfType(10))[0];
+        $playerId = $farmerCard->location_arg;
+
+        $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId));
+        //$this->debug($playerDiscard);
+
+        $counts = [];
+
+        foreach ([1, 2, 3, 5] as $type) {
+            $removedCards = array_values(array_filter($playerDiscard, fn($card) => $card->type == $type));
+            $cardsValue = $this->getCardsValues($removedCards);
+
+            $counts[$type] = [
+                'number' => count($removedCards),
+                'points' => $cardsValue,
+            ];
+        }
+
+        return [
+            'counts' => $counts,
+        ];
+    }
 }
