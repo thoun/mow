@@ -15,9 +15,7 @@ trait StateTrait {
         $this->cards->moveAllCardsInLocation( null, "deck" );
         $this->cards->shuffle( 'deck' );
     
-	    self::DbQuery("UPDATE player SET hand_points = 0, collected_points = 0 WHERE 1");
-        self::setGameStateValue('savedWithFarmerCard', 0);
-        self::setGameStateValue('savedWithFarmerCardPlayerId', 0);
+	    self::DbQuery("UPDATE player SET remaining_in_hand_points = 0, collected_points = 0, cancelled_points = 0 WHERE 1");
 
         $players = self::loadPlayersBasicInfos();
         $remainingCards = count($this->cards->getCardsInLocation( 'deck' )) - (5 * count($players));
@@ -162,7 +160,7 @@ trait StateTrait {
             $this->collectedCardsStats($player_hand, $player_id);
 
             if ($cardsValue > 0) {
-                $sql = "UPDATE player SET player_score = player_score - $cardsValue, hand_points = hand_points - $cardsValue WHERE player_id = $player_id";
+                $sql = "UPDATE player SET remaining_in_hand_points = remaining_in_hand_points + $cardsValue WHERE player_id = $player_id";
                 self::DbQuery($sql);
                     
                 // And notify
@@ -182,8 +180,7 @@ trait StateTrait {
         }
     }
 
-    function stEndHand() {
-        $resetPoints = 0;
+    function stEndRound() {
         $resetPointsPlayerId = 0;
         $topPlayerId = 0;
         if (!$this->isSimpleVersion()) {
@@ -192,36 +189,38 @@ trait StateTrait {
             $resetPointsPlayerId = intval(self::getUniqueValueFromDB($sql));
 
             if ($resetPointsPlayerId > 0) {
-                $sql = "SELECT (hand_points + collected_points) FROM `player` WHERE player_id = $resetPointsPlayerId";
-                $resetPoints = intval(self::getUniqueValueFromDB($sql));
-
-                $sql = "UPDATE player SET player_score = player_score - (hand_points + collected_points), hand_points = 0, collected_points = 0 WHERE player_id = $resetPointsPlayerId";
+                $sql = "UPDATE player SET remaining_in_hand_points = 0, collected_points = 0, cancelled_points = 0 WHERE player_id = $resetPointsPlayerId";
                 self::DbQuery($sql);
             
 
-                self::notifyAllPlayers('allTopFlies', clienttranslate('${player_name} got all 5 flies cards, his points in this hand are erased'), [
+                self::notifyAllPlayers('allTopFlies', clienttranslate('${player_name} got all 5-flies cards, his points in this hand are erased'), [
                     'playerId' => $resetPointsPlayerId,
-                    'player_name' => self::getUniqueValueFromDB("SELECT player_name FROM player where player_id = $resetPointsPlayerId"),
-                    'points' => intval(self::getUniqueValueFromDB("SELECT player_score FROM player where player_id = $resetPointsPlayerId")),
+                    'player_name' => $this->getPlayerName($resetPointsPlayerId),
                 ]);
             }
 
-            $sql = "SELECT player_id FROM `player` WHERE (hand_points + collected_points) < 0 order by (hand_points + collected_points) asc limit 1";
+            $sql = "SELECT player_id FROM `player` WHERE (remaining_in_hand_points + collected_points - cancelled_points) > 0 order by (remaining_in_hand_points + collected_points - cancelled_points) DESC limit 1";
             $topPlayerId = intval(self::getUniqueValueFromDB($sql));
             if ($topPlayerId > 0) {
                 $this->pickFarmerCard($topPlayerId);
             }
         }
 
+        $sql = "UPDATE player SET player_score = player_score - (collected_points + remaining_in_hand_points - cancelled_points)";
+        self::DbQuery($sql);
+
         $players = self::getObjectListFromDB("SELECT * FROM player");
         /// Display table window with results ////
 
         // Header line
         $headers = [''];
-        $collectedPoints = [ ['str' => clienttranslate('Collected points'), 'args' => [] ] ];
+        $collectedPoints = [ ['str' => clienttranslate('Collected cards points'), 'args' => [] ] ];
         $remainingPoints = [ ['str' => clienttranslate('Remaining cards points'), 'args' => [] ] ];
-        $handPoints = [ ['str' => clienttranslate('Hand points'), 'args' => [] ] ];
+        $roundPoints = [ ['str' => clienttranslate('Round points'), 'args' => [] ] ];
         $totalPoints = [ ['str' => clienttranslate('Total points'), 'args' => [] ] ];
+        
+        $playersScores = [];
+
         foreach ($players as $player) {
             $headers[] = [
                 'str' => '${player_name}',
@@ -230,30 +229,33 @@ trait StateTrait {
             ];
             $playerId = intval($player['player_id']);
             $playerCollectedPoints = intval($player['collected_points']);
-            $playerRemainingPoints = intval($player['hand_points']);
+            $playerRemainingPoints = intval($player['remaining_in_hand_points']);
+            $playerCancelledPoints = intval($player['cancelled_points']);
 
-            $collectedPoints[] = -$playerCollectedPoints;
-            $remainingPoints[] = -$playerRemainingPoints;
+            $collectedPoints[] = $playerCollectedPoints;
+            $remainingPoints[] = $playerRemainingPoints;
 
-            $handPointsCount = -($playerCollectedPoints + $playerRemainingPoints);
-            $handPointStr = null;
+            $roundPointsCount = $playerCollectedPoints + $playerRemainingPoints;
+            $roundPointStr = null;
             if ($playerId == $resetPointsPlayerId) {
-                $handPointStr = "<strike>".(-$resetPoints)."</strike> ".(-$handPointsCount);
-            } else if ($playerId == intval(self::getGameStateValue('savedWithFarmerCardPlayerId'))) {
-                $handPointStr = "<strike>".(-$handPointsCount + intval(self::getGameStateValue('savedWithFarmerCard')))."</strike> ".(-$handPointsCount);
+                $roundPointStr = "<strike>".$roundPointsCount."</strike> 0";
+            } else if ($playerCancelledPoints > 0) {
+                $roundPointStr = "<strike>".$roundPointsCount."</strike> ".($roundPointsCount - $playerCancelledPoints);
             } else {
-                $handPointStr = -$handPointsCount;
+                $roundPointStr = $roundPointsCount;
             }
-            $handPointStr = $playerId == $topPlayerId ? '<span class="tooltip-fly-img"></span>' . $handPointStr . '<span class="tooltip-fly-img"></span>' : $handPointStr;
-            $handPoints[] = $handPointStr;
+            $roundPointStr = $playerId == $topPlayerId ? '<span class="tooltip-fly-img"></span>' . $roundPointStr . '<span class="tooltip-fly-img"></span>' : $roundPointStr;
+            $roundPoints[] = $roundPointStr;
             $totalPoints[] = -$player['player_score'];
+            $playersScores[$playerId] = intval($player['player_score']);
 
             self::incStat($playerCollectedPoints, 'collectedPoints');
             self::incStat($playerCollectedPoints, 'collectedPoints', $playerId);
             self::incStat($playerRemainingPoints, 'remainingPoints');
             self::incStat($playerRemainingPoints, 'remainingPoints', $playerId);
         }
-        $table = [$headers, $collectedPoints, $remainingPoints, $handPoints, $totalPoints];
+        $table = [$headers, $collectedPoints, $remainingPoints, $roundPoints, $totalPoints];
+
 
         // Test if this is the end of the game
         $sql = "SELECT min(player_score) FROM player ";
@@ -264,6 +266,7 @@ trait StateTrait {
             "id" => 'finalScoring',
             "title" => clienttranslate('Result of hand'),
             "table" => $table,
+            "playersScores" => $playersScores,
             "closing" => $end ? clienttranslate("End of game") : clienttranslate("Next hand")
         ]);
         

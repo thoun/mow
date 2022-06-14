@@ -19,6 +19,10 @@ trait DebugUtilTrait {
         
     }
 
+    function debugEmptyDeck() {
+        $this->cards->moveAllCardsInLocation("deck", "discard");
+    }
+
     function debug($debugData) {
         if ($this->getBgaEnvironment() != 'studio') { 
             return;

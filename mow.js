@@ -750,7 +750,7 @@ var Mow = /** @class */ (function () {
                 case 'selectFliesType':
                     var selectFliesTypeArgs_1 = args;
                     [1, 2, 3, 5].forEach(function (type) {
-                        return _this.addActionButton("flyType" + type + "_button", _this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs_1), function () { return _this.selectFlieType(type); });
+                        return _this.addActionButton("flyType" + type + "_button", _this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs_1), function () { return _this.selectFlieType(type); }, null, null, selectFliesTypeArgs_1.counts[type].points ? undefined : 'gray');
                     });
                     this.addActionButton('flyTypeIgnore_button', _("Ignore"), function () { return _this.selectFlieType(0); }, null, false, 'red');
                     break;
@@ -762,7 +762,7 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.getSelectFlyTypeDetailsLabel = function (type, selectFliesTypeArgs) {
         var details = selectFliesTypeArgs.counts[type];
-        return (type > 1 ? _('${number} flies').replace('${number}', type) : _('1 fly')) + ' (' + _('${number} card(s), ${points} point(s)').replace('${number}', details.number).replace('${points}', details.points) + ')';
+        return (type > 1 ? _('${number}-flies cards').replace('${number}', type) : _('1-fly cards')) + ' (' + _('ignore ${points} point(s)') /*.replace('${number}', details.number)*/.replace('${points}', details.points) + ')';
     };
     ///////////////////////////////////////////////////
     //// Utility methods
@@ -961,6 +961,7 @@ var Mow = /** @class */ (function () {
     */
     Mow.prototype.setupNotifications = function () {
         //console.log( 'notifications subscriptions setup' );
+        var _this = this;
         dojo.subscribe('newHand', this, "notif_newHand");
         dojo.subscribe('cardPlayed', this, "notif_cardPlayed");
         dojo.subscribe('farmerCardPlayed', this, "notif_farmerCardPlayed");
@@ -970,12 +971,31 @@ var Mow = /** @class */ (function () {
         dojo.subscribe('directionChanged', this, "notif_directionChanged");
         dojo.subscribe('herdCollected', this, "notif_herdCollected");
         dojo.subscribe('handCollected', this, "notif_handCollected");
-        dojo.subscribe('allTopFlies', this, "notif_allTopFlies");
         dojo.subscribe('replaceCards', this, "notif_replaceCards");
         dojo.subscribe('removedCard', this, "notif_removedCard");
         dojo.subscribe('activeRowChanged', this, "notif_activeRowChanged");
+        dojo.subscribe('tableWindow', this, "notif_tableWindow");
         this.notifqueue.setSynchronous('herdCollected', 2000);
         this.notifqueue.setSynchronous('handCollected', 1500);
+        var notifs = [
+            ['newHand', 500],
+            ['cardPlayed', 500],
+            ['farmerCardPlayed', 500],
+            ['newCard', 1],
+            ['newFarmerCard', 1],
+            ['allowedCards', 1],
+            ['directionChanged', 500],
+            ['herdCollected', 2000],
+            ['handCollected', 1500],
+            ['replaceCards', 500],
+            ['removedCard', 1],
+            ['activeRowChanged', 500],
+            ['tableWindow', 1],
+        ];
+        notifs.forEach(function (notif) {
+            dojo.subscribe(notif[0], _this, "notif_" + notif[0]);
+            _this.notifqueue.setSynchronous(notif[0], notif[1]);
+        });
     };
     // from this point and below, you can write your game notifications handling methods
     Mow.prototype.notif_newHand = function (notif) {
@@ -1045,7 +1065,7 @@ var Mow = /** @class */ (function () {
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         if (notif.args.player_id) {
             this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-            this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerds[notif.args.row].removeAllTo('player_board_' + notif.args.player_id);
         }
         else {
@@ -1063,14 +1083,11 @@ var Mow = /** @class */ (function () {
                 dojo.query("#myhand").removeClass("bounce");
                 dojo.query("#myhand").addClass("bounce");
             }
-            this.scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         }
         if (this.player_id == notif.args.player_id) {
             setTimeout(function () { return _this.playerHand.removeAll(); }, 1450);
         }
-    };
-    Mow.prototype.notif_allTopFlies = function (notif) {
-        this.scoreCtrl[notif.args.playerId].toValue(notif.args.points);
     };
     Mow.prototype.notif_replaceCards = function (notif) {
         var _this = this;
@@ -1083,6 +1100,12 @@ var Mow = /** @class */ (function () {
     Mow.prototype.notif_activeRowChanged = function (notif) {
         this.gamedatas.activeRow = notif.args.activeRow;
         slideToObjectAndAttach(this, $('rowIndicator'), "rowIndicatorWrapper" + notif.args.activeRow);
+    };
+    Mow.prototype.notif_tableWindow = function (notif) {
+        var _this = this;
+        Object.keys(notif.args.playersScores).forEach(function (player_id) {
+            _this.scoreCtrl[player_id].toValue(Number(notif.args.playersScores[player_id]));
+        });
     };
     ////////////////////////////////
     ////////////////////////////////

@@ -53,9 +53,6 @@ class mow extends Table {
                 'activeRow' => 15,
                 'rowNumber' => 16,
 
-                'savedWithFarmerCard' => 20,
-                'savedWithFarmerCardPlayerId' => 21,
-
                 // farmer cards constants
                 'cantPlaySpecial' => 50,
                 'chooseDirectionPick' => 51,
@@ -121,9 +118,7 @@ class mow extends Table {
         self::setGameStateInitialValue( 'cantPlaySpecial', 0 );
         self::setGameStateInitialValue( 'chooseDirectionPick', 0 );
         self::setGameStateInitialValue( 'lookOpponentHand', 0 );
-        self::setGameStateInitialValue( 'exchangeCard', 0 );        
-        self::setGameStateInitialValue( 'savedWithFarmerCard', 0 );
-        self::setGameStateInitialValue( 'savedWithFarmerCardPlayerId', 0 );
+        self::setGameStateInitialValue( 'exchangeCard', 0 );
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)

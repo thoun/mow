@@ -33,7 +33,8 @@
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `player` ADD `collected_points` int(3) NOT NULL DEFAULT 0;
-ALTER TABLE `player` ADD `hand_points` int(3) NOT NULL DEFAULT 0;
+ALTER TABLE `player` ADD `remaining_in_hand_points` int(3) NOT NULL DEFAULT 0;
+ALTER TABLE `player` ADD `cancelled_points` int(3) NOT NULL DEFAULT 0;
 
 -- type : fly number
 -- type_arg : number

@@ -94,8 +94,10 @@ trait ArgsTrait {
         $farmerCard = $this->getFarmerCardsFromDb($this->farmerCards->getCardsOfType(10))[0];
         $playerId = $farmerCard->location_arg;
 
-        $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId));
-        //$this->debug($playerDiscard);
+        $playerDiscard = array_merge(
+            $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId)),
+            $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $playerId)),
+        );
 
         $counts = [];
 

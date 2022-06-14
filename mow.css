@@ -470,3 +470,7 @@
   text-align: center;
   font-size: 120%;
 }
+
+.tableWindow table {
+  width: 100%;
+}

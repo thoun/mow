@@ -231,7 +231,7 @@ $machinestates = [
       "name" => "endHand",
       "description" => "",
       "type" => "game",
-      "action" => "stEndHand",
+      "action" => "stEndRound",
       "transitions" => [ "nextHand" => ST_NEW_HAND, "endGame" => ST_END_GAME ]
     ],
 

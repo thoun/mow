@@ -433,7 +433,7 @@ class Mow implements Game {
                 case 'selectFliesType':
                     const selectFliesTypeArgs = args as EnteringSelectFliesTypeArgs;
                     [1, 2, 3, 5].forEach(type => 
-                        (this as any).addActionButton(`flyType${type}_button`, this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs), () => this.selectFlieType(type))
+                        (this as any).addActionButton(`flyType${type}_button`, this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs), () => this.selectFlieType(type), null, null, selectFliesTypeArgs.counts[type].points ? undefined : 'gray')
                     );
                     (this as any).addActionButton( 'flyTypeIgnore_button', _(`Ignore`), () => this.selectFlieType(0), null, false, 'red');
                     break;
@@ -446,7 +446,7 @@ class Mow implements Game {
     
     private getSelectFlyTypeDetailsLabel(type: number, selectFliesTypeArgs: EnteringSelectFliesTypeArgs): string {
         const details: SelectFliesTypeCount = selectFliesTypeArgs.counts[type];
-        return (type > 1 ? _('${number} flies').replace('${number}', type) : _('1 fly')) + ' (' + _('${number} card(s), ${points} point(s)').replace('${number}', details.number).replace('${points}', details.points) + ')';
+        return (type > 1 ? _('${number}-flies cards').replace('${number}', type) : _('1-fly cards')) + ' (' + _('ignore ${points} point(s)')/*.replace('${number}', details.number)*/.replace('${points}', details.points) + ')';
     }
 
     ///////////////////////////////////////////////////
@@ -698,13 +698,34 @@ class Mow implements Game {
         dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
         dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
         dojo.subscribe( 'handCollected', this, "notif_handCollected" );
-        dojo.subscribe( 'allTopFlies', this, "notif_allTopFlies" );
         dojo.subscribe( 'replaceCards', this, "notif_replaceCards" );
         dojo.subscribe( 'removedCard', this, "notif_removedCard" );
         dojo.subscribe( 'activeRowChanged', this, "notif_activeRowChanged" );
+        dojo.subscribe( 'tableWindow', this, "notif_tableWindow" );
 
         (this as any).notifqueue.setSynchronous( 'herdCollected', 2000 );
         (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
+        
+        const notifs = [
+            ['newHand', 500],
+            ['cardPlayed', 500],
+            ['farmerCardPlayed', 500],
+            ['newCard', 1],
+            ['newFarmerCard', 1],
+            ['allowedCards', 1],
+            ['directionChanged', 500],
+            ['herdCollected', 2000],
+            ['handCollected', 1500],
+            ['replaceCards', 500],
+            ['removedCard', 1],
+            ['activeRowChanged', 500],
+            ['tableWindow', 1],
+        ];
+    
+        notifs.forEach((notif) => {
+            dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
+            (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
+        });
     }
     
     // from this point and below, you can write your game notifications handling methods
@@ -793,7 +814,7 @@ class Mow implements Game {
         if (notif.args.player_id) {
             (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
-            (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
             this.theHerds[notif.args.row].removeAllTo( 'player_board_'+notif.args.player_id );
         } else {
             this.theHerds[notif.args.row].removeAllTo('topbar');
@@ -811,15 +832,11 @@ class Mow implements Game {
                 dojo.query("#myhand").addClass("bounce");
             }
             
-            (this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         }
         if (this.player_id == notif.args.player_id) {
             setTimeout(() => this.playerHand.removeAll(), 1450);
         }
-    }
-    
-    public notif_allTopFlies( notif: Notif<NotifAllTopFliesArgs> ) {
-        (this as any).scoreCtrl[notif.args.playerId].toValue(notif.args.points);
     }
     
     public notif_replaceCards( notif: Notif<NotifReplaceCardsArgs> ) {
@@ -834,6 +851,12 @@ class Mow implements Game {
     public notif_activeRowChanged( notif: Notif<NotifActiveRowChangedArgs> ) {
         this.gamedatas.activeRow = notif.args.activeRow;
         slideToObjectAndAttach(this, $('rowIndicator'), `rowIndicatorWrapper${notif.args.activeRow}`);
+    }
+    
+    public notif_tableWindow( notif: Notif<any> ) {
+        Object.keys(notif.args.playersScores).forEach(player_id => {
+            (this as any).scoreCtrl[player_id].toValue(Number(notif.args.playersScores[player_id]));
+        });
     }
 
     ////////////////////////////////

@@ -252,7 +252,7 @@ trait ActionTrait {
         $collectedPoints = $this->getCardsValues($herdCards);
         $this->collectedCardsStats($herdCards, $player_id);
 
-        $sql = "UPDATE player SET player_score=player_score-$collectedPoints, collected_points=collected_points-$collectedPoints WHERE player_id='$player_id'";
+        $sql = "UPDATE player SET collected_points = collected_points + $collectedPoints WHERE player_id='$player_id'";
         self::DbQuery($sql);
 
         $this->removeHerdAndNotify($player_id, $collectedPoints);
@@ -348,16 +348,15 @@ trait ActionTrait {
 
     function ignoreFlies(int $playerId, int $type) {
         if ($playerId > 0 && $type > 0) {
-            $playerDiscard = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId));
+            $playerDiscard = array_merge(
+                $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $playerId)),
+                $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $playerId))
+            );
             $removedCards = array_values(array_filter($playerDiscard, fn($card) => $card->type == $type));
-
             $cardsValue = $this->getCardsValues($removedCards);
-            
-            self::setGameStateValue('savedWithFarmerCard', $cardsValue);
-            self::setGameStateValue('savedWithFarmerCardPlayerId', $playerId);
 
             if ($cardsValue > 0) {
-                $sql = "UPDATE player SET player_score = player_score - $cardsValue, hand_points = hand_points - $cardsValue WHERE player_id = $playerId";
+                $sql = "UPDATE player SET cancelled_points = $cardsValue WHERE player_id = $playerId";
                 self::DbQuery($sql);
             }
 
