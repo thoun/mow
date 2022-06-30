@@ -119,6 +119,10 @@ class Mow implements Game {
         dojo.connect( this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged' );
 
         for (let iHerd=0; iHerd<gamedatas.herdNumber; iHerd++) {
+            if (iHerd > 0) {
+                dojo.place(`<hr/>`, 'theherds');
+            }
+
             dojo.place(`<div class="row">${gamedatas.herdNumber > 1 ? `<div id="rowIndicatorWrapper${iHerd}" class="rowIndicatorWrapper"></div>` : ''}<div id="herd${iHerd}" class="herd"></div></div>`, 'theherds');
             this.theHerds[iHerd] = new ebg.stock() as MowHerdStock;
             this.theHerds[iHerd].create( this, $(`herd${iHerd}`), this.cardwidth, this.cardheight );
