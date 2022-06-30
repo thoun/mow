@@ -656,6 +656,8 @@ class Mow implements Game {
          this.takeAction("viewCards", {
             playerId: this.selectedPlayerId
         });
+
+        this.selectedPlayerId = null;
     }
 
     public onPickOpponentCard() {
@@ -665,6 +667,8 @@ class Mow implements Game {
          this.takeAction("exchangeCard", {
             playerId: this.selectedPlayerId
         });
+
+        this.selectedPlayerId = null;
     }
 
     public next() {

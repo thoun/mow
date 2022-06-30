@@ -935,6 +935,7 @@ var Mow = /** @class */ (function () {
         this.takeAction("viewCards", {
             playerId: this.selectedPlayerId
         });
+        this.selectedPlayerId = null;
     };
     Mow.prototype.onPickOpponentCard = function () {
         if (!this.checkAction('exchangeCard'))
@@ -942,6 +943,7 @@ var Mow = /** @class */ (function () {
         this.takeAction("exchangeCard", {
             playerId: this.selectedPlayerId
         });
+        this.selectedPlayerId = null;
     };
     Mow.prototype.next = function () {
         if (!this.checkAction('next'))
