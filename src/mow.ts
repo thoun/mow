@@ -523,7 +523,7 @@ class Mow implements Game {
             const rowPick = this.gamedatas.herdNumber > 1;
             const ids: number[] = rowPick ? [0, 1, 2] : this.gamedatas.playerorder.map(id => Number(id)).filter(id => id != Number((this as any).player_id));
 
-            let html = '';
+            let html = `<div>${_('Or choose which opponent plays next:')}</div>`;
             ids.forEach(id => {
                 const player = rowPick ? {
                     color: 'transparent',

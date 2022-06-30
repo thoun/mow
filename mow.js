@@ -826,7 +826,7 @@ var Mow = /** @class */ (function () {
         if (canPick) {
             var rowPick_1 = this.gamedatas.herdNumber > 1;
             var ids = rowPick_1 ? [0, 1, 2] : this.gamedatas.playerorder.map(function (id) { return Number(id); }).filter(function (id) { return id != Number(_this.player_id); });
-            var html_1 = '';
+            var html_1 = "<div>" + _('Or choose which opponent plays next:') + "</div>";
             ids.forEach(function (id) {
                 var player = rowPick_1 ? {
                     color: 'transparent',
