@@ -41,7 +41,7 @@ trait ArgsTrait {
             'canCollect' => $canCollect,
             'suffix' => $suffix,
             'allowedCardIds' => $this->getAllowedCardsIds($player_id),
-            'allowedFarmerCardIds' => $this->getAllowedFarmerCardsId(),
+            'allowedFarmerCards' => $this->getAllowedFarmerCards(),
         ];
     }
 

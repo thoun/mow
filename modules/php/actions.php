@@ -431,10 +431,4 @@ trait ActionTrait {
 
         return $allowedCards; 
     }
-
-    function getAllowedFarmerCardsId() {
-        $allowedCards = $this->getAllowedFarmerCards();
-
-        return array_map(fn($card) => $card->id, $allowedCards); 
-    }
 }

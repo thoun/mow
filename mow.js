@@ -546,7 +546,7 @@ var Mow = /** @class */ (function () {
                 this.setGamestateDescription(suffix);
                 this.onEnteringStatePlayerTurn(args);
                 if (this.isCurrentPlayerActive()) {
-                    this.disableFarmerCards(args.args.allowedFarmerCardIds);
+                    this.disableFarmerCards(args.args.allowedFarmerCards.map(function (card) { return card.id; }));
                 }
                 break;
             case 'chooseDirection':
@@ -719,6 +719,12 @@ var Mow = /** @class */ (function () {
         giraffeHandWrap.style.boxShadow = '';
         document.getElementById('opponent-animals').innerHTML = '';
     };
+    Mow.prototype.addAllowedFarmerCardsButtons = function (args) {
+        var _this = this;
+        args.allowedFarmerCards.forEach(function (card) {
+            return _this.addActionButton("playFarmer" + card.id + "_button", _('Play farmer') + (" <div class=\"farmer-icon farmer" + card.type + "\"></div>"), function () { return _this.playFarmer(card.id); }, null, null, 'gray');
+        });
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //        
@@ -729,14 +735,13 @@ var Mow = /** @class */ (function () {
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'playerTurn':
+                    this.addAllowedFarmerCardsButtons(args);
                     if (args.canCollect) {
                         this.addActionButton('collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                     }
                     break;
                 case 'playFarmer':
-                    args.allowedFarmerCards.forEach(function (card) {
-                        return _this.addActionButton("playFarmer" + card.id + "_button", _('Play farmer') + (" <div class=\"farmer-icon farmer" + card.type + "\"></div>"), function () { return _this.playFarmer(card.id); });
-                    });
+                    this.addAllowedFarmerCardsButtons(args);
                     this.addActionButton('pass_button', _('Pass'), 'onPassFarmer');
                     break;
                 case 'swapHands':

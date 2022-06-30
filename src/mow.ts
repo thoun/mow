@@ -211,7 +211,7 @@ class Mow implements Game {
                 this.setGamestateDescription(suffix);
                 this.onEnteringStatePlayerTurn(args);  
                 if((this as any).isCurrentPlayerActive()) {
-                    this.disableFarmerCards(args.args.allowedFarmerCardIds);   
+                    this.disableFarmerCards(args.args.allowedFarmerCards.map(card => card.id));   
                 }
                 break;
 
@@ -404,6 +404,12 @@ class Mow implements Game {
         document.getElementById('opponent-animals').innerHTML = '';
     }
 
+    private addAllowedFarmerCardsButtons(args: any) {
+        args.allowedFarmerCards.forEach(card => 
+            (this as any).addActionButton(`playFarmer${card.id}_button`, _('Play farmer') + ` <div class="farmer-icon farmer${card.type}"></div>`, () => this.playFarmer(card.id), null, null, 'gray')
+        );
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //        
@@ -414,14 +420,13 @@ class Mow implements Game {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'playerTurn':
+                    this.addAllowedFarmerCardsButtons(args);
                     if (args.canCollect) {
                         (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                     }
                     break;
                 case 'playFarmer':
-                    args.allowedFarmerCards.forEach(card => 
-                        (this as any).addActionButton(`playFarmer${card.id}_button`, _('Play farmer') + ` <div class="farmer-icon farmer${card.type}"></div>`, () => this.playFarmer(card.id))
-                    );
+                    this.addAllowedFarmerCardsButtons(args);
                     (this as any).addActionButton('pass_button', _('Pass'), 'onPassFarmer');
                     break;
                 case 'swapHands':
