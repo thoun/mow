@@ -219,7 +219,7 @@ trait UtilTrait {
             $card = $herdWithoutSlowpokes[$i];
             //self::dump('$card', json_encode($card));
 
-            if ($lastDisplayedNumber != null) {
+            if ($lastDisplayedNumber !== null) {
                 $currentDisplayedNumber = $card->number;
                 if ($currentDisplayedNumber == 70 || $currentDisplayedNumber == 90) {
                     $currentDisplayedNumber = $currentDisplayedNumber / 10;

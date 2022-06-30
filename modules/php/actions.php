@@ -44,13 +44,10 @@ trait ActionTrait {
         }
             
         $displayedNumber = $card->number;
-        $precision = '';
         if ($displayedNumber == 21 || $displayedNumber == 22) {
             $displayedNumber = '';
-            $precision = 'slowpoke';
         } else if ($displayedNumber == 70 || $displayedNumber == 90) {
             $displayedNumber /= 10;
-            $precision = 'acrobatic';
         }
 
         // And notify
@@ -87,7 +84,7 @@ trait ActionTrait {
         // changing direction is useless with 2 players
         $canChooseDirection = $card->type === 5 && (self::getPlayersNumber() > 2 || !$this->isSimpleVersion());
         if ($canChooseDirection) {
-            self::setGameStateValue('canPick', ($displayedNumber == 0 || $displayedNumber == 16) ? 1 : 0);
+            self::setGameStateValue('canPick', ($displayedNumber === 0 || $displayedNumber === 16) ? 1 : 0);
         } else {
             $rowNumber = $this->getHerdNumber();
             if ($rowNumber > 1) {
@@ -135,6 +132,8 @@ trait ActionTrait {
         if ($rowNumber > 1) {
             $this->setNextActiveRow();
         }
+
+        self::setGameStateValue('canPick', 0);
 
         if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
             self::setGameStateValue('chooseDirectionPick', 0);
@@ -221,6 +220,8 @@ trait ActionTrait {
     }
 
     function setPlayer(int $playerId) {
+        self::setGameStateValue('canPick', 0);
+
         if ($this->getHerdNumber() > 1) {
 
             $activeRow = $playerId;

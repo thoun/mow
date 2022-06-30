@@ -199,7 +199,7 @@ class Mow implements Game {
     //                  You can use this method to perform some user interface changes at this moment.
     //
     public onEnteringState(stateName: string, args: any) {
-        //console.log( 'Entering state: '+stateName );
+        console.log( 'Entering state: '+stateName, args);
         
         if((this as any).isCurrentPlayerActive()) {
             dojo.addClass(`playertable-${args.active_player}`, "active");

@@ -536,7 +536,7 @@ var Mow = /** @class */ (function () {
     //                  You can use this method to perform some user interface changes at this moment.
     //
     Mow.prototype.onEnteringState = function (stateName, args) {
-        //console.log( 'Entering state: '+stateName );
+        console.log('Entering state: ' + stateName, args);
         if (this.isCurrentPlayerActive()) {
             dojo.addClass("playertable-" + args.active_player, "active");
         }
