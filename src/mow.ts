@@ -216,7 +216,7 @@ class Mow implements Game {
                 break;
             case 'playFarmer':
                 if((this as any).isCurrentPlayerActive()) {
-                    this.disableFarmerCards(args.args.allowedFarmerCardIds);   
+                    this.disableFarmerCards(args.args.allowedFarmerCards.map(card => card.id));   
                 }
                 break;
 
@@ -415,7 +415,10 @@ class Mow implements Game {
                     }
                     break;
                 case 'playFarmer':
-                    (this as any).addActionButton( 'pass_button', _('Pass'), 'onPassFarmer');
+                    args.allowedFarmerCards.forEach(card => 
+                        (this as any).addActionButton(`playFarmer${card.id}_button`, _('Play farmer') + ` <div class="farmer-icon farmer${card.type}"></div>`, () => this.playFarmer(card.id))
+                    );
+                    (this as any).addActionButton('pass_button', _('Pass'), 'onPassFarmer');
                     break;
                 case 'swapHands':
                     (this as any).addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
@@ -888,13 +891,17 @@ class Mow implements Game {
                 // Can play a card
                 const id = items[0].id;
 
-                this.takeAction("playFarmer", { 
-                    id
-                });
+                this.playFarmer(id);
                 
                 this.playerFarmerHand.unselectAll();
             }
         }
+    }
+
+    public playFarmer(id: number) {
+        this.takeAction("playFarmer", { 
+            id
+        });
     }
 
     ////////////////////////////////

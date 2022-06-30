@@ -71,3 +71,23 @@ $cardHeight: 188px;
       width: 100%;
     }
   }
+
+  
+
+.farmer-icon {
+  border-radius: 8px;
+  width: 80px; 
+  height: 31px;
+  background-image: url('img/farmers.jpg');
+  display: inline-block;
+  vertical-align: inherit;
+  margin-left: 5px;
+  margin-bottom: 1px;
+  background-position-y: 95%;
+
+  @for $i from 1 through 10 {
+    &.farmer#{$i} {
+        background-position-x: 1.8% + (($i - 1) * 10.7%);
+    }
+  }
+}

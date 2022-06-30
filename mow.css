@@ -474,3 +474,45 @@
 .tableWindow table {
   width: 100%;
 }
+
+.farmer-icon {
+  border-radius: 8px;
+  width: 80px;
+  height: 31px;
+  background-image: url("img/farmers.jpg");
+  display: inline-block;
+  vertical-align: inherit;
+  margin-left: 5px;
+  margin-bottom: 1px;
+  background-position-y: 95%;
+}
+.farmer-icon.farmer1 {
+  background-position-x: 1.8%;
+}
+.farmer-icon.farmer2 {
+  background-position-x: 12.5%;
+}
+.farmer-icon.farmer3 {
+  background-position-x: 23.2%;
+}
+.farmer-icon.farmer4 {
+  background-position-x: 33.9%;
+}
+.farmer-icon.farmer5 {
+  background-position-x: 44.6%;
+}
+.farmer-icon.farmer6 {
+  background-position-x: 55.3%;
+}
+.farmer-icon.farmer7 {
+  background-position-x: 66%;
+}
+.farmer-icon.farmer8 {
+  background-position-x: 76.7%;
+}
+.farmer-icon.farmer9 {
+  background-position-x: 87.4%;
+}
+.farmer-icon.farmer10 {
+  background-position-x: 98.1%;
+}

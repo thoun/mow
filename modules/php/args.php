@@ -55,7 +55,7 @@ trait ArgsTrait {
 
     function argPlayFarmer() {
         return [
-            'allowedFarmerCardIds' => $this->getAllowedFarmerCardsId(),
+            'allowedFarmerCards' => $this->getAllowedFarmerCards(),
         ]; 
     }
 

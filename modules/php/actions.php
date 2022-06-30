@@ -407,19 +407,25 @@ trait ActionTrait {
         $this->gamestate->nextState('giveCard');
     }
 
-    function getAllowedFarmerCardsId() {
+    function getAllowedFarmerCards() {
         $player_id = self::getActivePlayerId();
         
         $farmerCardsInHand = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $player_id));
 
-        $allowedCardIds = [];
+        $allowedCards = [];
         foreach($farmerCardsInHand as $card) {
             try {
                 $this->controlFarmerCardPlayable($card, $player_id);
-                $allowedCardIds[] = $card->id;
+                $allowedCards[] = $card;
             } catch (Exception $e) {}
         }
 
-        return $allowedCardIds; 
+        return $allowedCards; 
+    }
+
+    function getAllowedFarmerCardsId() {
+        $allowedCards = $this->getAllowedFarmerCards();
+
+        return array_map(fn($card) => $card->id, $allowedCards); 
     }
 }

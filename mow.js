@@ -551,7 +551,7 @@ var Mow = /** @class */ (function () {
                 break;
             case 'playFarmer':
                 if (this.isCurrentPlayerActive()) {
-                    this.disableFarmerCards(args.args.allowedFarmerCardIds);
+                    this.disableFarmerCards(args.args.allowedFarmerCards.map(function (card) { return card.id; }));
                 }
                 break;
             case 'swapHands':
@@ -731,6 +731,9 @@ var Mow = /** @class */ (function () {
                     }
                     break;
                 case 'playFarmer':
+                    args.allowedFarmerCards.forEach(function (card) {
+                        return _this.addActionButton("playFarmer" + card.id + "_button", _('Play farmer') + (" <div class=\"farmer-icon farmer" + card.type + "\"></div>"), function () { return _this.playFarmer(card.id); });
+                    });
                     this.addActionButton('pass_button', _('Pass'), 'onPassFarmer');
                     break;
                 case 'swapHands':
@@ -1131,12 +1134,15 @@ var Mow = /** @class */ (function () {
             if (this.checkAction('playFarmer', true)) {
                 // Can play a card
                 var id = items[0].id;
-                this.takeAction("playFarmer", {
-                    id: id
-                });
+                this.playFarmer(id);
                 this.playerFarmerHand.unselectAll();
             }
         }
+    };
+    Mow.prototype.playFarmer = function (id) {
+        this.takeAction("playFarmer", {
+            id: id
+        });
     };
     ////////////////////////////////
     ////////////////////////////////

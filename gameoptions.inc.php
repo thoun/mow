@@ -38,6 +38,7 @@ $game_options = [
                 'tmdisplay' => totranslate('Simple version (2008 edition)'),
             ],
         ],
+        'default' => 1,
     ],
 ];
 
