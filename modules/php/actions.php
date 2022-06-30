@@ -364,7 +364,15 @@ trait ActionTrait {
 
             // And notify
             $farmerCard = $this->getFarmerCardByType($playerId, 10);
+            $this->farmerCards->moveCard($farmerCard->id, 'discard');
             $this->farmerCardPlayed($playerId, $farmerCard);          
+            
+            $message = $type == 1 ? clienttranslate('${player_name} ignores cards with ${type} fly') : clienttranslate('${player_name} ignores cards with ${type} flies');
+            self::notifyAllPlayers('log', $message, [
+                'player_id' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'type' => $type,
+            ]);
         }
 
         $this->gamestate->setPlayerNonMultiactive($playerId, "endHand");

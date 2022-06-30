@@ -946,6 +946,8 @@ var Mow = /** @class */ (function () {
         this.takeAction("next");
     };
     Mow.prototype.selectFlieType = function (type) {
+        if (!this.checkAction('ignoreFlies'))
+            return;
         this.takeAction("ignoreFlies", {
             playerId: type === null ? 0 : this.player_id,
             type: type

@@ -220,7 +220,7 @@ $machinestates = [
         "type" => "multipleactiveplayer",
         "action" => "stSelectFliesType",
         "args" => "argSelectFliesType",
-        "possibleactions" => [ "choose" ],
+        "possibleactions" => [ "ignoreFlies" ],
         "transitions" => [
             "endHand" => ST_END_HAND,
         ],

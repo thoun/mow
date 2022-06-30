@@ -671,7 +671,10 @@ class Mow implements Game {
     }
 
     public selectFlieType(type: number) {
-         this.takeAction("ignoreFlies", {
+        if(!(this as any).checkAction('ignoreFlies'))
+         return;
+
+        this.takeAction("ignoreFlies", {
             playerId: type === null ? 0 : (this as any).player_id,
             type
         });
