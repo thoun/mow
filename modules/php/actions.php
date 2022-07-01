@@ -69,6 +69,9 @@ trait ActionTrait {
                 'card' => $newCard,
                 'allowedCardsIds' => $allowedCardsIds
             ]);
+            self::notifyAllPlayers('newCardUpdateCounter', '', [
+                'playerId' => $player_id,
+            ]);
         }
 
         // notify all players
@@ -210,6 +213,9 @@ trait ActionTrait {
                     'playerId' => $opponentId,
                     'card' => $removedCard,
                 ]);
+                self::notifyAllPlayers('removedCardUpdateCounter', '', [
+                    'playerId' => $opponentId,
+                ]);
             }
         }
 
@@ -307,6 +313,9 @@ trait ActionTrait {
             self::notifyPlayer($playerId, 'newFarmerCard', '', [
                 'card' => $farmerCard
             ]);
+            self::notifyAllPlayers('newFarmerCardUpdateCounter', '', [
+                'playerId' => $playerId,
+            ]);
         }
     }       
     
@@ -400,6 +409,9 @@ trait ActionTrait {
             'card' => $card,
             'fromPlayerId' => $opponentId,
         ]);
+        self::notifyAllPlayers('newCardUpdateCounter', '', [
+            'playerId' => $opponentId,
+        ]);
 
         $this->cards->moveCard($cardId, 'hand', $opponentId);
         $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($opponentId) : null;
@@ -409,6 +421,9 @@ trait ActionTrait {
             'player_name' => $this->getPlayerName($playerId),
             'fromPlayerId' => $playerId,
             'allowedCardsIds' => $allowedCardsIds
+        ]);
+        self::notifyAllPlayers('newCardUpdateCounter', '', [
+            'playerId' => $playerId,
         ]);
 
         // card cleared when played

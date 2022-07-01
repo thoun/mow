@@ -19,6 +19,11 @@ interface FarmerCard {
     time: number; // (see material.inc.php)
 }
 
+interface MowPlayer extends Player {
+    cards: number;
+    farmerCards: number;
+}
+
 interface MowGamedatas {
     allowedCardsIds: number[];
     current_player_id: string;
@@ -36,7 +41,7 @@ interface MowGamedatas {
     next_players_id: { [playerId: number]: number };
     notifications: {last_packet_id: string, move_nbr: string}
     playerorder: (string | number)[];
-    players: { [playerId: number]: Player };
+    players: { [playerId: number]: MowPlayer };
     remainingCards: number;
     tablespeed: string;
     simpleVersion: boolean;
@@ -92,6 +97,10 @@ interface NotifNewCardArgs {
 
 interface NotifNewFarmerCardArgs {
     card: FarmerCard;
+}
+
+interface NotifNewCardUpdateCounterArgs {
+    playerId: number;
 }
 
 interface DirectionChangedArgs {

@@ -34,7 +34,6 @@ trait StateTrait {
 
         $swapPlayerId = 0;
         if (!$this->isSimpleVersion()) {
-            $sql = "SELECT min(player_score) FROM player  ";
             $players = self::getObjectListFromDB("SELECT player_id, player_score FROM player where player_score < 0 order by player_score ASC");
             if (count($players) >= 1) {
                 $swapPlayerId = intval($players[0]['player_id']);
@@ -114,6 +113,9 @@ trait StateTrait {
                 'card' => $removedCard,
                 'fromPlayerId' => $player_id,
             ]);
+            self::notifyAllPlayers('removedCardUpdateCounter', '', [
+                'playerId' => $opponentId,
+            ]);
 
             $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($player_id) : null;
             self::notifyPlayer($player_id, 'newCard', clienttranslate('Card ${card_display} was picked from ${player_name2} hand'), [
@@ -122,6 +124,9 @@ trait StateTrait {
                 'card' => $removedCard,
                 'fromPlayerId' => $opponentId,
                 'allowedCardsIds' => $allowedCardsIds,
+            ]);
+            self::notifyAllPlayers('newCardUpdateCounter', '', [
+                'playerId' => $player_id,
             ]);
         }
     }

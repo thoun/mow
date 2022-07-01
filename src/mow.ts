@@ -1,19 +1,5 @@
-/**
- *------
- * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * mow implementation : © <Your name here> <Your email address here>
- *
- * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
- * See http://en.boardgamearena.com/#!doc/Studio for more information.
- * -----
- *
- * mow.ts
- *
- * mow user interface script
- * 
- * In this file, you are describing the logic of your user interface, in Typescript language.
- *
- */
+const isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;;
+const log = isDebug ? console.log.bind(window.console) : function () { };
 
 /**
  * JS const
@@ -27,6 +13,8 @@ declare const $;
 type PickCardAction = 'play' | 'give';
 
 class Mow implements Game {
+    private cardCounters: Counter[] = [];
+    private farmerCardCounters: Counter[] = [];
 
     private gamedatas: MowGamedatas;
     private playerHand: Stock = null;
@@ -80,7 +68,13 @@ class Mow implements Game {
     */
     
    public setup(gamedatas: MowGamedatas) {
-        //console.log( "Starting game setup" );
+        log( "Starting game setup" );
+        
+        this.gamedatas = gamedatas;
+
+        log('gamedatas', gamedatas);
+
+        this.createPlayerPanels(gamedatas); 
 
         // Place payer zone
         this.players = gamedatas.players;
@@ -206,6 +200,9 @@ class Mow implements Game {
         }
 
         switch( stateName ) {
+            case 'newHand':
+                Object.keys(this.gamedatas.players).forEach(playerId => this.cardCounters[playerId].toValue(5));
+                break;
             case 'playerTurn':
                 const suffix = args.args.suffix;
                 this.setGamestateDescription(suffix);
@@ -479,6 +476,50 @@ class Mow implements Game {
         return Object.values(this.gamedatas.players).find(player => Number(player.id) == playerId);
     }
 
+    private createPlayerPanels(gamedatas: MowGamedatas) {
+
+        Object.values(gamedatas.players).forEach(player => {
+            const playerId = Number(player.id);
+
+            let html = `<div class="counters">
+                <div id="card-counter-wrapper-${player.id}" class="counter">
+                    <div class="counter-icon card"></div>
+                    <div class="player-hand-card"></div> 
+                    <span id="card-counter-${player.id}"></span>
+                </div>`;
+            if (!gamedatas.simpleVersion) {
+                html += `
+                    <div id="farmer-card-counter-wrapper-${player.id}" class="counter">
+                        <div class="counter-icon farmer-card"></div>
+                        <div class="player-hand-card"></div> 
+                        <span id="farmer-card-counter-${player.id}"></span>
+                    </div>`;
+            }
+            html += `</div>`;
+
+            dojo.place(html, `player_board_${player.id}`);
+
+            const cardCounter = new ebg.counter();
+            cardCounter.create(`card-counter-${playerId}`);
+            cardCounter.setValue(player.cards);
+            this.cardCounters[playerId] = cardCounter;
+
+            (this as any).addTooltipHtml(`card-counter-wrapper-${player.id}`, _("Number of cards in hand"));
+
+            
+            if (!gamedatas.simpleVersion) {
+                const farmerCardCounter = new ebg.counter();
+                farmerCardCounter.create(`farmer-card-counter-${playerId}`);
+                farmerCardCounter.setValue(player.farmerCards);
+                this.farmerCardCounters[playerId] = farmerCardCounter;
+
+                (this as any).addTooltipHtml(`farmer-card-counter-wrapper-${player.id}`, _("Number of farmer cards in hand"));
+            }
+
+            
+        });
+    }
+
     private setPickCardAction(pickCardAction: PickCardAction) {
         if (this.pickCardAction == pickCardAction) {
             return;
@@ -708,35 +749,21 @@ class Mow implements Game {
    public setupNotifications() {
         //console.log( 'notifications subscriptions setup' );
         
-        dojo.subscribe( 'newHand', this, "notif_newHand" );
-        dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );   
-        dojo.subscribe( 'farmerCardPlayed', this, "notif_farmerCardPlayed" );         
-        dojo.subscribe( 'newCard', this, "notif_newCard" );         
-        dojo.subscribe( 'newFarmerCard', this, "notif_newFarmerCard" );
-        dojo.subscribe( 'allowedCards', this, "notif_allowedCards" );  
-        dojo.subscribe( 'directionChanged', this, "notif_directionChanged" );
-        dojo.subscribe( 'herdCollected', this, "notif_herdCollected" );
-        dojo.subscribe( 'handCollected', this, "notif_handCollected" );
-        dojo.subscribe( 'replaceCards', this, "notif_replaceCards" );
-        dojo.subscribe( 'removedCard', this, "notif_removedCard" );
-        dojo.subscribe( 'activeRowChanged', this, "notif_activeRowChanged" );
-        dojo.subscribe( 'tableWindow', this, "notif_tableWindow" );
-
-        (this as any).notifqueue.setSynchronous( 'herdCollected', 2000 );
-        (this as any).notifqueue.setSynchronous( 'handCollected', 1500 );
-        
         const notifs = [
             ['newHand', 500],
             ['cardPlayed', 500],
             ['farmerCardPlayed', 500],
             ['newCard', 1],
+            ['newCardUpdateCounter', 1],
             ['newFarmerCard', 1],
+            ['newFarmerCardUpdateCounter', 1],
             ['allowedCards', 1],
             ['directionChanged', 500],
             ['herdCollected', 2000],
             ['handCollected', 1500],
             ['replaceCards', 500],
             ['removedCard', 1],
+            ['removedCardUpdateCounter', 1],
             ['activeRowChanged', 500],
             ['tableWindow', 1],
         ];
@@ -770,10 +797,13 @@ class Mow implements Game {
         this.playCardOnTable(notif.args.player_id, notif.args.card, notif.args.row, notif.args.slowpokeNumber);
 
         this.setRemainingCards(notif.args.remainingCards);
+
+        this.cardCounters[notif.args.player_id].incValue(-1);
     }
 
-    public notif_farmerCardPlayed( notif: Notif<NotifFarmerCardPlayedArgs> ) {
+    public notif_farmerCardPlayed(notif: Notif<NotifFarmerCardPlayedArgs>) {
         this.playerFarmerHand.removeFromStockById(''+notif.args.card.id);
+        this.farmerCardCounters[notif.args.player_id].incValue(-1);
     }
     
     public notif_allowedCards( notif: Notif<NotifAllowedCardsArgs> ) {
@@ -797,11 +827,19 @@ class Mow implements Game {
         
     }
     
+    public notif_newCardUpdateCounter( notif: Notif<NotifNewCardUpdateCounterArgs> ) {
+        this.cardCounters[notif.args.playerId].incValue(1);       
+    }
+    
     public notif_newFarmerCard( notif: Notif<NotifNewFarmerCardArgs> ) {
         //console.log( 'notif_newCard', notif );
 
         const card = notif.args.card;
         this.addFarmerCardToHand(card);        
+    }
+    
+    public notif_newFarmerCardUpdateCounter( notif: Notif<NotifNewCardUpdateCounterArgs> ) {
+        this.farmerCardCounters[notif.args.playerId].incValue(1);       
     }
     
     public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
@@ -853,9 +891,13 @@ class Mow implements Game {
             
             //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         }
-        if (this.player_id == notif.args.player_id) {
-            setTimeout(() => this.playerHand.removeAll(), 1450);
-        }
+
+        setTimeout(() => {
+            if (this.player_id == notif.args.player_id) {
+                this.playerHand.removeAll();
+            }
+            this.cardCounters[notif.args.player_id].toValue(0);
+        }, 1450);
     }
     
     public notif_replaceCards( notif: Notif<NotifReplaceCardsArgs> ) {
@@ -865,6 +907,10 @@ class Mow implements Game {
     
     public notif_removedCard( notif: Notif<NotifRemovedCardArgs> ) {
         this.playerHand.removeFromStockById(''+notif.args.card.id, notif.args.fromPlayerId  ? 'playertable-'+notif.args.fromPlayerId : undefined);
+    }
+    
+    public notif_removedCardUpdateCounter( notif: Notif<NotifNewCardUpdateCounterArgs> ) {
+        this.farmerCardCounters[notif.args.playerId].incValue(-1);       
     }
     
     public notif_activeRowChanged( notif: Notif<NotifActiveRowChangedArgs> ) {

@@ -1,0 +1,45 @@
+.player-board {
+
+  .player-hand-card {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background-image: url('img/cards.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: bottom;
+  }
+}
+
+.counters {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+
+  .counter {
+    flex: 1;
+    display: flex;
+    align-items: center;
+
+    span {
+      padding: 0 5px 0 5px;
+    }
+  }
+
+  .counter-icon {
+    left: 0;
+    width: 126px;  
+    background-size: contain;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    width: 32px;
+    height: 32px;
+
+    &.card {
+      background-image: url('img/illustration-left.png');
+    }
+    &.farmer-card {
+      background-image: url('img/farmer-icon.png');
+    }
+  }
+}

@@ -367,22 +367,6 @@ var FarmerCards = /** @class */ (function () {
     };
     return FarmerCards;
 }());
-/**
- *------
- * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * mow implementation : © <Your name here> <Your email address here>
- *
- * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
- * See http://en.boardgamearena.com/#!doc/Studio for more information.
- * -----
- *
- * mow.ts
- *
- * mow user interface script
- *
- * In this file, you are describing the logic of your user interface, in Typescript language.
- *
- */
 var __spreadArrays = (this && this.__spreadArrays) || function () {
     for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
     for (var r = Array(s), k = 0, i = 0; i < il; i++)
@@ -390,8 +374,13 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
+var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
+;
+var log = isDebug ? console.log.bind(window.console) : function () { };
 var Mow = /** @class */ (function () {
     function Mow() {
+        this.cardCounters = [];
+        this.farmerCardCounters = [];
         this.playerHand = null;
         this.playerFarmerHand = null;
         this.theHerds = [];
@@ -432,8 +421,11 @@ var Mow = /** @class */ (function () {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     Mow.prototype.setup = function (gamedatas) {
-        //console.log( "Starting game setup" );
         var _this = this;
+        log("Starting game setup");
+        this.gamedatas = gamedatas;
+        log('gamedatas', gamedatas);
+        this.createPlayerPanels(gamedatas);
         // Place payer zone
         this.players = gamedatas.players;
         this.playerNumber = Object.keys(this.players).length;
@@ -536,11 +528,15 @@ var Mow = /** @class */ (function () {
     //                  You can use this method to perform some user interface changes at this moment.
     //
     Mow.prototype.onEnteringState = function (stateName, args) {
+        var _this = this;
         console.log('Entering state: ' + stateName, args);
         if (this.isCurrentPlayerActive()) {
             dojo.addClass("playertable-" + args.active_player, "active");
         }
         switch (stateName) {
+            case 'newHand':
+                Object.keys(this.gamedatas.players).forEach(function (playerId) { return _this.cardCounters[playerId].toValue(5); });
+                break;
             case 'playerTurn':
                 var suffix = args.args.suffix;
                 this.setGamestateDescription(suffix);
@@ -789,6 +785,30 @@ var Mow = /** @class */ (function () {
     Mow.prototype.getPlayer = function (playerId) {
         return Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) == playerId; });
     };
+    Mow.prototype.createPlayerPanels = function (gamedatas) {
+        var _this = this;
+        Object.values(gamedatas.players).forEach(function (player) {
+            var playerId = Number(player.id);
+            var html = "<div class=\"counters\">\n                <div id=\"card-counter-wrapper-" + player.id + "\" class=\"counter\">\n                    <div class=\"counter-icon card\"></div>\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"card-counter-" + player.id + "\"></span>\n                </div>";
+            if (!gamedatas.simpleVersion) {
+                html += "\n                    <div id=\"farmer-card-counter-wrapper-" + player.id + "\" class=\"counter\">\n                        <div class=\"counter-icon farmer-card\"></div>\n                        <div class=\"player-hand-card\"></div> \n                        <span id=\"farmer-card-counter-" + player.id + "\"></span>\n                    </div>";
+            }
+            html += "</div>";
+            dojo.place(html, "player_board_" + player.id);
+            var cardCounter = new ebg.counter();
+            cardCounter.create("card-counter-" + playerId);
+            cardCounter.setValue(player.cards);
+            _this.cardCounters[playerId] = cardCounter;
+            _this.addTooltipHtml("card-counter-wrapper-" + player.id, _("Number of cards in hand"));
+            if (!gamedatas.simpleVersion) {
+                var farmerCardCounter = new ebg.counter();
+                farmerCardCounter.create("farmer-card-counter-" + playerId);
+                farmerCardCounter.setValue(player.farmerCards);
+                _this.farmerCardCounters[playerId] = farmerCardCounter;
+                _this.addTooltipHtml("farmer-card-counter-wrapper-" + player.id, _("Number of farmer cards in hand"));
+            }
+        });
+    };
     Mow.prototype.setPickCardAction = function (pickCardAction) {
         if (this.pickCardAction == pickCardAction) {
             return;
@@ -977,33 +997,21 @@ var Mow = /** @class */ (function () {
     Mow.prototype.setupNotifications = function () {
         //console.log( 'notifications subscriptions setup' );
         var _this = this;
-        dojo.subscribe('newHand', this, "notif_newHand");
-        dojo.subscribe('cardPlayed', this, "notif_cardPlayed");
-        dojo.subscribe('farmerCardPlayed', this, "notif_farmerCardPlayed");
-        dojo.subscribe('newCard', this, "notif_newCard");
-        dojo.subscribe('newFarmerCard', this, "notif_newFarmerCard");
-        dojo.subscribe('allowedCards', this, "notif_allowedCards");
-        dojo.subscribe('directionChanged', this, "notif_directionChanged");
-        dojo.subscribe('herdCollected', this, "notif_herdCollected");
-        dojo.subscribe('handCollected', this, "notif_handCollected");
-        dojo.subscribe('replaceCards', this, "notif_replaceCards");
-        dojo.subscribe('removedCard', this, "notif_removedCard");
-        dojo.subscribe('activeRowChanged', this, "notif_activeRowChanged");
-        dojo.subscribe('tableWindow', this, "notif_tableWindow");
-        this.notifqueue.setSynchronous('herdCollected', 2000);
-        this.notifqueue.setSynchronous('handCollected', 1500);
         var notifs = [
             ['newHand', 500],
             ['cardPlayed', 500],
             ['farmerCardPlayed', 500],
             ['newCard', 1],
+            ['newCardUpdateCounter', 1],
             ['newFarmerCard', 1],
+            ['newFarmerCardUpdateCounter', 1],
             ['allowedCards', 1],
             ['directionChanged', 500],
             ['herdCollected', 2000],
             ['handCollected', 1500],
             ['replaceCards', 500],
             ['removedCard', 1],
+            ['removedCardUpdateCounter', 1],
             ['activeRowChanged', 500],
             ['tableWindow', 1],
         ];
@@ -1028,9 +1036,11 @@ var Mow = /** @class */ (function () {
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         this.playCardOnTable(notif.args.player_id, notif.args.card, notif.args.row, notif.args.slowpokeNumber);
         this.setRemainingCards(notif.args.remainingCards);
+        this.cardCounters[notif.args.player_id].incValue(-1);
     };
     Mow.prototype.notif_farmerCardPlayed = function (notif) {
         this.playerFarmerHand.removeFromStockById('' + notif.args.card.id);
+        this.farmerCardCounters[notif.args.player_id].incValue(-1);
     };
     Mow.prototype.notif_allowedCards = function (notif) {
         // console.log( 'notif_allowedCards', notif );        
@@ -1050,10 +1060,16 @@ var Mow = /** @class */ (function () {
             }
         }, 1000);
     };
+    Mow.prototype.notif_newCardUpdateCounter = function (notif) {
+        this.cardCounters[notif.args.playerId].incValue(1);
+    };
     Mow.prototype.notif_newFarmerCard = function (notif) {
         //console.log( 'notif_newCard', notif );
         var card = notif.args.card;
         this.addFarmerCardToHand(card);
+    };
+    Mow.prototype.notif_newFarmerCardUpdateCounter = function (notif) {
+        this.farmerCardCounters[notif.args.playerId].incValue(1);
     };
     Mow.prototype.notif_directionChanged = function (notif) {
         //console.log( 'notif_directionChanged', notif );
@@ -1100,9 +1116,12 @@ var Mow = /** @class */ (function () {
             }
             //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
         }
-        if (this.player_id == notif.args.player_id) {
-            setTimeout(function () { return _this.playerHand.removeAll(); }, 1450);
-        }
+        setTimeout(function () {
+            if (_this.player_id == notif.args.player_id) {
+                _this.playerHand.removeAll();
+            }
+            _this.cardCounters[notif.args.player_id].toValue(0);
+        }, 1450);
     };
     Mow.prototype.notif_replaceCards = function (notif) {
         var _this = this;
@@ -1111,6 +1130,9 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.notif_removedCard = function (notif) {
         this.playerHand.removeFromStockById('' + notif.args.card.id, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : undefined);
+    };
+    Mow.prototype.notif_removedCardUpdateCounter = function (notif) {
+        this.farmerCardCounters[notif.args.playerId].incValue(-1);
     };
     Mow.prototype.notif_activeRowChanged = function (notif) {
         this.gamedatas.activeRow = notif.args.activeRow;

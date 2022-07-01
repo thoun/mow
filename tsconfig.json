@@ -10,6 +10,7 @@
     },
     "files": [
         "src/framework.d.ts",
+        "src/counter.d.ts",
         "src/stock.d.ts",
         "src/mow.d.ts",
         "src/slide-utils.ts",

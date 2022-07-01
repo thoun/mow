@@ -20,12 +20,11 @@ $cardHeight: 188px;
     }
 }
 
+@import 'playerboards';
 @import 'gametable';
 @import 'handdeck';
 @import 'tooltips';
 @import 'logs';
-
-
 
 .hand-wrap {
     display: flex;
