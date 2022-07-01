@@ -86,20 +86,43 @@ class Mow implements Game {
             playerId = ids[0];
         }
 
+        const isTwoPlayers = Object.keys(gamedatas.players).length == 2;
+
         const bottomPlayers = this.playerNumber === 5 ? 2 : 1;
+
+        let alreadyPlacedOneTop = false;
+        let alreadyPlacedOneBottom = false;
         
         for(let i = 1; i <= this.playerNumber; i++) {
             const player: Player = this.players[playerId];
-            dojo.place((this as any).format_block( 'jstpl_playertable', {
-                player_id: playerId,
-                player_color: player.color,
-                player_name: (player.name.length > 10 ? `${player.name.substr(0,10)}...` : player.name)
-            } ), i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers');
+            const html = `<div id="playertable-${playerId}" class="playertable" data-id="${playerId}">
+              <div class="playertablename" style="color:#${player.color}" data-id="${playerId}" title="${player.name}">
+                ${(player.name.length > 10 ? `${player.name.substr(0,10)}...` : player.name)}
+              </div>
+            </div>`;
+            const row = i > bottomPlayers ? 'toprowplayers' : 'bottomrowplayers';
+
+            if (alreadyPlacedOneTop && i > bottomPlayers ) {
+                dojo.place(`<div class="between-players-arrow top ${this.gamedatas.direction_clockwise ? '' : 'direction-anticlockwise'}"></div>`, row);
+            }
+            if (alreadyPlacedOneBottom && i <= bottomPlayers) {
+                dojo.place(`<div class="between-players-arrow bottom ${this.gamedatas.direction_clockwise ? '' : 'direction-anticlockwise'}"></div>`, row);
+            }
+
+            dojo.place(html, row);
 
             playerId = gamedatas.next_players_id[playerId];
+            
+            if (!isTwoPlayers) {
+                if (i > bottomPlayers) {
+                    alreadyPlacedOneTop = true;
+                } else {
+                    alreadyPlacedOneBottom = true;
+                }
+            }
         }
         
-        if (Object.keys(gamedatas.players).length == 2) {
+        if (isTwoPlayers) {
             dojo.style( 'direction-text', 'display', 'none' );
         }
         
@@ -850,6 +873,7 @@ class Mow implements Game {
             dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
         } else {            
             dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
+            Array.from(document.getElementsByClassName('between-players-arrow')).forEach(elem => elem.classList.toggle('direction-anticlockwise', !notif.args.direction_clockwise));
         }
 
         dojo.removeClass("direction-animation-symbol");

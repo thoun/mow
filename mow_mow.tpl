@@ -42,15 +42,6 @@
     </div>
 </div>
 
-<script type="text/javascript">
-var jstpl_playertable = `<div id="playertable-\${player_id}" class="playertable" data-id="\${player_id}">
-  <div class="playertablename" style="color:#\${player_color}" data-id="\${player_id}">
-    \${player_name}
-  </div>
-</div>`;
-
-</script>
-
 <div id="opponent-hand-wrap" class="whiteblock hand-wrap hidden">
     <div class="hand-label"><h3 id="opponent-hand-label"></h3></div>
     <div id="opponent-animals" class="animals"></div>

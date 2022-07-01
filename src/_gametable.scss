@@ -18,6 +18,7 @@
         .players-row {
             display: flex;
             justify-content: space-evenly;
+            align-items: center;
             padding: 15px;
         }
         
@@ -190,6 +191,32 @@
         justify-content: center;
         align-items: center;
         z-index: 2;
+    }
+
+    .between-players-arrow {
+        background-image: url('img/direction.jpg');
+        background-size: contain;
+        width: $cardHeight / 4;
+        height: $cardWidth / 4;
+        transform-origin: center center;
+        border-radius: 4px;
+        transition: transform 0.5s;
+
+        &.top {
+            transform: rotate(0deg);
+
+            &.direction-anticlockwise {
+                transform: rotate(180deg);
+            }
+        }
+
+        &.bottom {
+            transform: rotate(180deg);
+
+            &.direction-anticlockwise {
+                transform: rotate(0deg);
+            }
+        }
     }
 
     #direction-animation-symbol {
