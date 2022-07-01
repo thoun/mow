@@ -110,6 +110,7 @@ interface DirectionChangedArgs {
 interface NotifCollectedArgs {
     player_id: string;
     points: number;
+    playerScore: number;
 }
 
 type NotifHandCollectedArgs = NotifCollectedArgs;

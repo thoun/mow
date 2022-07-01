@@ -31,6 +31,10 @@ trait UtilTrait {
         return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
     }
 
+    function getPlayerScore(int $playerId) {
+        return intval(self::getUniqueValueFromDb("SELECT player_score - (collected_points + remaining_in_hand_points - cancelled_points) FROM player WHERE player_id = $playerId"));
+    }
+
     function getOpponentId() {
         $playerId = $this->getActivePlayerId();
         $playersIds = array_keys($this->loadPlayersBasicInfos());

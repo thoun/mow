@@ -172,7 +172,8 @@ trait StateTrait {
                 self::notifyAllPlayers('handCollected', clienttranslate('${player_name} collects points in his hand'), [
                     'player_id' => $player_id,
                     'player_name' => $player['player_name'],
-                    'points' => $cardsValue
+                    'points' => $cardsValue,
+                    'playerScore' => $this->getPlayerScore($player_id),
                 ]);
             }
         }

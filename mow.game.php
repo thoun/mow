@@ -207,6 +207,8 @@ class mow extends Table {
         $result['farmerHand'] = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation( 'hand', $current_player_id ));
 
         foreach ($result['players'] as $playerId => &$playerDb) {
+            $playerDb['score'] = $this->getPlayerScore($playerId);
+            
             $playerDb['cards'] = intval($this->cards->countCardInLocation('hand', $playerId));
             $playerDb['farmerCards'] = intval($this->farmerCards->countCardInLocation('hand', $playerId));
         }

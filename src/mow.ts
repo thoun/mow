@@ -167,8 +167,6 @@ class Mow implements Game {
            dojo.style(('myfarmers'), "display", "none");        
         }
         
-        console.log('gamedatas', this.gamedatas);
-        
         // Cards in player's hand
         this.gamedatas.hand.forEach((card: Card) => this.addCardToHand(card));
         this.gamedatas.farmerHand.forEach((card: FarmerCard) => this.addFarmerCardToHand(card));
@@ -203,10 +201,10 @@ class Mow implements Game {
         }
 
         // Setup game notifications to handle (see "setupNotifications" method below)
-        //console.log('setupNotifications');
+        log('setupNotifications');
         this.setupNotifications();
 
-        //console.log( "Ending game setup" );
+        log( "Ending game setup" );
     }
 
     ///////////////////////////////////////////////////
@@ -216,7 +214,7 @@ class Mow implements Game {
     //                  You can use this method to perform some user interface changes at this moment.
     //
     public onEnteringState(stateName: string, args: any) {
-        console.log( 'Entering state: '+stateName, args);
+        log( 'Entering state: '+stateName, args);
         
         if((this as any).isCurrentPlayerActive()) {
             dojo.addClass(`playertable-${args.active_player}`, "active");
@@ -377,7 +375,7 @@ class Mow implements Game {
     //                 You can use this method to perform some user interface changes at this moment.
     //
     public onLeavingState(stateName: string) {
-        //console.log( 'Leaving state: '+stateName ); 
+        log( 'Leaving state: '+stateName ); 
         dojo.query(".playertable").removeClass("active");   
         
         switch( stateName ) {
@@ -434,7 +432,7 @@ class Mow implements Game {
     //                        action status bar (ie: the HTML links in the status bar).
     //        
     public onUpdateActionButtons(stateName: string, args: any) {
-        //console.log( 'onUpdateActionButtons: '+stateName );
+        //log( 'onUpdateActionButtons: '+stateName );
         (this as any).removeActionButtons();
                     
         if ((this as any).isCurrentPlayerActive()) {
@@ -770,7 +768,7 @@ class Mow implements Game {
     
     */
    public setupNotifications() {
-        //console.log( 'notifications subscriptions setup' );
+        log( 'notifications subscriptions setup' );
         
         const notifs = [
             ['newHand', 500],
@@ -800,7 +798,6 @@ class Mow implements Game {
     // from this point and below, you can write your game notifications handling methods
     
     public notif_newHand( notif: Notif<NotifNewHandArgs> ) {
-        //console.log( 'notif_newHand', notif );
 
         // We received a new full hand of 5 cards.
         this.playerHand.removeAll();
@@ -813,7 +810,6 @@ class Mow implements Game {
     }
     
     public notif_cardPlayed( notif: Notif<NotifCardPlayedArgs> ) {
-        console.log( 'notif_cardPlayed', notif );
         
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         
@@ -830,14 +826,12 @@ class Mow implements Game {
     }
     
     public notif_allowedCards( notif: Notif<NotifAllowedCardsArgs> ) {
-        // console.log( 'notif_allowedCards', notif );        
         if (this.gamedatas.herdNumber == 1) {
             this.enableAllowedCards(notif.args.allowedCardsIds);
         }
     }
     
     public notif_newCard( notif: Notif<NotifNewCardArgs> ) {
-        //console.log( 'notif_newCard', notif );
 
         const card = notif.args.card;
         setTimeout(() => {
@@ -855,8 +849,6 @@ class Mow implements Game {
     }
     
     public notif_newFarmerCard( notif: Notif<NotifNewFarmerCardArgs> ) {
-        //console.log( 'notif_newCard', notif );
-
         const card = notif.args.card;
         this.addFarmerCardToHand(card);        
     }
@@ -866,8 +858,6 @@ class Mow implements Game {
     }
     
     public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
-        //console.log( 'notif_directionChanged', notif );
-
         if (this.gamedatas.herdNumber > 1) {
             document.getElementById('direction-animation-symbol').innerHTML = '🠗';
             dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
@@ -889,13 +879,11 @@ class Mow implements Game {
     }
     
     public notif_herdCollected( notif: Notif<NotifHerdCollectedArgs> ) {
-        //console.log( 'notif_herdCollected', notif );
-        
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         if (notif.args.player_id) {
             (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
-            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            (this as any).scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
             this.theHerds[notif.args.row].removeAllTo( 'player_board_'+notif.args.player_id );
         } else {
             this.theHerds[notif.args.row].removeAllTo('topbar');
@@ -913,7 +901,7 @@ class Mow implements Game {
                 dojo.query("#myhand").addClass("bounce");
             }
             
-            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            (this as any).scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
         }
 
         setTimeout(() => {

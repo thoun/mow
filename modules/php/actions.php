@@ -290,6 +290,7 @@ trait ActionTrait {
                 'player_name' => self::getActivePlayerName(),
                 'points' => $collectedPoints,
                 'row' => $this->getActiveRow(),
+                'playerScore' => $this->getPlayerScore($player_id),
             ]);
         } else {
             self::notifyAllPlayers('herdCollected', clienttranslate('Herd removed'), [

@@ -501,7 +501,6 @@ var Mow = /** @class */ (function () {
         if (this.isSimpleVersion()) {
             dojo.style(('myfarmers'), "display", "none");
         }
-        console.log('gamedatas', this.gamedatas);
         // Cards in player's hand
         this.gamedatas.hand.forEach(function (card) { return _this.addCardToHand(card); });
         this.gamedatas.farmerHand.forEach(function (card) { return _this.addFarmerCardToHand(card); });
@@ -533,9 +532,9 @@ var Mow = /** @class */ (function () {
             dojo.place("<div id=\"rowIndicator\"><div id=\"rowIndicatorBackground\" class=\"" + (!this.gamedatas.direction_clockwise ? 'inverse' : '') + "\"></div></div>", "rowIndicatorWrapper" + gamedatas.activeRow);
         }
         // Setup game notifications to handle (see "setupNotifications" method below)
-        //console.log('setupNotifications');
+        log('setupNotifications');
         this.setupNotifications();
-        //console.log( "Ending game setup" );
+        log("Ending game setup");
     };
     ///////////////////////////////////////////////////
     //// Game & client states
@@ -544,7 +543,7 @@ var Mow = /** @class */ (function () {
     //
     Mow.prototype.onEnteringState = function (stateName, args) {
         var _this = this;
-        console.log('Entering state: ' + stateName, args);
+        log('Entering state: ' + stateName, args);
         if (this.isCurrentPlayerActive()) {
             dojo.addClass("playertable-" + args.active_player, "active");
         }
@@ -691,7 +690,7 @@ var Mow = /** @class */ (function () {
     //                 You can use this method to perform some user interface changes at this moment.
     //
     Mow.prototype.onLeavingState = function (stateName) {
-        //console.log( 'Leaving state: '+stateName ); 
+        log('Leaving state: ' + stateName);
         dojo.query(".playertable").removeClass("active");
         switch (stateName) {
             case 'playerTurn':
@@ -741,7 +740,7 @@ var Mow = /** @class */ (function () {
     //        
     Mow.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
-        //console.log( 'onUpdateActionButtons: '+stateName );
+        //log( 'onUpdateActionButtons: '+stateName );
         this.removeActionButtons();
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
@@ -1010,8 +1009,8 @@ var Mow = /** @class */ (function () {
     
     */
     Mow.prototype.setupNotifications = function () {
-        //console.log( 'notifications subscriptions setup' );
         var _this = this;
+        log('notifications subscriptions setup');
         var notifs = [
             ['newHand', 500],
             ['cardPlayed', 500],
@@ -1037,7 +1036,6 @@ var Mow = /** @class */ (function () {
     };
     // from this point and below, you can write your game notifications handling methods
     Mow.prototype.notif_newHand = function (notif) {
-        //console.log( 'notif_newHand', notif );
         var _this = this;
         // We received a new full hand of 5 cards.
         this.playerHand.removeAll();
@@ -1047,7 +1045,6 @@ var Mow = /** @class */ (function () {
         }
     };
     Mow.prototype.notif_cardPlayed = function (notif) {
-        console.log('notif_cardPlayed', notif);
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         this.playCardOnTable(notif.args.player_id, notif.args.card, notif.args.row, notif.args.slowpokeNumber);
         this.setRemainingCards(notif.args.remainingCards);
@@ -1058,13 +1055,11 @@ var Mow = /** @class */ (function () {
         this.farmerCardCounters[notif.args.player_id].incValue(-1);
     };
     Mow.prototype.notif_allowedCards = function (notif) {
-        // console.log( 'notif_allowedCards', notif );        
         if (this.gamedatas.herdNumber == 1) {
             this.enableAllowedCards(notif.args.allowedCardsIds);
         }
     };
     Mow.prototype.notif_newCard = function (notif) {
-        //console.log( 'notif_newCard', notif );
         var _this = this;
         var card = notif.args.card;
         setTimeout(function () {
@@ -1079,7 +1074,6 @@ var Mow = /** @class */ (function () {
         this.cardCounters[notif.args.playerId].incValue(1);
     };
     Mow.prototype.notif_newFarmerCard = function (notif) {
-        //console.log( 'notif_newCard', notif );
         var card = notif.args.card;
         this.addFarmerCardToHand(card);
     };
@@ -1087,7 +1081,6 @@ var Mow = /** @class */ (function () {
         this.farmerCardCounters[notif.args.playerId].incValue(1);
     };
     Mow.prototype.notif_directionChanged = function (notif) {
-        //console.log( 'notif_directionChanged', notif );
         if (this.gamedatas.herdNumber > 1) {
             document.getElementById('direction-animation-symbol').innerHTML = '🠗';
             dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
@@ -1108,11 +1101,10 @@ var Mow = /** @class */ (function () {
         }
     };
     Mow.prototype.notif_herdCollected = function (notif) {
-        //console.log( 'notif_herdCollected', notif );
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         if (notif.args.player_id) {
             this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            this.scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
             this.theHerds[notif.args.row].removeAllTo('player_board_' + notif.args.player_id);
         }
         else {
@@ -1130,7 +1122,7 @@ var Mow = /** @class */ (function () {
                 dojo.query("#myhand").removeClass("bounce");
                 dojo.query("#myhand").addClass("bounce");
             }
-            //(this as any).scoreCtrl[notif.args.player_id].incValue(-notif.args.points);
+            this.scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
         }
         setTimeout(function () {
             if (_this.player_id == notif.args.player_id) {
