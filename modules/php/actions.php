@@ -58,6 +58,7 @@ trait ActionTrait {
             'slowpokeNumber' => $slowpokeNumber,
             'row' => $this->getActiveRow(),
             'card' => $card,
+            'card_display' => $card->number,
         ]);
 
         // get new card if possible
@@ -212,6 +213,7 @@ trait ActionTrait {
                 self::notifyPlayer($opponentId, 'removedCard', 'Card ${card_display} was removed from your hand', [
                     'playerId' => $opponentId,
                     'card' => $removedCard,
+                    'card_display' => $card->number,
                 ]);
                 self::notifyAllPlayers('removedCardUpdateCounter', '', [
                     'playerId' => $opponentId,
@@ -413,6 +415,7 @@ trait ActionTrait {
             'playerId' => $playerId,
             'card' => $card,
             'fromPlayerId' => $opponentId,
+            'card_display' => $card->number,
         ]);
         self::notifyAllPlayers('newCardUpdateCounter', '', [
             'playerId' => $opponentId,
@@ -425,7 +428,8 @@ trait ActionTrait {
             'card' => $card,
             'player_name' => $this->getPlayerName($playerId),
             'fromPlayerId' => $playerId,
-            'allowedCardsIds' => $allowedCardsIds
+            'allowedCardsIds' => $allowedCardsIds,
+            'card_display' => $card->number,
         ]);
         self::notifyAllPlayers('newCardUpdateCounter', '', [
             'playerId' => $playerId,

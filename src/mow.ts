@@ -1023,7 +1023,7 @@ class Mow implements Game {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                if (args.card && typeof args.card_display !== 'string') {
+                if (args.card && (typeof args.card_display !== 'string')) {
                     const card: Card = args.card;
 
                     let displayedNumber: number | string = card.number;

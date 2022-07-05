@@ -1229,7 +1229,7 @@ var Mow = /** @class */ (function () {
     Mow.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                if (args.card && typeof args.card_display !== 'string') {
+                if (args.card && (typeof args.card_display !== 'string')) {
                     var card = args.card;
                     var displayedNumber = card.number;
                     var precision = null;
