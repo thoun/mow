@@ -272,7 +272,11 @@ trait ActionTrait {
         }
 
         if (count($this->cards->getCardsInLocation( "deck" )) > 0) {
-            $this->gamestate->nextState('collectHerd');
+            if ($this->isSimpleVersion()) {
+                $this->gamestate->nextState('collectHerdSimple');
+            } else {
+                $this->gamestate->nextState('collectHerd');
+            }
         } else {
             $this->gamestate->nextState('collectLastHerd');
         }

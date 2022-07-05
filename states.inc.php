@@ -91,7 +91,7 @@ $machinestates = [
     	"name" => "playerTurn",
     	"description" => clienttranslate('${actplayer} must play a card or pick up the herd'),
     	"descriptionnoHerd" => clienttranslate('${actplayer} must play a card'),
-    	"descriptionmustTake" => clienttranslate('${actplayer} must pick up the herd'),
+    	"descriptionmustTake" => clienttranslate('${actplayer} must play a card or pick up the herd'),
     	"descriptionmyturn" => clienttranslate('${you} must play a card or pick up the herd'),
     	"descriptionmyturnnoHerd" => clienttranslate('${you} must play a card'),
     	"descriptionmyturnmustTake" => clienttranslate('${you} must pick up the herd'),
@@ -104,6 +104,7 @@ $machinestates = [
             "playFarmerWithOpponentSelection" => ST_PLAYER_SELECT_OPPONENT,
             "chooseDirection" => ST_CHOOSE_DIRECTION, 
             "collectHerd" => ST_PLAY_AGAIN, 
+            "collectHerdSimple" => ST_PLAYER_TURN,
             "collectLastHerd" => ST_COLLECT_HAND,
             "zombiePass" => ST_NEXT_PLAYER,
         ]
