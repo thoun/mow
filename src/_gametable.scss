@@ -1,3 +1,79 @@
+
+    
+#direction_popin {
+    display: none;
+    margin-bottom: 20px;
+    /*display: flex;*/
+    justify-content: center;
+    align-items: center;
+
+    .popin-content {
+        display: flex;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 1px 1px 5px 2px #0006;
+
+        #pickBlock {
+            display: none;
+            padding: 10px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            &.visible {
+                display: flex;
+            }
+
+            .pickButton {
+                min-width: 100px;
+                max-width: 200px;
+            }
+        }
+    }
+
+    .direction-button {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 30px;
+
+        .next-player {
+            font-weight: bold;
+        }
+    }
+
+    .centered {
+        display: flex;
+    }
+
+    &.swap .centered {
+        flex-direction: row-reverse;
+    }
+}
+
+.direction-symbol {
+    font-size: 400%;
+    text-shadow: rgb(0 0 0 / 40%) 0 3px 0;
+    
+    &.direction-arrow-icon {
+        width: 3rem;
+        height: 3rem;
+    }
+}
+
+#direction_animation {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
 #gamezone {
     display: flex;
     align-items: center;
@@ -116,83 +192,6 @@
                 border-radius: 0 0 30px 0;
             }
         }
-    }
-
-    /* direction popins */
-
-    .direction-symbol {
-        &.direction-arrow-icon {
-            width: 3rem;
-            height: 3rem;
-        }
-    }
-    
-    #direction_popin {
-        display: none;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        /*display: flex;*/
-        justify-content: center;
-        align-items: center;
-        z-index: 2;
-
-        .popin-content {
-            display: flex;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 1px 1px 5px 2px #0006;
-
-            #pickBlock {
-                display: none;
-                padding: 10px;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-
-                &.visible {
-                    display: flex;
-                }
-
-                .pickButton {
-                    min-width: 100px;
-                    max-width: 200px;
-                }
-            }
-        }
-
-        .direction-button {
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 30px;
-
-            .next-player {
-                font-weight: bold;
-            }
-        }
-
-        .centered {
-            display: flex;
-        }
-
-        &.swap .centered {
-            flex-direction: row-reverse;
-        }
-    }
-
-    #direction_animation {
-        pointer-events: none;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2;
     }
 
     .between-players-arrow {

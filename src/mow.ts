@@ -307,8 +307,8 @@ class Mow implements Game {
                 $("keepDirectionNextPlayer").innerHTML = dojo.string.substitute(_("Herd ${number}"), {'number' : keepDirectionRow+1 });
                 $("changeDirectionNextPlayer").innerHTML = dojo.string.substitute(_("Herd ${number}"), {'number' : changeDirectionRow+1 });
 
-                document.getElementById('keepDirectionSymbol').innerHTML = '🠗';
-                document.getElementById('changeDirectionSymbol').innerHTML = '🠗';
+                document.getElementById('keepDirectionSymbol').classList.add('straight');
+                document.getElementById('changeDirectionSymbol').classList.add('straight');
                 dojo.toggleClass('keepDirectionSymbol', 'reverse-arrow', !args.direction_clockwise);
                 dojo.toggleClass('changeDirectionSymbol', 'reverse-arrow', args.direction_clockwise);
             } else {

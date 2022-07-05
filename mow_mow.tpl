@@ -3,6 +3,28 @@
 <div id="direction-text">
     {DIRECTION} <span id="direction-play-symbol" class="direction-arrow-icon"></span>
 </div>
+<div id="direction_popin">
+    <div class="popin-content">
+        <div class="centered whiteblock">
+            <div>
+                <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
+                    {KEEP_DIRECTION}
+                    <div id="keepDirectionSymbol" class="direction-symbol direction-arrow-icon white"></div>
+                </div>
+                <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="keepDirectionNextPlayer" class="next-player"></div>
+            </div>
+
+            <div>
+                <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
+                    {CHANGE_DIRECTION}
+                    <div id="changeDirectionSymbol" class="direction-symbol direction-arrow-icon white"></div>
+                </div>
+                <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="changeDirectionNextPlayer" class="next-player"></div>
+            </div>
+        </div>
+        <div id="pickBlock"></div>
+    </div>
+</div>
 <div id="gamezone">
     <div id="playertables">
         <div class="illustration left"></div>
@@ -13,29 +35,6 @@
         <div id="theherds"></div>
 
         <div id="bottomrowplayers" class="players-row"></div>
-    </div>
-
-    <div id="direction_popin">
-        <div class="popin-content">
-            <div class="centered whiteblock">
-                <div>
-                    <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
-                        {KEEP_DIRECTION}
-                        <div id="keepDirectionSymbol" class="direction-symbol direction-arrow-icon white"></div>
-                    </div>
-                    <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="keepDirectionNextPlayer" class="next-player"></div>
-                </div>
-
-                <div>
-                    <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
-                        {CHANGE_DIRECTION}
-                        <div id="changeDirectionSymbol" class="direction-symbol direction-arrow-icon white"></div>
-                    </div>
-                    <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="changeDirectionNextPlayer" class="next-player"></div>
-                </div>
-            </div>
-            <div id="pickBlock"></div>
-        </div>
     </div>
     <div id="direction_animation">
         <span id="direction-animation-symbol" class="">↻</span>

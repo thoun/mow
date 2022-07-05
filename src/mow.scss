@@ -26,6 +26,10 @@ $cardHeight: 188px;
 
   &.white {
     background-image: url('img/direction-white.svg');
+
+    &.straight {
+      background-image: url('img/direction-straight.svg');
+    }
   }
 }
 
