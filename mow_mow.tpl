@@ -1,7 +1,7 @@
 {OVERALL_GAME_HEADER}
 
 <div id="direction-text">
-    Direction of play : <span id="direction-play-symbol">↻</span>
+    {DIRECTION} <span id="direction-play-symbol" class="direction-arrow-icon"></span>
 </div>
 <div id="gamezone">
     <div id="playertables">
@@ -21,7 +21,7 @@
                 <div>
                     <div id="keepDirectionButton" class="direction-button bgabutton bgabutton_blue">
                         {KEEP_DIRECTION}
-                        <div id="keepDirectionSymbol" class="direction-symbol">↻</div>
+                        <div id="keepDirectionSymbol" class="direction-symbol direction-arrow-icon white"></div>
                     </div>
                     <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="keepDirectionNextPlayer" class="next-player"></div>
                 </div>
@@ -29,7 +29,7 @@
                 <div>
                     <div id="changeDirectionButton" class="direction-button bgabutton bgabutton_blue">
                         {CHANGE_DIRECTION}
-                        <div id="changeDirectionSymbol" class="direction-symbol">↻</div>
+                        <div id="changeDirectionSymbol" class="direction-symbol direction-arrow-icon white"></div>
                     </div>
                     <span class="label-next-player">{NEXT_PLAYER}</span> : <div id="changeDirectionNextPlayer" class="next-player"></div>
                 </div>

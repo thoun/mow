@@ -16,8 +16,17 @@ $cardHeight: 188px;
     #direction-play-symbol {
         display: inline-block;
         transition: transform 500ms ease-in-out;
-        font-weight: bold;
     }
+}
+
+.direction-arrow-icon {
+  background: url('img/direction.svg') no-repeat center;
+  width: 1rem;
+  height: 1rem;
+
+  &.white {
+    background-image: url('img/direction-white.svg');
+  }
 }
 
 @import 'playerboards';

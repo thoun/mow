@@ -121,8 +121,10 @@
     /* direction popins */
 
     .direction-symbol {
-        font-size: 400%;
-        text-shadow: rgb(0 0 0 / 40%) 0 3px 0;
+        &.direction-arrow-icon {
+            width: 3rem;
+            height: 3rem;
+        }
     }
     
     #direction_popin {

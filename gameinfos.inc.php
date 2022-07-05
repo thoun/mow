@@ -6,10 +6,10 @@ $gameinfos = [
 'designer' => 'Bruno Cathala',       
 
 // Game artist (or game artists, separated by commas)
-'artist' => 'Sandra Tagliabue',         
+'artist' => 'Cyril Bouquet',         
 
 // Year of FIRST publication of this game. Can be negative.
-'year' => 2008,                 
+'year' => 2022,                 
 
 // Game publisher
 'publisher' => 'Hurrican',                     

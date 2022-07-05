@@ -26,23 +26,21 @@
   
   require_once( APP_BASE_PATH."view/common/game.view.php" );
   
-  class view_mow_mow extends game_view
-  {
+  class view_mow_mow extends game_view {
     function getGameName() {
         return "mow";
-    }    
-  	function build_page( $viewArgs )
-  	{		
+    }
+
+  	function build_page($viewArgs) {		
   	    // Get players & players number
         $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count( $players );
-        
+        $players_nbr = count($players);
 
         /*********** Place your code below:  ************/
-
 		
 		$this->tpl['MY_HAND'] = self::_("My hand");
         $this->tpl['DECK_REMAINING_CARDS'] = self::_("Remaining cards in deck");
+		$this->tpl['DIRECTION'] = self::_("Direction of play:");
 		$this->tpl['KEEP_DIRECTION'] = self::_("Keep direction");
 		$this->tpl['CHANGE_DIRECTION'] = self::_("Change direction");
 		$this->tpl['NEXT_PLAYER'] = self::_("Next player");
