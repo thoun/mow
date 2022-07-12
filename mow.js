@@ -1140,7 +1140,7 @@ var Mow = /** @class */ (function () {
         this.playerHand.removeFromStockById('' + notif.args.card.id, notif.args.fromPlayerId ? 'playertable-' + notif.args.fromPlayerId : undefined);
     };
     Mow.prototype.notif_removedCardUpdateCounter = function (notif) {
-        this.farmerCardCounters[notif.args.playerId].incValue(-1);
+        this.cardCounters[notif.args.playerId].incValue(-1);
     };
     Mow.prototype.notif_activeRowChanged = function (notif) {
         this.gamedatas.activeRow = notif.args.activeRow;

@@ -213,7 +213,7 @@ trait ActionTrait {
                 self::notifyPlayer($opponentId, 'removedCard', 'Card ${card_display} was removed from your hand', [
                     'playerId' => $opponentId,
                     'card' => $removedCard,
-                    'card_display' => $card->number,
+                    'card_display' => $removedCard->number,
                 ]);
                 self::notifyAllPlayers('removedCardUpdateCounter', '', [
                     'playerId' => $opponentId,

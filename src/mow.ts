@@ -922,7 +922,7 @@ class Mow implements Game {
     }
     
     public notif_removedCardUpdateCounter( notif: Notif<NotifNewCardUpdateCounterArgs> ) {
-        this.farmerCardCounters[notif.args.playerId].incValue(-1);       
+        this.cardCounters[notif.args.playerId].incValue(-1);       
     }
     
     public notif_activeRowChanged( notif: Notif<NotifActiveRowChangedArgs> ) {

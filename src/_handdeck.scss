@@ -2,10 +2,14 @@
     display: none;
 }
 
-#myhand .stockitem, #myfarmers .stockitem, #theherds .stockitem, #direction, #deck, #rowIndicatorBackground {
-    border-radius:10px;
-    margin:5px;
+#myhand .stockitem, #myfarmers .stockitem, #theherds .stockitem, #opponent-animals .stockitem, #direction, #deck, #rowIndicatorBackground {
+    border-radius: 10px;
+    margin: 5px;
     box-shadow:1px 1px 3px 1px rgba(0, 0, 0, 0.5);
+}
+
+#opponent-animals {
+    padding-bottom: 5px;
 }
 
 #theherds {
