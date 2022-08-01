@@ -120,7 +120,7 @@ function updateDisplay(from: string) {
                     topDestination = iRow * (itemHeight + itemMargin);
 
                     topDestinations[acrobaticNumber] = topDestination;
-                    leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                    leftDestinations[acrobaticNumber] = (matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex]) ?? 0;
                     zIndexes[acrobaticNumber] = 0;
                 }
             });
@@ -130,6 +130,7 @@ function updateDisplay(from: string) {
     for (let i in this.items) {
         topDestination = topDestinations[i];
         leftDestination = leftDestinations[i];
+        console.log(i, leftDestinations, leftDestination);
 
         const item = this.items[i];
         const itemDivId = this.getItemDivId(item.id);

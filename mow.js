@@ -120,6 +120,7 @@ function updateDisplay(from) {
         var rowIsAcrobatic = row.some(function (id) { return _this.isAcrobatic(id); });
         if (rowIsAcrobatic) {
             row.forEach(function (acrobaticNumber) {
+                var _a;
                 var acrobaticDisplayedNumber = (_this.items[acrobaticNumber].type / 10) % 10;
                 var matchingItemIndex = _this.items.findIndex(function (item) { return item.type % 10 === acrobaticDisplayedNumber; });
                 //console.log('iAcrobatic: ',iAcrobatic, 'acrobaticDisplayedNumber', acrobaticDisplayedNumber, 'matchingItemIndex', matchingItemIndex);
@@ -127,7 +128,7 @@ function updateDisplay(from) {
                 if (typeof item.loc == "undefined") {
                     topDestination = iRow * (itemHeight + itemMargin);
                     topDestinations[acrobaticNumber] = topDestination;
-                    leftDestinations[acrobaticNumber] = matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex];
+                    leftDestinations[acrobaticNumber] = (_a = (matchingItemIndex === -1 ? 0 : leftDestinations[matchingItemIndex])) !== null && _a !== void 0 ? _a : 0;
                     zIndexes[acrobaticNumber] = 0;
                 }
             });
@@ -136,6 +137,7 @@ function updateDisplay(from) {
     for (var i in this.items) {
         topDestination = topDestinations[i];
         leftDestination = leftDestinations[i];
+        console.log(i, leftDestinations, leftDestination);
         var item = this.items[i];
         var itemDivId = this.getItemDivId(item.id);
         var $itemDiv = $(itemDivId);
