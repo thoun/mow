@@ -859,7 +859,6 @@ class Mow implements Game {
     
     public notif_directionChanged( notif: Notif<DirectionChangedArgs> ) {
         if (this.gamedatas.herdNumber > 1) {
-            document.getElementById('direction-animation-symbol').innerHTML = '🠗';
             dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
         } else {            
             dojo.toggleClass('direction-play-symbol', 'direction-anticlockwise', !notif.args.direction_clockwise);
@@ -868,6 +867,7 @@ class Mow implements Game {
 
         dojo.removeClass("direction-animation-symbol");
         if (this.gamedatas.herdNumber > 1) {
+            document.getElementById('direction-animation-symbol').classList.add('straight');
             dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "upToDown" : "downToUp");
         } else {
             dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "anticlockwiseToClockwise" : "clockwiseToAnticlockwise");

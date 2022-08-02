@@ -1084,7 +1084,6 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.notif_directionChanged = function (notif) {
         if (this.gamedatas.herdNumber > 1) {
-            document.getElementById('direction-animation-symbol').innerHTML = '🠗';
             dojo.toggleClass('direction-play-symbol', 'reverse-arrow', !notif.args.direction_clockwise);
         }
         else {
@@ -1093,6 +1092,7 @@ var Mow = /** @class */ (function () {
         }
         dojo.removeClass("direction-animation-symbol");
         if (this.gamedatas.herdNumber > 1) {
+            document.getElementById('direction-animation-symbol').classList.add('straight');
             dojo.addClass("direction-animation-symbol", notif.args.direction_clockwise ? "upToDown" : "downToUp");
         }
         else {

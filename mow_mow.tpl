@@ -37,7 +37,7 @@
         <div id="bottomrowplayers" class="players-row"></div>
     </div>
     <div id="direction_animation">
-        <span id="direction-animation-symbol" class="">↻</span>
+        <span id="direction-animation-symbol"></span>
     </div>
 </div>
 
