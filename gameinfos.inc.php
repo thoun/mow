@@ -83,6 +83,14 @@ $gameinfos = [
 // If you want to disable this, set this to true
 'disable_player_order_swap_on_rematch' => false, 
 
+// Game presentation
+// Short game presentation text that will appear on the game description page, structured as an array of paragraphs.
+// Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
+// A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
+'presentation' => [
+    totranslate("A gentle breeze has set the green grass swaying, and the sun will soon be setting. Time to round up the cows and lead them back to the stable. But steer clear of the ones covered in flies... Nobody like flies! Avoid the most flies to become these majestic creatures’ favorite farmer!"),
+],
+
 // Games categories
 //  You can attribute any number of "tags" to your game.
 //  Each tag has a specific ID (ex: 22 for the category "Prototype", 101 for the tag "Science-fiction theme game")
