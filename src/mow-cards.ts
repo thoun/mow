@@ -57,7 +57,7 @@ class MowCards {
         switch (cardTypeId) {
             case 500:
             case 516:
-                tooltip += _("<strong>Blocker:</strong> Play this cow to close off one end of the line.");
+                tooltip += _("<strong>Flanker cow:</strong> Play this cow to close off one end of the line.");
                 break;    
             case 570:
             case 590:
