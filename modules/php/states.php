@@ -18,7 +18,7 @@ trait StateTrait {
 	    self::DbQuery("UPDATE player SET remaining_in_hand_points = 0, collected_points = 0, cancelled_points = 0 WHERE 1");
 
         $players = self::loadPlayersBasicInfos();
-        $remainingCards = count($this->cards->getCardsInLocation( 'deck' )) - (5 * count($players));
+        $remainingCards = intval($this->cards->countCardInLocation('deck')) - (5 * count($players));
 
         // Deal 5 cards to each players
         // Create deck, shuffle it and give 5 initial cards

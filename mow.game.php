@@ -243,7 +243,7 @@ class mow extends Table {
         $result['activeRow'] = $this->getActiveRow();
         
         // Remaining cards on deck
-        $result['remainingCards'] = count($this->cards->getCardsInLocation( 'deck' ));
+        $result['remainingCards'] = intval($this->cards->countCardInLocation('deck'));
 
         $result['allowedCardsIds'] = $this->getAllowedCardsIds($current_player_id);
 

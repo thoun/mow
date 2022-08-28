@@ -199,7 +199,7 @@ trait UtilTrait {
             $player_hand = $this->getcardsFromDb($this->cards->getCardsInLocation('hand', $playerId));
             $centerCardsNumber = count(array_values(array_filter($player_hand, fn($card) => $card->number >= 7 && $card->number <= 9)));
 
-            if (count($this->cards->getCardsInLocation( 'deck' )) < $centerCardsNumber) {
+            if (intval($this->cards->countCardInLocation( 'deck' )) < $centerCardsNumber) {
                 throw new BgaUserException(self::_("Not enough remaining cards to play this farmer card"), true);
             }
         }

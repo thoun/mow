@@ -50,19 +50,21 @@ trait ActionTrait {
             $displayedNumber /= 10;
         }
 
+        // get new card if possible
+        $dbCard = $this->cards->pickCard('deck', $player_id);
+
         // And notify
         self::notifyAllPlayers('cardPlayed', clienttranslate('${player_name} plays ${card_display}'), [
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'remainingCards' => count($this->cards->getCardsInLocation( 'deck' )),
+            'remainingCards' => intval($this->cards->countCardInLocation('deck')),
             'slowpokeNumber' => $slowpokeNumber,
             'row' => $this->getActiveRow(),
             'card' => $card,
             'card_display' => $card->number,
         ]);
 
-        // get new card if possible
-        $dbCard = $this->cards->pickCard('deck', $player_id);
+        // notify new card
         if ($dbCard) {
             $newCard = $this->getCardFromDb($dbCard);
             $allowedCardsIds = self::getPlayersNumber() > 2 ? $this->getAllowedCardsIds($player_id) : null;
@@ -183,7 +185,7 @@ trait ActionTrait {
             $number = count($centerCards);
             if ($number > 0) {
                 $this->cards->moveCards(array_map(fn($card) => $card->id, $centerCards), 'discard');
-                $newCards = $this->getCardsFromDb($this->cards->pickCards(count($centerCards), 'hand', $player_id));
+                $newCards = $this->getCardsFromDb($this->cards->pickCards(count($centerCards), 'deck', $player_id));
 
                 self::notifyPlayer($player_id, 'replaceCards', '', [
                     'playerId' => $player_id,
