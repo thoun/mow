@@ -166,7 +166,7 @@
   box-sizing: border-box;
   background-color: rgba(255, 255, 255, 0.7);
   padding: 10px;
-  min-width: 120px;
+  min-width: 180px;
 }
 #gamezone #playertables .playertable.active {
   border: 1px solid orange;
