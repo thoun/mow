@@ -81,7 +81,7 @@ interface NotifCardPlayedArgs {
 }
 
 interface NotifFarmerCardPlayedArgs {
-    player_id: string; 
+    player_id: number; 
     card: FarmerCard;
 }
 

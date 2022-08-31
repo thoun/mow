@@ -39,6 +39,12 @@
     <div id="direction_animation">
         <span id="direction-animation-symbol"></span>
     </div>
+    <div id="farmer-animation-wrapper">
+        <div id="farmer-animation">
+            <div id="farmer-animation-text"></div>
+            <div id="farmer-animation-image" class="log-farmer-card"></div>
+        </div>
+    </div>
 </div>
 
 <div id="opponent-hand-wrap" class="whiteblock hand-wrap hidden">

@@ -1016,7 +1016,7 @@ var Mow = /** @class */ (function () {
         var notifs = [
             ['newHand', 500],
             ['cardPlayed', 500],
-            ['farmerCardPlayed', 500],
+            ['farmerCardPlayed', 3000],
             ['newCard', 1],
             ['newCardUpdateCounter', 1],
             ['newFarmerCard', 1],
@@ -1055,6 +1055,12 @@ var Mow = /** @class */ (function () {
     Mow.prototype.notif_farmerCardPlayed = function (notif) {
         this.playerFarmerHand.removeFromStockById('' + notif.args.card.id);
         this.farmerCardCounters[notif.args.player_id].incValue(-1);
+        var player = this.getPlayer(notif.args.player_id);
+        document.getElementById("farmer-animation-text").innerHTML = notif.log.replace('${farmerCardType}', '').replace('${player_name}', "<strong style=\"color: #" + player.color + ";\">" + player.name + "</strong>");
+        document.getElementById("farmer-animation-image").dataset.type = '' + notif.args.card.type;
+        var wrapper = document.getElementById("farmer-animation-wrapper");
+        wrapper.style.opacity = '1';
+        setTimeout(function () { return wrapper.style.opacity = '0'; }, 3000);
     };
     Mow.prototype.notif_allowedCards = function (notif) {
         if (this.gamedatas.herdNumber == 1) {
@@ -1070,7 +1076,7 @@ var Mow = /** @class */ (function () {
             if (notif.args.allowedCardsIds && notif.args.allowedCardsIds.indexOf(card.id) === -1) {
                 dojo.query("#myhand_item_" + card.id).addClass("disabled");
             }
-        }, 1000);
+        }, 500);
     };
     Mow.prototype.notif_newCardUpdateCounter = function (notif) {
         this.cardCounters[notif.args.playerId].incValue(1);
