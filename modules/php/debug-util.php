@@ -16,7 +16,7 @@ trait DebugUtilTrait {
         //$this->cards->createCards( array_slice($cards, count($cards) - 15, 15), 'deck' );
         // TODO TEMP
         if (!$this->isSimpleVersion()) {
-            foreach($playersIds as $playerId){ $this->farmerCards->pickCards(3, 'deck', $playerId); }	 
+            //foreach($playersIds as $playerId){ $this->farmerCards->pickCards(3, 'deck', $playerId); }	 
         }  
         
     }
