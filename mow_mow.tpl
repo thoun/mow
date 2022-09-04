@@ -43,6 +43,7 @@
         <div id="farmer-animation">
             <div id="farmer-animation-text"></div>
             <div id="farmer-animation-image" class="log-farmer-card"></div>
+            <div id="farmer-animation-description"></div>
         </div>
     </div>
 </div>

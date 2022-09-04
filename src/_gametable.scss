@@ -350,13 +350,17 @@
             background: #FFFFFFEE;
             box-shadow: 0 0 20px 15px #FFFFFFEE;
             z-index: 1000;
-            font-size: 250%;
             padding: 30px;
             border-radius: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
+            max-width: 800px;
+
+            #farmer-animation-text {
+                font-size: 250%;
+            }
         }
     }
 }

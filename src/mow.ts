@@ -827,6 +827,7 @@ class Mow implements Game {
         const player = this.getPlayer(notif.args.player_id);
         document.getElementById(`farmer-animation-text`).innerHTML = notif.log.replace('${farmerCardType}', '').replace('${player_name}', `<strong style="color: #${player.color};">${player.name}</strong>`);
         document.getElementById(`farmer-animation-image`).dataset.type = ''+notif.args.card.type;
+        document.getElementById(`farmer-animation-description`).innerHTML = this.farmerCards.getTooltip(notif.args.card.type);
         const wrapper = document.getElementById(`farmer-animation-wrapper`);
         wrapper.style.opacity = '1';
         setTimeout(() => wrapper.style.opacity = '0', 3000);
@@ -1053,7 +1054,10 @@ class Mow implements Game {
                 }
 
                 if (args.farmerCardType && typeof args.farmerCardType !== 'string') {
-                    args.farmerCardType = `<div class="log-farmer-card" data-type="${args.farmerCardType}"></div>`;
+                    args.farmerCardType = `
+                        <div class="log-farmer-card" data-type="${args.farmerCardType}"></div>
+                        <div>${this.farmerCards.getTooltip(args.farmerCardType)}</div>
+                    `;
                 }
             }
         } catch (e) {

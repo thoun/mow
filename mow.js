@@ -1058,6 +1058,7 @@ var Mow = /** @class */ (function () {
         var player = this.getPlayer(notif.args.player_id);
         document.getElementById("farmer-animation-text").innerHTML = notif.log.replace('${farmerCardType}', '').replace('${player_name}', "<strong style=\"color: #" + player.color + ";\">" + player.name + "</strong>");
         document.getElementById("farmer-animation-image").dataset.type = '' + notif.args.card.type;
+        document.getElementById("farmer-animation-description").innerHTML = this.farmerCards.getTooltip(notif.args.card.type);
         var wrapper = document.getElementById("farmer-animation-wrapper");
         wrapper.style.opacity = '1';
         setTimeout(function () { return wrapper.style.opacity = '0'; }, 3000);
@@ -1258,7 +1259,7 @@ var Mow = /** @class */ (function () {
                     }
                 }
                 if (args.farmerCardType && typeof args.farmerCardType !== 'string') {
-                    args.farmerCardType = "<div class=\"log-farmer-card\" data-type=\"" + args.farmerCardType + "\"></div>";
+                    args.farmerCardType = "\n                        <div class=\"log-farmer-card\" data-type=\"" + args.farmerCardType + "\"></div>\n                        <div>" + this.farmerCards.getTooltip(args.farmerCardType) + "</div>\n                    ";
                 }
             }
         }
