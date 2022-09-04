@@ -202,7 +202,7 @@ trait ActionTrait {
                 ]);
                 
             
-                self::notifyAllPlayers('log', clienttranslate('${player_name} discard ${number} cows with the values 7, 8 and 9 and replaces them by discard cards'),  [
+                self::notifyAllPlayers('log', clienttranslate('${player_name} discard ${number} cows with the values 7, 8 and 9 and replaces them by new cards from the deck'),  [
                     'playerId' => $player_id,
                     'player_name' => $this->getPlayerName($player_id),
                     'number' => $number,
