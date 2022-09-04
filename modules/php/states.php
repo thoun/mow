@@ -84,9 +84,21 @@ trait StateTrait {
             $opponentId = $this->getOpponentId();
             if (intval(self::getGameStateValue('lookOpponentHand')) == 1) {
                 self::setGameStateValue('lookOpponentHand', $opponentId);
+        
+                self::notifyAllPlayers('log', clienttranslate('${player_name} looks ${player_name2} cards'),  [
+                    'player_name' => $this->getPlayerName($player_id),
+                    'player_name2' => $this->getPlayerName($opponentId),
+                ]);
+
                 $this->gamestate->nextState('viewCards');
             } else if (intval(self::getGameStateValue('exchangeCard')) == 1) {
                 self::setGameStateValue('exchangeCard', $opponentId);
+        
+                self::notifyAllPlayers('log', clienttranslate('${player_name} takes a card from ${player_name2} hand'),  [
+                    'player_name' => $this->getPlayerName($player_id),
+                    'player_name2' => $this->getPlayerName($opponentId),
+                ]);
+
                 $this->gamestate->nextState('exchangeCard');
             }
         }

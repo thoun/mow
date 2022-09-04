@@ -131,6 +131,11 @@ trait ActionTrait {
 
             self::incStat( 1, "changeDirectionNumber" );
         } else {
+
+            self::notifyAllPlayers('log', clienttranslate('${player_name} keeps current direction'), [
+                'player_name' => self::getActivePlayerName(),
+            ]);
+
             self::incStat( 1, "keepDirectionNumber" );
         }
 
@@ -160,6 +165,9 @@ trait ActionTrait {
         $this->controlFarmerCardPlayable($card, $player_id);
 
         $this->farmerCards->moveCard($cardId, 'discard');
+
+        // notify
+        $this->farmerCardPlayed($player_id, $card);
 
         $nextState = 'playFarmer';
         if ($card->type == 1) {
@@ -192,6 +200,13 @@ trait ActionTrait {
                     'oldCards' => $centerCards,
                     'newCards' => $newCards,
                 ]);
+                
+            
+                self::notifyAllPlayers('log', clienttranslate('${player_name} discard ${number} cows with the values 7, 8 and 9 and replaces them by discard cards'),  [
+                    'playerId' => $player_id,
+                    'player_name' => $this->getPlayerName($player_id),
+                    'number' => $number,
+                ]);
             }
         } else if ($card->type == 8) {
             self::setGameStateValue( 'chooseDirectionPick', 1);
@@ -223,9 +238,6 @@ trait ActionTrait {
             }
         }
 
-        // And notify
-        $this->farmerCardPlayed($player_id, $card);
-
         $this->gamestate->nextState($nextState);
     }
 
@@ -244,6 +256,11 @@ trait ActionTrait {
             $this->gamestate->nextState('nextPlayer');
         } else {
             self::setGameStateValue('gotoPlayer', $playerId);
+
+            self::notifyAllPlayers('log', clienttranslate('${player_name} chooses ${player_name2} as the next player'), [
+                'player_name' => self::getActivePlayerName(),
+                'player_name2' => $this->getPlayerName($playerId),
+            ]);
 
             if (intval(self::getGameStateValue('chooseDirectionPick')) > 0) {
                 self::setGameStateValue('chooseDirectionPick', 0);
@@ -328,13 +345,27 @@ trait ActionTrait {
         }
     }       
     
-    function viewCards($playerId) {
+    function viewCards(int $playerId) {
         self::setGameStateValue('lookOpponentHand', $playerId);
+        
+        $activePlayerId = self::getActivePlayerId();
+        self::notifyAllPlayers('log', clienttranslate('${player_name} looks ${player_name2} cards'),  [
+            'player_name' => $this->getPlayerName($activePlayerId),
+            'player_name2' => $this->getPlayerName($playerId),
+        ]);
+
         $this->gamestate->nextState('viewCards');
     }
 
-    function exchangeCard($playerId) {
+    function exchangeCard(int $playerId) {
         self::setGameStateValue('exchangeCard', $playerId);
+        
+        $activePlayerId = self::getActivePlayerId();
+        self::notifyAllPlayers('log', clienttranslate('${player_name} takes a card from ${player_name2} hand'),  [
+            'player_name' => $this->getPlayerName($activePlayerId),
+            'player_name2' => $this->getPlayerName($playerId),
+        ]);
+
         $this->gamestate->nextState('exchangeCard');
     }
 
@@ -435,6 +466,11 @@ trait ActionTrait {
         ]);
         self::notifyAllPlayers('newCardUpdateCounter', '', [
             'playerId' => $playerId,
+        ]);
+        
+        self::notifyAllPlayers('log', clienttranslate('${player_name} gives back a card to ${player_name2}'),  [
+            'player_name' => $this->getPlayerName($playerId),
+            'player_name2' => $this->getPlayerName($opponentId),
         ]);
 
         // card cleared when played
