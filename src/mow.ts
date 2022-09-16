@@ -492,6 +492,10 @@ class Mow implements Game {
     private isSimpleVersion(): boolean {
         return this.gamedatas.simpleVersion;
     }
+    
+    private getPlayerId(): number {
+        return Number((this as any).player_id);
+    }    
 
     private getPlayer(playerId: number): Player {
         return Object.values(this.gamedatas.players).find(player => Number(player.id) == playerId);
@@ -537,8 +541,42 @@ class Mow implements Game {
                 (this as any).addTooltipHtml(`farmer-card-counter-wrapper-${player.id}`, _("Number of farmer cards in hand"));
             }
 
-            
+            if (playerId == this.getPlayerId()) {
+                html = `
+                <div>
+                    <button class="bgabutton bgabutton_gray" id="collected-button-${player.id}" style="white-space: normal;">${_('See collected cards')}</button>
+                </div>`;
+
+                dojo.place(html, `player_board_${player.id}`);
+                document.getElementById(`collected-button-${player.id}`).addEventListener('click', () => this.showCollected());
+            }
         });
+    }
+
+    private showCollected() {
+        const discardedDialog = new ebg.popindialog();
+        discardedDialog.create('mowCollectedDialog');
+        discardedDialog.setTitle('');
+        
+        var html = `<div id="collected-popin">
+            <h1>${_("Collected cards")}</h1>
+            <div class="collected-cards">`;
+
+        if (this.gamedatas.collectedCards.length) {
+            const cards = this.gamedatas.collectedCards.slice();
+            cards.sort((a, b) => a.type == b.type ? a.number - b.number : b.type - a.type);
+            cards.forEach(card => html += `<div class="card" data-type="${card.type}" data-number="${card.number}"></div>`);
+        } else {
+            html += `<div class="message">${_('No collected cards on this round')}</div>`;
+        }
+            
+        html += `</div>
+        </div>`;
+        
+        // Show the dialog
+        discardedDialog.setContent(html);
+
+        discardedDialog.show();
     }
 
     private setPickCardAction(pickCardAction: PickCardAction) {
@@ -899,6 +937,10 @@ class Mow implements Game {
         dojo.query("#myhand .stockitem").removeClass("disabled");
         this.allowedCardsIds = null; 
         this.playerHand.unselectAll();
+
+        if (Number(notif.args.player_id) == this.getPlayerId()) {
+            this.gamedatas.collectedCards.push(...notif.args.collectedCards);
+        }
     }
     
     public notif_handCollected( notif: Notif<NotifHandCollectedArgs> ) {
@@ -918,6 +960,10 @@ class Mow implements Game {
             }
             this.cardCounters[notif.args.player_id].toValue(0);
         }, 1450);
+
+        if (Number(notif.args.player_id) == this.getPlayerId()) {
+            this.gamedatas.collectedCards.push(...notif.args.collectedCards);
+        }
     }
     
     public notif_replaceCards( notif: Notif<NotifReplaceCardsArgs> ) {
@@ -939,9 +985,10 @@ class Mow implements Game {
     }
     
     public notif_tableWindow( notif: Notif<any> ) {
-        Object.keys(notif.args.playersScores).forEach(player_id => {
-            (this as any).scoreCtrl[player_id].toValue(Number(notif.args.playersScores[player_id]));
+        Object.keys(notif.args.playersScores).forEach(playerId => {
+            (this as any).scoreCtrl[playerId].toValue(Number(notif.args.playersScores[playerId]));
         });
+        this.gamedatas.collectedCards = [];
     }
 
     ////////////////////////////////

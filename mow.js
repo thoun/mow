@@ -137,7 +137,7 @@ function updateDisplay(from) {
     for (var i in this.items) {
         topDestination = topDestinations[i];
         leftDestination = leftDestinations[i];
-        console.log(i, leftDestinations, leftDestination);
+        //console.log(i, leftDestinations, leftDestination);
         var item = this.items[i];
         var itemDivId = this.getItemDivId(item.id);
         var $itemDiv = $(itemDivId);
@@ -798,6 +798,9 @@ var Mow = /** @class */ (function () {
     Mow.prototype.isSimpleVersion = function () {
         return this.gamedatas.simpleVersion;
     };
+    Mow.prototype.getPlayerId = function () {
+        return Number(this.player_id);
+    };
     Mow.prototype.getPlayer = function (playerId) {
         return Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) == playerId; });
     };
@@ -823,7 +826,30 @@ var Mow = /** @class */ (function () {
                 _this.farmerCardCounters[playerId] = farmerCardCounter;
                 _this.addTooltipHtml("farmer-card-counter-wrapper-" + player.id, _("Number of farmer cards in hand"));
             }
+            if (playerId == _this.getPlayerId()) {
+                html = "\n                <div>\n                    <button class=\"bgabutton bgabutton_gray\" id=\"collected-button-" + player.id + "\" style=\"white-space: normal;\">" + _('See collected cards') + "</button>\n                </div>";
+                dojo.place(html, "player_board_" + player.id);
+                document.getElementById("collected-button-" + player.id).addEventListener('click', function () { return _this.showCollected(); });
+            }
         });
+    };
+    Mow.prototype.showCollected = function () {
+        var discardedDialog = new ebg.popindialog();
+        discardedDialog.create('mowCollectedDialog');
+        discardedDialog.setTitle('');
+        var html = "<div id=\"collected-popin\">\n            <h1>" + _("Collected cards") + "</h1>\n            <div class=\"collected-cards\">";
+        if (this.gamedatas.collectedCards.length) {
+            var cards = this.gamedatas.collectedCards.slice();
+            cards.sort(function (a, b) { return a.type == b.type ? a.number - b.number : b.type - a.type; });
+            cards.forEach(function (card) { return html += "<div class=\"card\" data-type=\"" + card.type + "\" data-number=\"" + card.number + "\"></div>"; });
+        }
+        else {
+            html += "<div class=\"message\">" + _('No collected cards on this round') + "</div>";
+        }
+        html += "</div>\n        </div>";
+        // Show the dialog
+        discardedDialog.setContent(html);
+        discardedDialog.show();
     };
     Mow.prototype.setPickCardAction = function (pickCardAction) {
         if (this.pickCardAction == pickCardAction) {
@@ -1110,6 +1136,7 @@ var Mow = /** @class */ (function () {
         }
     };
     Mow.prototype.notif_herdCollected = function (notif) {
+        var _a;
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         if (notif.args.player_id) {
             this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
@@ -1122,8 +1149,12 @@ var Mow = /** @class */ (function () {
         dojo.query("#myhand .stockitem").removeClass("disabled");
         this.allowedCardsIds = null;
         this.playerHand.unselectAll();
+        if (Number(notif.args.player_id) == this.getPlayerId()) {
+            (_a = this.gamedatas.collectedCards).push.apply(_a, notif.args.collectedCards);
+        }
     };
     Mow.prototype.notif_handCollected = function (notif) {
+        var _a;
         var _this = this;
         if (notif.args.points > 0) {
             this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
@@ -1139,6 +1170,9 @@ var Mow = /** @class */ (function () {
             }
             _this.cardCounters[notif.args.player_id].toValue(0);
         }, 1450);
+        if (Number(notif.args.player_id) == this.getPlayerId()) {
+            (_a = this.gamedatas.collectedCards).push.apply(_a, notif.args.collectedCards);
+        }
     };
     Mow.prototype.notif_replaceCards = function (notif) {
         var _this = this;
@@ -1157,9 +1191,10 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.notif_tableWindow = function (notif) {
         var _this = this;
-        Object.keys(notif.args.playersScores).forEach(function (player_id) {
-            _this.scoreCtrl[player_id].toValue(Number(notif.args.playersScores[player_id]));
+        Object.keys(notif.args.playersScores).forEach(function (playerId) {
+            _this.scoreCtrl[playerId].toValue(Number(notif.args.playersScores[playerId]));
         });
+        this.gamedatas.collectedCards = [];
     };
     ////////////////////////////////
     ////////////////////////////////

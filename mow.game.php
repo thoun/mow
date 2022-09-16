@@ -203,8 +203,9 @@ class mow extends Table {
         $result['simpleVersion'] = $this->isSimpleVersion();
   
 		// Cards in player hand      
-        $result['hand'] = $this->getCardsFromDb($this->cards->getCardsInLocation( 'hand', $current_player_id ));
-        $result['farmerHand'] = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation( 'hand', $current_player_id ));
+        $result['hand'] = $this->getCardsFromDb($this->cards->getCardsInLocation('hand', $current_player_id ));
+        $result['farmerHand'] = $this->getFarmerCardsFromDb($this->farmerCards->getCardsInLocation('hand', $current_player_id ));
+        $result['collectedCards'] = $this->getCardsFromDb($this->cards->getCardsInLocation('discard', $current_player_id));
 
         foreach ($result['players'] as $playerId => &$playerDb) {
             $playerDb['score'] = $this->getPlayerScore($playerId);

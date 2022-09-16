@@ -130,7 +130,7 @@ function updateDisplay(from: string) {
     for (let i in this.items) {
         topDestination = topDestinations[i];
         leftDestination = leftDestinations[i];
-        console.log(i, leftDestinations, leftDestination);
+        //console.log(i, leftDestinations, leftDestination);
 
         const item = this.items[i];
         const itemDivId = this.getItemDivId(item.id);

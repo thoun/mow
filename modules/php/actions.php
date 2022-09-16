@@ -303,7 +303,8 @@ trait ActionTrait {
         }
     }
 
-    function removeHerdAndNotify($player_id, $collectedPoints) {  
+    function removeHerdAndNotify($player_id, $collectedPoints) {
+        $herdCards = $this->getCardsFromDb($this->cards->getCardsInLocation("herd", $this->getActiveRow()));
         $this->cards->moveAllCardsInLocation( "herd", "discard", $this->getActiveRow(), $player_id ? $player_id : 0);
         $sql = "UPDATE cow SET card_slowpoke_type_arg=null WHERE card_slowpoke_type_arg is not null";
         self::DbQuery($sql);
@@ -316,6 +317,7 @@ trait ActionTrait {
                 'points' => $collectedPoints,
                 'row' => $this->getActiveRow(),
                 'playerScore' => $this->getPlayerScore($player_id),
+                'collectedCards' => $herdCards,
             ]);
         } else {
             self::notifyAllPlayers('herdCollected', clienttranslate('Herd removed'), [

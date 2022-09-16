@@ -33,6 +33,7 @@ interface MowGamedatas {
     gamestate: Gamestate;
     gamestates: { [gamestateId: number]: Gamestate };
     hand: Card[];
+    collectedCards: Card[];
     farmerHand: FarmerCard[];
     herdNumber: number;
     herds: Card[][];
@@ -111,6 +112,7 @@ interface NotifCollectedArgs {
     player_id: string;
     points: number;
     playerScore: number;
+    collectedCards: Card[];
 }
 
 type NotifHandCollectedArgs = NotifCollectedArgs;

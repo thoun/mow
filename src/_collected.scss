@@ -1,0 +1,98 @@
+#popin_mowCollectedDialog {
+    background-repeat: repeat;
+    max-width: 100vw;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+#collected-popin {
+    max-width: 35rem;
+    max-height: calc(80vh - 80px);
+    overflow: auto;
+
+    h1 {
+        color: black;
+    }
+
+    .collected-cards {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+
+        .message {
+            padding: 10px;
+            font-style: italic;
+        }
+
+        .card {
+            width: 121px;
+            height: 188px;
+            border-radius: 10px;
+            margin: 5px;
+            box-shadow: 1px 1px 3px 1px rgb(0 0 0 / 50%);
+
+            &[data-type="0"] {
+                background-image: url('img/cards0.jpg');
+
+                @for $number from 1 through 15 {
+                    &[data-number="#{$number}"] {
+                        background-position-x: #{($number - 1) * 100% / 14};
+                    }
+                }
+            }
+
+            &[data-type="1"] {
+                background-image: url('img/cards1.jpg');
+
+                @for $number from 2 through 14 {
+                    &[data-number="#{$number}"] {
+                        background-position-x: #{($number - 2) * 100% / 12};
+                    }
+                }
+            }
+
+            &[data-type="2"] {
+                background-image: url('img/cards2.jpg');
+
+                @for $number from 3 through 13 {
+                    &[data-number="#{$number}"] {
+                        background-position-x: #{($number - 3) * 100% / 10};
+                    }
+                }
+            }
+
+            &[data-type="3"] {
+                background-image: url('img/cards3.jpg');
+
+                @for $number from 7 through 9 {
+                    &[data-number="#{$number}"] {
+                        background-position-x: #{($number - 7) * 100% / 2};
+                    }
+                }
+            }
+
+            &[data-type="5"] {
+                background-image: url('img/cards5.jpg');
+
+                &[data-number="0"] {
+                    background-position-x: #{0 * 100% / 5};
+                }
+                &[data-number="16"] {
+                    background-position-x: #{1 * 100% / 5};
+                }
+                &[data-number="21"] {
+                    background-position-x: #{2 * 100% / 5};
+                }
+                &[data-number="22"] {
+                    background-position-x: #{3 * 100% / 5};
+                }
+                &[data-number="70"] {
+                    background-position-x: #{4 * 100% / 5};
+                }
+                &[data-number="90"] {
+                    background-position-x: #{5 * 100% / 5};
+                }
+            }
+        }
+    }
+}

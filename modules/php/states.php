@@ -186,6 +186,7 @@ trait StateTrait {
                     'player_name' => $player['player_name'],
                     'points' => $cardsValue,
                     'playerScore' => $this->getPlayerScore($player_id),
+                    'collectedCards' => $player_hand,
                 ]);
             }
         }
