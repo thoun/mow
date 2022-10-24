@@ -863,7 +863,7 @@ class Mow implements Game {
         this.farmerCardCounters[notif.args.player_id].incValue(-1);
 
         const player = this.getPlayer(notif.args.player_id);
-        document.getElementById(`farmer-animation-text`).innerHTML = notif.log.replace('${farmerCardType}', '').replace('${player_name}', `<strong style="color: #${player.color};">${player.name}</strong>`);
+        document.getElementById(`farmer-animation-text`).innerHTML = _(notif.log).replace('${farmerCardType}', '').replace('${player_name}', `<strong style="color: #${player.color};">${player.name}</strong>`);
         document.getElementById(`farmer-animation-image`).dataset.type = ''+notif.args.card.type;
         document.getElementById(`farmer-animation-description`).innerHTML = this.farmerCards.getTooltip(notif.args.card.type);
         const wrapper = document.getElementById(`farmer-animation-wrapper`);
