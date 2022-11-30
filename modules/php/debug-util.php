@@ -21,6 +21,21 @@ trait DebugUtilTrait {
         
     }
 
+    function debugAllBlackCards() {
+        $playerId = 2343492;
+
+        $cards = $this->getFarmerCardsFromDb($this->cards->getCardsOfType(5));
+        $this->cards->moveCard($cards[0]->id, 'hand', $playerId);
+        for ($i=1;$i<count($cards);$i++) {
+            $this->cards->moveCard($cards[$i]->id, 'discard', $playerId);
+        }
+        //$this->debug($cards);
+    }
+
+    function debugEmptyDeck() {
+        $this->cards->moveAllCardsInLocation("deck", "discard");
+    }
+
     public function debugReplacePlayersIds() {
         if ($this->getBgaEnvironment() != 'studio') { 
             return;
@@ -50,10 +65,6 @@ trait DebugUtilTrait {
 			++$sid;
 		}
 	}
-
-    function debugEmptyDeck() {
-        $this->cards->moveAllCardsInLocation("deck", "discard");
-    }
 
     function debug($debugData) {
         if ($this->getBgaEnvironment() != 'studio') { 

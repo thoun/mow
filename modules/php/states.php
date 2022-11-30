@@ -204,7 +204,7 @@ trait StateTrait {
         $topPlayerId = 0;
         if (!$this->isSimpleVersion()) {
             // we reset player's points to 0 for this hand if he got the 6 5-flies cards
-            $sql = "SELECT card_location_arg FROM `cow` where card_location = 'discard' and card_type = 5 group by card_location_arg having count(*) >= 6";
+            $sql = "SELECT card_location_arg FROM `cow` where card_location IN ('hand', 'discard') and card_type = 5 group by card_location_arg having count(*) >= 6";
             $resetPointsPlayerId = intval(self::getUniqueValueFromDB($sql));
 
             if ($resetPointsPlayerId > 0) {
