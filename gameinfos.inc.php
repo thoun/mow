@@ -1,15 +1,6 @@
 <?php
 
-$gameinfos = [
-
-// Game designer (or game designers, separated by commas)
-'designer' => 'Bruno Cathala',       
-
-// Game artist (or game artists, separated by commas)
-'artist' => 'Cyril Bouquet',         
-
-// Year of FIRST publication of this game. Can be negative.
-'year' => 2022,                 
+$gameinfos = [              
 
 // Game publisher
 'publisher' => 'Hurrican',                     
@@ -59,19 +50,6 @@ $gameinfos = [
 // Is this game cooperative (all players wins together or loose together)
 'is_coop' => 0, 
 
-
-// Complexity of the game, from 0 (extremely simple) to 5 (extremely complex)
-'complexity' => 1,    
-
-// Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
-'luck' => 3,    
-
-// Strategy of the game, from 0 (no strategy can be setup) to 5 (totally based on strategy)
-'strategy' => 1,    
-
-// Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-'diplomacy' => 0,  
-
 // Colors attributed to players
 'player_colors' => ['ff0000', '008000', '0000ff', 'ffa500', '000000', 'e94190', '982fff', '72c3b1', 'f07f16', 'bdd002', '7b7b7b'],
 
@@ -82,17 +60,4 @@ $gameinfos = [
 // When doing a rematch, the player order is swapped using a "rotation" so the starting player is not the same
 // If you want to disable this, set this to true
 'disable_player_order_swap_on_rematch' => false, 
-
-// Game presentation
-// Short game presentation text that will appear on the game description page, structured as an array of paragraphs.
-// Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
-// A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
-'presentation' => [
-    totranslate("A gentle breeze has set the green grass swaying, and the sun will soon be setting. Time to round up the cows and lead them back to the stable. But steer clear of the ones covered in flies... Nobody like flies! Avoid the most flies to become these majestic creatures’ favorite farmer!"),
-],
-
-// Games categories
-//  You can attribute any number of "tags" to your game.
-//  Each tag has a specific ID (ex: 22 for the category "Prototype", 101 for the tag "Science-fiction theme game")
-'tags' => [2, 200]
 ];

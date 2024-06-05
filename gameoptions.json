@@ -1,0 +1,17 @@
+{
+    "100": {
+        "name": "Simple version (2008 edition)",
+        "values": {
+            "1": {
+                "name": "No",
+                "description": "Standard rules"
+            },
+            "2": {
+                "name": "Yes",
+                "description": "No farmer, no card swap, no special rule when all special cows are collected",
+                "tmdisplay": "Simple version (2008 edition)"
+            }
+        },
+        "default": 1
+    }
+}
