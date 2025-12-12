@@ -1,27 +1,24 @@
 const isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;;
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-/**
- * JS const
- */
-
-declare const define;
-declare const ebg;
-declare const $;
-//declare const dojo: Dojo;
-
 type PickCardAction = 'play' | 'give';
 
-class Mow implements Game {
+// @ts-ignore
+GameGui = (function () { // this hack required so we fake extend GameGui
+  function GameGui() {}
+  return GameGui;
+})();
+
+
+class Mow extends GameGui<MowGamedatas> /*implements Game*/ {
     private cardCounters: Counter[] = [];
     private farmerCardCounters: Counter[] = [];
 
-    private gamedatas: MowGamedatas;
+    public gamedatas: MowGamedatas;
     private playerHand: Stock = null;
     private playerFarmerHand: Stock = null;
     private theHerds: MowHerdStock[] = [];
     private allowedCardsIds: number[];
-    private player_id: string;
 
     private cardwidth: number = 121;
     private cardheight: number = 188;
@@ -52,7 +49,10 @@ class Mow implements Game {
     private mowCards = new MowCards();
     private farmerCards = new FarmerCards();
 
-    constructor() {}
+    constructor() {
+        super();
+        //Object.assign(this, this.bga);
+    }
         
     /*
         setup:
@@ -216,7 +216,7 @@ class Mow implements Game {
     public onEnteringState(stateName: string, args: any) {
         log( 'Entering state: '+stateName, args);
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             dojo.addClass(`playertable-${args.active_player}`, "active");
         }
 
@@ -228,7 +228,7 @@ class Mow implements Game {
                 const suffix = args.args.suffix;
                 this.setGamestateDescription(suffix);
                 this.onEnteringStatePlayerTurn(args);  
-                if((this as any).isCurrentPlayerActive()) {
+                if(this.isCurrentPlayerActive()) {
                     this.disableFarmerCards(args.args.allowedFarmerCards.map(card => card.id));   
                 }
                 break;
@@ -237,14 +237,14 @@ class Mow implements Game {
                 this.onEnteringStateChooseDirection(args.args);     
                 break;
             case 'playFarmer':
-                if((this as any).isCurrentPlayerActive()) {
+                if(this.isCurrentPlayerActive()) {
                     this.disableFarmerCards(args.args.allowedFarmerCards.map(card => card.id));   
                 }
                 break;
 
             case 'swapHands':  
                 this.onEnteringSelectionAction();
-                if((this as any).isCurrentPlayerActive() && args.args.opponentId) {
+                if(this.isCurrentPlayerActive() && args.args.opponentId) {
                     this.selectPlayer(args.args.opponentId);
                 }
                 break;
@@ -252,10 +252,10 @@ class Mow implements Game {
                 this.onEnteringSelectionAction();
                 break;
             case 'viewCards':
-                this.onEnteringViewCards(args.args, (this as any).isCurrentPlayerActive());
+                this.onEnteringViewCards(args.args, this.isCurrentPlayerActive());
                 break;
             case 'giveCard':                
-                if((this as any).isCurrentPlayerActive()) {
+                if(this.isCurrentPlayerActive()) {
                     this.setPickCardAction('give');
                 }
                 break;
@@ -268,16 +268,16 @@ class Mow implements Game {
     }
 
     private onEnteringStatePlayerTurn(args: { active_player: string | number, args: { allowedCardIds: number[] } }) {
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             this.setPickCardAction('play');
             this.enableAllowedCards(args.args.allowedCardIds);
         }
-        if((this as any).isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
+        if(this.isCurrentPlayerActive() && this.playerHand.getSelectedItems().length === 1) {
             const selectedCardId = this.playerHand.getSelectedItems()[0].id;
             if (this.allowedCardsIds?.indexOf(Number(selectedCardId)) !== -1) {
 
                 setTimeout(() => {
-                    if ((this as any).isInterfaceLocked()) {
+                    if (this.isInterfaceLocked()) {
                         this.playerHand.unselectAll();
                     } else {
                         this.onPlayerHandSelectionChanged();
@@ -288,7 +288,7 @@ class Mow implements Game {
     }
 
     private onEnteringStateChooseDirection(args: { direction_clockwise: boolean, canPick: boolean }) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             const herdSelector = this.gamedatas.herdNumber > 1;
             dojo.toggleClass('keepDirectionSymbol', 'direction-anticlockwise', !args.direction_clockwise);
             dojo.toggleClass('changeDirectionSymbol', 'direction-anticlockwise', args.direction_clockwise);
@@ -328,9 +328,9 @@ class Mow implements Game {
     }
 
     private onEnteringSelectionAction() {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             this.playersSelectable = true;  
-            Object.keys(this.gamedatas.players).filter(playerId => Number(playerId) !== Number((this as any).player_id)).forEach(playerId => 
+            Object.keys(this.gamedatas.players).filter(playerId => Number(playerId) !== Number(this.player_id)).forEach(playerId => 
                 dojo.addClass(`playertable-${playerId}`, 'selectable')
             );
         }
@@ -356,7 +356,7 @@ class Mow implements Game {
             this.mowCards.createCards([opponentHand]);
             args.cards.forEach(card=> this.addCardToStock(opponentHand, card));
         } else {
-            const active = this.getPlayer(Number((this as any).getActivePlayerId()));
+            const active = this.getPlayer(Number(this.getActivePlayerId()));
             document.getElementById('opponent-animals').innerHTML = '<div>' + dojo.string.substitute(_("${active_player_name} is looking at ${player_name} cards"), { 
                 active_player_name: `<span style="color: #${active.color}">${active.name}</span>`,
                 player_name: `<span style="color: #${opponent.color}">${opponent.name}</span>` 
@@ -368,7 +368,7 @@ class Mow implements Game {
         const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
         this.gamedatas.gamestate.description = `${originalState['description' + suffix]}`; 
         this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + suffix]}`; 
-        (this as any).updatePageTitle();        
+        this.updatePageTitle();        
     }
 
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -381,7 +381,7 @@ class Mow implements Game {
         switch( stateName ) {
         
             case 'playerTurn':                 
-                if((this as any).isCurrentPlayerActive()) {
+                if(this.isCurrentPlayerActive()) {
                     this.enableFarmerCards();
                     if (this.gamedatas.herdNumber > 1) {
                         this.resetAllowedCards();
@@ -394,7 +394,7 @@ class Mow implements Game {
                 break;   
         
             case 'playFarmer':                 
-                if((this as any).isCurrentPlayerActive()) {
+                if(this.isCurrentPlayerActive()) {
                     this.enableFarmerCards();   
                 }               
                 break;
@@ -424,7 +424,7 @@ class Mow implements Game {
 
     private addAllowedFarmerCardsButtons(args: any) {
         args.allowedFarmerCards.forEach(card => 
-            (this as any).addActionButton(`playFarmer${card.id}_button`, _('Play farmer') + ` <div class="farmer-icon farmer${card.type}"></div>`, () => this.playFarmer(card.id), null, null, 'gray')
+            this.addActionButton(`playFarmer${card.id}_button`, _('Play farmer') + ` <div class="farmer-icon farmer${card.type}"></div>`, () => this.playFarmer(card.id), null, null, 'gray')
         );
     }
 
@@ -433,42 +433,42 @@ class Mow implements Game {
     //        
     public onUpdateActionButtons(stateName: string, args: any) {
         //log( 'onUpdateActionButtons: '+stateName );
-        (this as any).removeActionButtons();
+        this.removeActionButtons();
                     
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'playerTurn':
                     this.addAllowedFarmerCardsButtons(args);
                     if (args.canCollect) {
-                        (this as any).addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
+                        this.addActionButton( 'collectHerd_button', _('Collect herd'), 'onCollectHerd', null, false, 'red');
                     }
                     break;
                 case 'playFarmer':
                     this.addAllowedFarmerCardsButtons(args);
-                    (this as any).addActionButton('pass_button', _('Pass'), 'onPassFarmer');
+                    this.addActionButton('pass_button', _('Pass'), 'onPassFarmer');
                     break;
                 case 'swapHands':
-                    (this as any).addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
-                    (this as any).addActionButton( 'selectionAction_button', _(`Swap`), 'onSwap');
+                    this.addActionButton( 'dontSwapHands_button', _(`Don't swap`), 'onDontSwap');
+                    this.addActionButton( 'selectionAction_button', _(`Swap`), 'onSwap');
                     dojo.addClass('selectionAction_button', 'disabled');
                     break;                
                 case 'selectOpponent':
                     if (args.lookOpponentHand) {
-                        (this as any).addActionButton( 'selectionAction_button', _(`Look player's hand`), 'onLookHand');
+                        this.addActionButton( 'selectionAction_button', _(`Look player's hand`), 'onLookHand');
                     } else {
-                        (this as any).addActionButton( 'selectionAction_button', _(`Pick a card`), 'onPickOpponentCard');
+                        this.addActionButton( 'selectionAction_button', _(`Pick a card`), 'onPickOpponentCard');
                     }
                     dojo.addClass('selectionAction_button', 'disabled');
                     break;
                 case 'selectFliesType':
                     const selectFliesTypeArgs = args as EnteringSelectFliesTypeArgs;
                     [1, 2, 3, 5].forEach(type => 
-                        (this as any).addActionButton(`flyType${type}_button`, this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs), () => this.selectFlieType(type), null, null, selectFliesTypeArgs.counts[type].points ? undefined : 'gray')
+                        this.addActionButton(`flyType${type}_button`, this.getSelectFlyTypeDetailsLabel(type, selectFliesTypeArgs), () => this.selectFlieType(type), null, null, selectFliesTypeArgs.counts[type].points ? undefined : 'gray')
                     );
-                    (this as any).addActionButton( 'flyTypeIgnore_button', _(`Ignore`), () => this.selectFlieType(0), null, false, 'red');
+                    this.addActionButton( 'flyTypeIgnore_button', _(`Ignore`), () => this.selectFlieType(0), null, false, 'red');
                     break;
                 case 'viewCards':
-                    (this as any).addActionButton('seen-button', _('Seen'), () => this.next());
+                    this.addActionButton('seen-button', _('Seen'), () => this.next());
                     break;
             }
         }
@@ -494,7 +494,7 @@ class Mow implements Game {
     }
     
     private getPlayerId(): number {
-        return Number((this as any).player_id);
+        return Number(this.player_id);
     }    
 
     private getPlayer(playerId: number): Player {
@@ -529,7 +529,7 @@ class Mow implements Game {
             cardCounter.setValue(player.cards);
             this.cardCounters[playerId] = cardCounter;
 
-            (this as any).addTooltipHtml(`card-counter-wrapper-${player.id}`, _("Number of cards in hand"));
+            this.addTooltipHtml(`card-counter-wrapper-${player.id}`, _("Number of cards in hand"));
 
             
             if (!gamedatas.simpleVersion) {
@@ -538,7 +538,7 @@ class Mow implements Game {
                 farmerCardCounter.setValue(player.farmerCards);
                 this.farmerCardCounters[playerId] = farmerCardCounter;
 
-                (this as any).addTooltipHtml(`farmer-card-counter-wrapper-${player.id}`, _("Number of farmer cards in hand"));
+                this.addTooltipHtml(`farmer-card-counter-wrapper-${player.id}`, _("Number of farmer cards in hand"));
             }
 
             if (playerId == this.getPlayerId()) {
@@ -602,7 +602,7 @@ class Mow implements Game {
             this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.number), slowpokeNumber);
         }
             
-        if( playerId != this.player_id ) {
+        if(Number(playerId) != this.bga.players.getCurrentPlayerId() ) {
             // Some opponent played a card
             // Move card from player panel
             this.addCardToHerd(card, row, 'playertable-'+playerId);
@@ -621,7 +621,7 @@ class Mow implements Game {
 
         if (canPick) {
             const rowPick = this.gamedatas.herdNumber > 1;
-            const ids: number[] = rowPick ? [0, 1, 2] : this.gamedatas.playerorder.map(id => Number(id)).filter(id => id != Number((this as any).player_id));
+            const ids: number[] = rowPick ? [0, 1, 2] : this.gamedatas.playerorder.map(id => Number(id)).filter(id => id != Number(this.player_id));
 
             let html = `<div>${_('Or choose which opponent plays next:')}</div>`;
             ids.forEach(id => {
@@ -677,7 +677,7 @@ class Mow implements Game {
 
         const playerId = Number((event.target as HTMLDivElement).dataset.id);
 
-        if (playerId === (this as any).player_id) {
+        if (playerId === this.player_id) {
             return;
         }
 
@@ -698,14 +698,14 @@ class Mow implements Game {
     
 
    public onCollectHerd() {
-        if(!(this as any).checkAction('collectHerd'))
+        if(!this.checkAction('collectHerd'))
         return;
     
         this.takeAction("collectHerd");
     }
 
     public onKeepDirection() {
-        if(!(this as any).checkAction('setDirection'))
+        if(!this.checkAction('setDirection'))
         return;
         this.takeAction("setDirection", {
             change: false
@@ -713,7 +713,7 @@ class Mow implements Game {
     }
 
     public onChangeDirection() {
-        if(!(this as any).checkAction('setDirection'))
+        if(!this.checkAction('setDirection'))
         return;
         this.takeAction("setDirection", {
             change: true
@@ -721,7 +721,7 @@ class Mow implements Game {
     }
 
     public pickPlayer(id: number) {
-        if(!(this as any).checkAction('setPlayer'))
+        if(!this.checkAction('setPlayer'))
         return;
         this.takeAction("setPlayer", {
             id
@@ -729,13 +729,13 @@ class Mow implements Game {
     }
 
     public onPassFarmer() {
-        if(!(this as any).checkAction('pass'))
+        if(!this.checkAction('pass'))
         return;
         this.takeAction("pass");
     }
 
     public onSwap() {
-         if(!(this as any).checkAction('swap'))
+         if(!this.checkAction('swap'))
          return;
      
          this.takeAction("swap", {
@@ -746,7 +746,7 @@ class Mow implements Game {
     }
 
     public onDontSwap() {
-         if(!(this as any).checkAction('dontSwap'))
+         if(!this.checkAction('dontSwap'))
          return;
      
          this.takeAction("swap", {
@@ -755,7 +755,7 @@ class Mow implements Game {
     }
 
     public onLookHand() {
-        if(!(this as any).checkAction('viewCards'))
+        if(!this.checkAction('viewCards'))
          return;
      
          this.takeAction("viewCards", {
@@ -766,7 +766,7 @@ class Mow implements Game {
     }
 
     public onPickOpponentCard() {
-        if(!(this as any).checkAction('exchangeCard'))
+        if(!this.checkAction('exchangeCard'))
          return;
      
          this.takeAction("exchangeCard", {
@@ -777,18 +777,18 @@ class Mow implements Game {
     }
 
     public next() {
-         if (!(this as any).checkAction('next'))
+         if (!this.checkAction('next'))
          return;
      
          this.takeAction("next");
     }
 
     public selectFlieType(type: number) {
-        if(!(this as any).checkAction('ignoreFlies'))
+        if(!this.checkAction('ignoreFlies'))
          return;
 
         this.takeAction("ignoreFlies", {
-            playerId: type === null ? 0 : (this as any).player_id,
+            playerId: type === null ? 0 : this.player_id,
             type
         });
     }
@@ -927,9 +927,9 @@ class Mow implements Game {
     public notif_herdCollected( notif: Notif<NotifHerdCollectedArgs> ) {
         // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
         if (notif.args.player_id) {
-            (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+            this.displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
             
-            (this as any).scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
+            this.scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
             this.theHerds[notif.args.row].removeAllTo( 'player_board_'+notif.args.player_id );
         } else {
             this.theHerds[notif.args.row].removeAllTo('topbar');
@@ -945,17 +945,17 @@ class Mow implements Game {
     
     public notif_handCollected( notif: Notif<NotifHandCollectedArgs> ) {
         if (notif.args.points > 0) {
-            (this as any).displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-            if (this.player_id == notif.args.player_id) {
+            this.displayScoring( 'playertable-'+notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
+            if (this.bga.players.getCurrentPlayerId() == Number(notif.args.player_id)) {
                 dojo.query("#myhand").removeClass("bounce");
                 dojo.query("#myhand").addClass("bounce");
             }
             
-            (this as any).scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
+            this.scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
         }
 
         setTimeout(() => {
-            if (this.player_id == notif.args.player_id) {
+            if (this.bga.players.getCurrentPlayerId() == Number(notif.args.player_id)) {
                 this.playerHand.removeAll();
             }
             this.cardCounters[notif.args.player_id].toValue(0);
@@ -986,7 +986,7 @@ class Mow implements Game {
     
     public notif_tableWindow( notif: Notif<any> ) {
         Object.keys(notif.args.playersScores).forEach(playerId => {
-            (this as any).scoreCtrl[playerId].toValue(Number(notif.args.playersScores[playerId]));
+            this.scoreCtrl[playerId].toValue(Number(notif.args.playersScores[playerId]));
         });
         this.gamedatas.collectedCards = [];
     }
@@ -1002,7 +1002,7 @@ class Mow implements Game {
             const card = items[0];
             const action = this.pickCardAction + 'Card';
             
-            if ((this as any).checkAction(action, true)) {    
+            if (this.checkAction(action, true)) {    
                 this.takeAction(action, { 
                     id: card.id
                 });
@@ -1016,7 +1016,7 @@ class Mow implements Game {
     public onPlayerFarmerHandSelectionChanged() {    
         const items = this.playerFarmerHand.getSelectedItems();
         if (items.length == 1) {
-            if ((this as any).checkAction('playFarmer', true)) {
+            if (this.checkAction('playFarmer', true)) {
                 // Can play a card
                 const id = items[0].id;
 
@@ -1042,12 +1042,12 @@ class Mow implements Game {
     private takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
-        (this as any).ajaxcall(`/mow/mow/${action}.html`, data, this, () => {});
+        this.ajaxcall(`/mow/mow/${action}.html`, data, this, () => {});
     }
 
     private setRemainingCards(remainingCards: number) {
         let $remainingCards = $('remainingCards');
-        $remainingCards.innerHTML = remainingCards;
+        $remainingCards.innerHTML = ''+remainingCards;
         dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
     }
 
@@ -1114,16 +1114,16 @@ class Mow implements Game {
     }
 
     private getNextPlayer() {
-        const activePlayerId = (this as any).getActivePlayerId();
-        const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
+        const activePlayerId = this.bga.players.getActivePlayerId();
+        const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => playerId === activePlayerId);
         const nextPlayerIndex = activePlayerIndex >= this.gamedatas.playerorder.length-1 ? 0 : activePlayerIndex+1;
         //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[nextPlayerIndex]);
         return this.gamedatas.players[Number(this.gamedatas.playerorder[nextPlayerIndex])];
     }
 
     private getPreviousPlayer() {
-        const activePlayerId = (this as any).getActivePlayerId();
-        const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => ''+playerId === activePlayerId);
+        const activePlayerId = this.bga.players.getActivePlayerId();
+        const activePlayerIndex = this.gamedatas.playerorder.findIndex(playerId => playerId === activePlayerId);
         const previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length-1 : activePlayerIndex-1;
         //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[previousPlayerIndex]);
         return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];

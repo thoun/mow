@@ -16,9 +16,6 @@
   *
   */
 
-
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
-
 require_once('modules/php/constants.inc.php');
 require_once("modules/php/objects/card.php");
 require_once("modules/php/objects/farmer-card.php");
@@ -28,12 +25,21 @@ require_once('modules/php/states.php');
 require_once('modules/php/args.php');
 require_once('modules/php/debug-util.php');
 
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
+
 class mow extends Table {
     use UtilTrait;
     use ActionTrait;
     use StateTrait;
     use ArgsTrait;
     use DebugUtilTrait;
+
+    public Deck $cards;
+    public Deck $farmerCards;
+
+    public array $special_labels;
+    public array $farmers_placement;
 
 	function __construct() {       	
  
@@ -63,16 +69,10 @@ class mow extends Table {
                 "simpleVersion" => 100,
         ]);
 		
-        $this->cards = self::getNew("module.common.deck");
-        $this->cards->init("cow");
+        $this->cards = $this->deckFactory->createDeck("cow");
 		
-        $this->farmerCards = self::getNew("module.common.deck");
-        $this->farmerCards->init("farmer");
-	}
-	
-    protected function getGameName() {
-        return "mow";
-    }	
+        $this->farmerCards = $this->deckFactory->createDeck("farmer");
+	}	
 
     /*
         setupNewGame:
@@ -176,6 +176,7 @@ class mow extends Table {
         $this->activeNextPlayer();
 
         /************ End of the game initialization *****/
+        return \ST_NEW_HAND;
     }
 
     /*
@@ -187,7 +188,7 @@ class mow extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $result = [
             'players' => []
         ];

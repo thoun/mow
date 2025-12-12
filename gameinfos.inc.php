@@ -42,10 +42,7 @@ $gameinfos = [
 // Note: if you are NOT using any tie breaker, leave the empty string.
 //
 // Example: 'tie_breaker_description' => totranslate( "Number of remaining cards in hand" ),
-'tie_breaker_description' => "",
-
-// Game is "beta". A game MUST set is_beta=1 when published on BGA for the first time, and must remains like this until all bugs are fixed.
-'is_beta' => 1,                     
+'tie_breaker_description' => "",                
 
 // Is this game cooperative (all players wins together or loose together)
 'is_coop' => 0, 

@@ -369,6 +369,19 @@ var FarmerCards = /** @class */ (function () {
     };
     return FarmerCards;
 }());
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __spreadArrays = (this && this.__spreadArrays) || function () {
     for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
     for (var r = Array(s), k = 0, i = 0; i < il; i++)
@@ -379,19 +392,26 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
 ;
 var log = isDebug ? console.log.bind(window.console) : function () { };
-var Mow = /** @class */ (function () {
+// @ts-ignore
+GameGui = (function () {
+    function GameGui() { }
+    return GameGui;
+})();
+var Mow = /** @class */ (function (_super) {
+    __extends(Mow, _super); /*implements Game*/
     function Mow() {
-        this.cardCounters = [];
-        this.farmerCardCounters = [];
-        this.playerHand = null;
-        this.playerFarmerHand = null;
-        this.theHerds = [];
-        this.cardwidth = 121;
-        this.cardheight = 188;
-        this.playersSelectable = false;
-        this.selectedPlayerId = null;
-        this.pickCardAction = 'play';
-        this.colors = [
+        var _this = _super.call(this) || this;
+        _this.cardCounters = [];
+        _this.farmerCardCounters = [];
+        _this.playerHand = null;
+        _this.playerFarmerHand = null;
+        _this.theHerds = [];
+        _this.cardwidth = 121;
+        _this.cardheight = 188;
+        _this.playersSelectable = false;
+        _this.selectedPlayerId = null;
+        _this.pickCardAction = 'play';
+        _this.colors = [
             '#b5b5b5',
             '#a4d6e3',
             '#e98023',
@@ -399,7 +419,7 @@ var Mow = /** @class */ (function () {
             null,
             '#000000'
         ];
-        this.remainingCardsColors = [
+        _this.remainingCardsColors = [
             '#FF0000',
             '#FF3300',
             '#ff6600',
@@ -407,8 +427,10 @@ var Mow = /** @class */ (function () {
             '#FFCC00',
             '#FFFF00'
         ];
-        this.mowCards = new MowCards();
-        this.farmerCards = new FarmerCards();
+        _this.mowCards = new MowCards();
+        _this.farmerCards = new FarmerCards();
+        return _this;
+        //Object.assign(this, this.bga);
     }
     /*
         setup:
@@ -870,7 +892,7 @@ var Mow = /** @class */ (function () {
         if (slowpokeNumber != -1) {
             this.setSlowpokeWeight(this.mowCards.getCardUniqueId(card.type, card.number), slowpokeNumber);
         }
-        if (playerId != this.player_id) {
+        if (Number(playerId) != this.bga.players.getCurrentPlayerId()) {
             // Some opponent played a card
             // Move card from player panel
             this.addCardToHerd(card, row, 'playertable-' + playerId);
@@ -1158,14 +1180,14 @@ var Mow = /** @class */ (function () {
         var _this = this;
         if (notif.args.points > 0) {
             this.displayScoring('playertable-' + notif.args.player_id, this.gamedatas.players[notif.args.player_id].color, -notif.args.points, 1000);
-            if (this.player_id == notif.args.player_id) {
+            if (this.bga.players.getCurrentPlayerId() == Number(notif.args.player_id)) {
                 dojo.query("#myhand").removeClass("bounce");
                 dojo.query("#myhand").addClass("bounce");
             }
             this.scoreCtrl[notif.args.player_id].toValue(notif.args.playerScore);
         }
         setTimeout(function () {
-            if (_this.player_id == notif.args.player_id) {
+            if (_this.bga.players.getCurrentPlayerId() == Number(notif.args.player_id)) {
                 _this.playerHand.removeAll();
             }
             _this.cardCounters[notif.args.player_id].toValue(0);
@@ -1242,7 +1264,7 @@ var Mow = /** @class */ (function () {
     };
     Mow.prototype.setRemainingCards = function (remainingCards) {
         var $remainingCards = $('remainingCards');
-        $remainingCards.innerHTML = remainingCards;
+        $remainingCards.innerHTML = '' + remainingCards;
         dojo.style($remainingCards, "color", remainingCards > 5 ? null : this.remainingCardsColors[remainingCards]);
     };
     Mow.prototype.enableAllowedCards = function (allowedCardsIds) {
@@ -1304,15 +1326,15 @@ var Mow = /** @class */ (function () {
         return this.inherited(arguments);
     };
     Mow.prototype.getNextPlayer = function () {
-        var activePlayerId = this.getActivePlayerId();
-        var activePlayerIndex = this.gamedatas.playerorder.findIndex(function (playerId) { return '' + playerId === activePlayerId; });
+        var activePlayerId = this.bga.players.getActivePlayerId();
+        var activePlayerIndex = this.gamedatas.playerorder.findIndex(function (playerId) { return playerId === activePlayerId; });
         var nextPlayerIndex = activePlayerIndex >= this.gamedatas.playerorder.length - 1 ? 0 : activePlayerIndex + 1;
         //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[nextPlayerIndex]);
         return this.gamedatas.players[Number(this.gamedatas.playerorder[nextPlayerIndex])];
     };
     Mow.prototype.getPreviousPlayer = function () {
-        var activePlayerId = this.getActivePlayerId();
-        var activePlayerIndex = this.gamedatas.playerorder.findIndex(function (playerId) { return '' + playerId === activePlayerId; });
+        var activePlayerId = this.bga.players.getActivePlayerId();
+        var activePlayerIndex = this.gamedatas.playerorder.findIndex(function (playerId) { return playerId === activePlayerId; });
         var previousPlayerIndex = activePlayerIndex === 0 ? this.gamedatas.playerorder.length - 1 : activePlayerIndex - 1;
         //return this.gamedatas.players.find(player => player.id === ''+this.gamedatas.playerorder[previousPlayerIndex]);
         return this.gamedatas.players[Number(this.gamedatas.playerorder[previousPlayerIndex])];
@@ -1333,7 +1355,7 @@ var Mow = /** @class */ (function () {
         this.addFarmerCardToStock(this.playerFarmerHand, card, from);
     };
     return Mow;
-}());
+}(GameGui));
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>

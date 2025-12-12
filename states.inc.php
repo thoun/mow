@@ -52,16 +52,6 @@ require_once("modules/php/constants.inc.php");
 //    !! It is not a good idea to modify this file when a game is running !!
 
 $machinestates = [
-
-    // The initial state. Please do not modify.
-    ST_BGA_GAME_SETUP => [
-        "name" => "gameSetup",
-        "description" => clienttranslate("Game setup"),
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => [ "" => ST_NEW_HAND ]
-    ],
-    	
 	ST_NEW_HAND => [
         "name" => "newHand",
         "description" => "",
@@ -235,18 +225,6 @@ $machinestates = [
       "action" => "stEndRound",
       "transitions" => [ "nextHand" => ST_NEW_HAND, "endGame" => ST_END_GAME ]
     ],
-
-   
-    // Final state.
-    // Please do not modify.
-    ST_END_GAME => [
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    ]
-
 ];
 
 
