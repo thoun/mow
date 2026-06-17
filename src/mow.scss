@@ -8,6 +8,12 @@ $cardHeight: 188px;
     transform: scaleY(-1);
 }
 
+html[data-theme="dark"] {
+  #direction-play-symbol {
+		filter: invert(1);
+	}
+}
+
 #direction-text {
     text-align: right;
     font-size: 110%;

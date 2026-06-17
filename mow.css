@@ -7,6 +7,10 @@
   transform: scaleY(-1);
 }
 
+html[data-theme=dark] #direction-play-symbol {
+  filter: invert(1);
+}
+
 #direction-text {
   text-align: right;
   font-size: 110%;
@@ -77,6 +81,7 @@
 }
 #direction_popin .popin-content {
   display: flex;
+  color: black;
   background: white;
   border-radius: 10px;
   box-shadow: 1px 1px 5px 2px #0006;
@@ -131,6 +136,11 @@
   justify-content: center;
   align-items: center;
   z-index: 2;
+}
+
+html[data-theme=dark] #gamezone #playertables {
+  position: relative;
+  background-color: #4b7016;
 }
 
 #gamezone {
@@ -374,6 +384,7 @@
   transition: opacity 0.1s;
 }
 #gamezone #farmer-animation-wrapper #farmer-animation {
+  color: black;
   background: #FFFFFFEE;
   box-shadow: 0 0 20px 15px #FFFFFFEE;
   z-index: 1000;
