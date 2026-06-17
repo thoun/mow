@@ -1,5 +1,7 @@
 <?php
 
+use Bga\GameFramework\UserException;
+
 trait UtilTrait {
 
     //////////////////////////////////////////////////////////////////////////////
@@ -101,7 +103,7 @@ trait UtilTrait {
         }
 
         if(!$bIsInHand) {
-            throw new BgaUserException("This card is not in your hand");
+            throw new UserException("This card is not in your hand");
         }
     }
 
@@ -109,7 +111,7 @@ trait UtilTrait {
         if ($card->type == 5) {
             $cantPlaySpecial = intval(self::getGameStateValue('cantPlaySpecial'));
             if ($cantPlaySpecial > 0 && intval($this->getActivePlayerId()) != $cantPlaySpecial) {
-                throw new BgaUserException(self::_("You can't play a special cow because of a farmer card"), true);
+                throw new UserException(clienttranslate("You can't play a special cow because of a farmer card"));
             }
         }
 
@@ -130,9 +132,9 @@ trait UtilTrait {
             // if it's not in the interval
             if (($card->type != 5 || $card->number == 0 || $card->number == 16) && $cardNumber >= $minHerd && $cardNumber <= $maxHerd) {
                 if ($minHerd == $maxHerd) {
-                    throw new BgaUserException(sprintf(self::_("You must play different than %s"), $minHerd), true);
+                    throw new UserException(sprintf(self::_("You must play different than %s"), $minHerd));
                 } else {
-                    throw new BgaUserException(sprintf(self::_("You must play less than %s or more than %s"), $minHerd, $maxHerd), true);
+                    throw new UserException(sprintf(self::_("You must play less than %s or more than %s"), $minHerd, $maxHerd));
                 }
             }
         }
@@ -140,7 +142,7 @@ trait UtilTrait {
         // if acrobatic can't be played
         if (($cardNumber == 70 && !in_array(7, $herdDisplayedNumbers)) || ($cardNumber == 90 && !in_array(9, $herdDisplayedNumbers))) {
             $cardNumber = $cardNumber / 10;
-            throw new BgaUserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber), true);
+            throw new UserException(sprintf(self::_("You can't play acrobatic %s if there is no %s"), $cardNumber, $cardNumber));
         }
 
         // if no place for slowpoke
@@ -148,7 +150,7 @@ trait UtilTrait {
             $places = $this->getPlacesForSlowpoke();
 
             if (count($places) == 0) {
-                throw new BgaUserException(self::_("You can't play slowpoke cow, no place available"), true);
+                throw new UserException(clienttranslate("You can't play slowpoke cow, no place available"));
             }
         }
     }
@@ -166,7 +168,7 @@ trait UtilTrait {
         }
 
         if(!$bIsInHand) {
-            throw new BgaUserException("This card is not in your hand");
+            throw new UserException("This card is not in your hand");
         }
     }
 
@@ -186,13 +188,13 @@ trait UtilTrait {
         }
 
         if (!$validTime) {
-            throw new BgaUserException(self::_("You can't play this farmer card at this moment"), true);
+            throw new UserException(clienttranslate("You can't play this farmer card at this moment"));
         }
 
         if ($card->type == 5) {
             $herdCount = count($this->cards->getCardsInLocation('herd', $this->getActiveRow()));
             if ($herdCount == 0) {
-                throw new BgaUserException(self::_("No card in the herd"), true);
+                throw new UserException(clienttranslate("No card in the herd"));
             }
         }
 
@@ -201,7 +203,7 @@ trait UtilTrait {
             $centerCardsNumber = count(array_values(array_filter($player_hand, fn($card) => $card->number >= 7 && $card->number <= 9)));
 
             if (intval($this->cards->countCardInLocation( 'deck' )) < $centerCardsNumber) {
-                throw new BgaUserException(self::_("Not enough remaining cards to play this farmer card"), true);
+                throw new UserException(clienttranslate("Not enough remaining cards to play this farmer card"));
             }
         }
 
